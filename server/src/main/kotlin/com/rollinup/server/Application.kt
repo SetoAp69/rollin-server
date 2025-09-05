@@ -1,21 +1,46 @@
 package com.rollinup.server
 
-import com.rollinup.server.plugins.configureRouting
-import io.ktor.server.application.*
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import com.rollinup.server.configurations.module
+import io.ktor.server.application.Application
+import io.ktor.server.application.serverConfig
+import io.ktor.server.engine.connector
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
 
-fun main() {
-    embeddedServer(Netty, port = SERVER_PORT, host = "0.0.0.0", module = Application::configureRouting)
-        .start(wait = true)
+fun main(){
+    embeddedServer(
+        factory = Netty,
+        serverConfig {
+            developmentMode = true
+            module(Application::module)
+        },
+        configure = {
+            connector {
+                host = "0.0.0.0"
+                port = SERVER_PORT
+            }
+        },
+    ).start(wait = true)
+
 }
 
-fun Application.module() {
-    routing {
-        get("/") {
-            call.respondText("Ktor: ${Greeting().greet()}")
-        }
-    }
-}
+fun mainx(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
+
+//fun Application.module() {
+////    configureSocket()
+////    install(plugin = ContentNegotiation){
+////        json()
+////    }
+////    configureRouting()
+//    val repository = TaskRepositoryImpl()
+//
+//    install(Koin){
+//        modules(
+//            taskDataModule
+//        )
+//    }
+//
+//    configureDatabase()
+//    configureSerialization(repository)
+//}
+
