@@ -3,6 +3,13 @@ junit = "4.13.2"
 kotlin = "2.2.10"
 ktor = "3.2.3"
 logback = "1.5.18"
+jsonPath = "2.9.0"
+exposed = "1.0.0-beta-5"
+h2 = "2.3.232"
+postgresql = "42.7.3"
+koin = "4.1.0"
+ksp = "2.2.0-2.0.2"
+
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -13,6 +20,40 @@ ktor-serverCore = { module = "io.ktor:ktor-server-core-jvm", version.ref = "ktor
 ktor-serverNetty = { module = "io.ktor:ktor-server-netty-jvm", version.ref = "ktor" }
 ktor-serverTestHost = { module = "io.ktor:ktor-server-test-host-jvm", version.ref = "ktor" }
 
+
+ktor-serialization-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
+
+#Content Negotiatiom
+ktor-content-negotiation = { group = "io.ktor", name = "ktor-server-content-negotiation", version.ref = "ktor" }
+ktor-content-negotiation-client = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }
+
+#web socket
+ktor-websockets = { group = "io.ktor", name = "ktor-server-websockets", version.ref = "ktor" }
+
+#Exposed
+exposed-core = {group = "org.jetbrains.exposed",name = "exposed-core", version.ref = "exposed"}
+exposed-jdbc = {group = "org.jetbrains.exposed",name = "exposed-jdbc", version.ref = "exposed"}
+exposed-dao = {group = "org.jetbrains.exposed",name = "exposed-dao", version.ref = "exposed"}
+h2 = {group = "com.h2database", name="h2", version.ref = "h2"}
+
+#DB Driver
+#postgresql = { group = " org.postgresql", name = "postgresql", version.ref = "postgresql" }
+postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
+
+#jsonpath
+json-path = { group = "com.jayway.jsonpath", name = "json-path", version.ref = "jsonPath" }
+
+#koin
+koin-core = {group = "io.insert-koin",name = "koin-core", version.ref = "koin"}
+koin-ktor = {group = "io.insert-koin",name = "koin-ktor", version.ref = "koin"}
+koin-logger = {group = "io.insert-koin",name = "koin-logger-slf4j", version.ref = "koin"}
+
 [plugins]
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+
+#ksp
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+#id "org.jetbrains.kotlin.plugin.serialization" version "1.6.10"
+
