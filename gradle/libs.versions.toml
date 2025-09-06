@@ -33,6 +33,7 @@ ktor-websockets = { group = "io.ktor", name = "ktor-server-websockets", version.
 #Exposed
 exposed-core = {group = "org.jetbrains.exposed",name = "exposed-core", version.ref = "exposed"}
 exposed-jdbc = {group = "org.jetbrains.exposed",name = "exposed-jdbc", version.ref = "exposed"}
+exposed-r2dbc = {group = "org.jetbrains.exposed",name = "exposed-r2dbc", version.ref = "exposed"}
 exposed-dao = {group = "org.jetbrains.exposed",name = "exposed-dao", version.ref = "exposed"}
 h2 = {group = "com.h2database", name="h2", version.ref = "h2"}
 

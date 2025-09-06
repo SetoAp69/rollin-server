@@ -7,7 +7,7 @@ import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 
-fun main(){
+fun maiasdasdasdn(){
     embeddedServer(
         factory = Netty,
         serverConfig {
@@ -24,7 +24,7 @@ fun main(){
 
 }
 
-fun mainx(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
+fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
 //fun Application.module() {
 ////    configureSocket()

@@ -22,7 +22,7 @@ class TaskRepositoryImpl : TaskRepository {
     override suspend fun getTaskByPriority(priority: Priority): List<Task> {
         return suspendTransaction {
             TaskDAO
-                .find { (TaskTable.priority eq priority.name) }
+                .find { (TaskTable.priority eq priority.value) }
                 .map(::daoToModel)
         }
     }

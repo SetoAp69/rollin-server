@@ -47,6 +47,7 @@ dependencies {
     //Exposed
     implementation(libs.exposed.core)
     implementation(libs.exposed.jdbc)
+    implementation(libs.exposed.r2dbc)
     implementation(libs.h2)
     implementation(libs.exposed.dao)
 
