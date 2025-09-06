@@ -3,14 +3,16 @@ package com.rollinup.server.model.task
 import com.rollinup.server.model.Priority
 import com.rollinup.server.model.Task
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.jetbrains.exposed.v1.core.Transaction
-import org.jetbrains.exposed.v1.jdbc.transactions.experimental.newSuspendedTransaction
+import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
 suspend fun <T> suspendTransaction(block: Transaction.() -> T): T =
-    newSuspendedTransaction(
-        context = Dispatchers.IO, statement = block
-
-    )
+    withContext(context = Dispatchers.IO) {
+        transaction {
+            block()
+        }
+    }
 
 fun daoToModel(dao: TaskDAO) = Task(
     name = dao.name,
