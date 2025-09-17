@@ -7,7 +7,7 @@ import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 
-fun maiasdasdasdn(){
+fun maasdasdin(){
     embeddedServer(
         factory = Netty,
         serverConfig {
@@ -16,7 +16,7 @@ fun maiasdasdasdn(){
         },
         configure = {
             connector {
-                host = "0.0.0.0"
+                host = "0.0.0.3"
                 port = SERVER_PORT
             }
         },

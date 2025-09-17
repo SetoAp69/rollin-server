@@ -13,5 +13,16 @@ fun Application.configureRouting() {
         ) {
             Route.Tasks.route(this)
         }
+        Route.Auth.route(this)
     }
+
+
+//    {
+//        route(
+//            path = Route.Auth.path
+//        ){
+//            Route.Auth.route(this)
+//        }
+//    }
+
 }

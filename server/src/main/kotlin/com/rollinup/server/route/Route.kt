@@ -1,5 +1,6 @@
 package com.rollinup.server.route
 
+import com.rollinup.server.route.auth.authRoute
 import com.rollinup.server.route.tasks.taskRoute
 
 sealed class Route(
@@ -10,6 +11,13 @@ sealed class Route(
         path = "/tasks",
         route = {
             taskRoute()
+        }
+    )
+
+    object Auth:Route(
+        path = "/auth",
+        route = {
+            authRoute()
         }
     )
 }

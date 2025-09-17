@@ -9,6 +9,7 @@ h2 = "2.3.232"
 postgresql = "42.7.3"
 koin = "4.1.0"
 ksp = "2.2.0-2.0.2"
+gson = "2.11.0"
 
 
 [libraries]
@@ -20,8 +21,22 @@ ktor-serverCore = { module = "io.ktor:ktor-server-core-jvm", version.ref = "ktor
 ktor-serverNetty = { module = "io.ktor:ktor-server-netty-jvm", version.ref = "ktor" }
 ktor-serverTestHost = { module = "io.ktor:ktor-server-test-host-jvm", version.ref = "ktor" }
 
+#Client engine
+ktor-client-apache = {group= "io.ktor", name = "ktor-client-apache-jvm", version.ref = "ktor"}
+ktor-client-cio = {group= "io.ktor", name = "ktor-client-cio", version.ref = "ktor"}
+
+#Auth
+ktor-auth = { group = "io.ktor", name = "ktor-server-auth", version.ref = "ktor" }
+ktor-auth-jwt = { group = "io.ktor", name = "ktor-server-auth-jwt", version.ref = "ktor" }
+
+#CallLogging
+ktor-server-call-logging = { group = "io.ktor", name = "ktor-server-call-logging", version.ref = "ktor" }
+ktor-client-logging = { group = "io.ktor", name = "ktor-client-logging", version.ref = "ktor" }
 
 ktor-serialization-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
+
+#Gson
+gson = {group = "com.google.code.gson", name = "gson", version.ref = "gson"}
 
 #Content Negotiatiom
 ktor-content-negotiation = { group = "io.ktor", name = "ktor-server-content-negotiation", version.ref = "ktor" }
@@ -31,11 +46,11 @@ ktor-content-negotiation-client = { group = "io.ktor", name = "ktor-client-conte
 ktor-websockets = { group = "io.ktor", name = "ktor-server-websockets", version.ref = "ktor" }
 
 #Exposed
-exposed-core = {group = "org.jetbrains.exposed",name = "exposed-core", version.ref = "exposed"}
-exposed-jdbc = {group = "org.jetbrains.exposed",name = "exposed-jdbc", version.ref = "exposed"}
-exposed-r2dbc = {group = "org.jetbrains.exposed",name = "exposed-r2dbc", version.ref = "exposed"}
-exposed-dao = {group = "org.jetbrains.exposed",name = "exposed-dao", version.ref = "exposed"}
-h2 = {group = "com.h2database", name="h2", version.ref = "h2"}
+exposed-core = { group = "org.jetbrains.exposed", name = "exposed-core", version.ref = "exposed" }
+exposed-jdbc = { group = "org.jetbrains.exposed", name = "exposed-jdbc", version.ref = "exposed" }
+exposed-r2dbc = { group = "org.jetbrains.exposed", name = "exposed-r2dbc", version.ref = "exposed" }
+exposed-dao = { group = "org.jetbrains.exposed", name = "exposed-dao", version.ref = "exposed" }
+h2 = { group = "com.h2database", name = "h2", version.ref = "h2" }
 
 #DB Driver
 #postgresql = { group = " org.postgresql", name = "postgresql", version.ref = "postgresql" }
@@ -45,9 +60,9 @@ postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" 
 json-path = { group = "com.jayway.jsonpath", name = "json-path", version.ref = "jsonPath" }
 
 #koin
-koin-core = {group = "io.insert-koin",name = "koin-core", version.ref = "koin"}
-koin-ktor = {group = "io.insert-koin",name = "koin-ktor", version.ref = "koin"}
-koin-logger = {group = "io.insert-koin",name = "koin-logger-slf4j", version.ref = "koin"}
+koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koin" }
+koin-ktor = { group = "io.insert-koin", name = "koin-ktor", version.ref = "koin" }
+koin-logger = { group = "io.insert-koin", name = "koin-logger-slf4j", version.ref = "koin" }
 
 [plugins]
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

@@ -1,4 +1,4 @@
-package com.rollinup.server.repository.task
+package com.rollinup.server.datasource.database.repository.task
 
 import com.rollinup.server.model.Priority
 import com.rollinup.server.model.Task
