@@ -35,6 +35,18 @@ dependencies {
     implementation(libs.ktor.serverCore)
     implementation(libs.ktor.serverNetty)
 
+    //Engine
+    implementation(libs.ktor.client.apache)
+    implementation(libs.ktor.client.cio)
+
+    //Auth
+    implementation(libs.ktor.auth)
+    implementation(libs.ktor.auth.jwt)
+
+    //Call Logging
+    implementation(libs.ktor.server.call.logging)
+    implementation(libs.ktor.client.logging)
+
     //web socket
     implementation(libs.ktor.websockets)
 
@@ -43,6 +55,7 @@ dependencies {
 
     //Negotiation
     implementation(libs.ktor.content.negotiation)
+    implementation(libs.ktor.content.negotiation.client)
 
     //Exposed
     implementation(libs.exposed.core)
@@ -56,6 +69,9 @@ dependencies {
     implementation(libs.koin.ktor)
     implementation(libs.koin.logger)
 
+    //Gson
+    implementation(libs.gson)
+
     //DB DRiver
 //    implementation("org.postgresql:postgresql:42.7.3")
     implementation(libs.postgresql)
@@ -63,7 +79,6 @@ dependencies {
     //Testing
     testImplementation(libs.kotlin.testJunit)
     testImplementation(libs.ktor.serverTestHost)
-    testImplementation(libs.ktor.content.negotiation.client)
     testImplementation(libs.json.path)
 
 }
