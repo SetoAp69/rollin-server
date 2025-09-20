@@ -1,6 +1,5 @@
 package com.rollinup.server.configurations
 
-import com.rollinup.server.route.tasks.taskRoute
 import com.rollinup.server.route.Route
 import io.ktor.server.application.Application
 import io.ktor.server.routing.route
@@ -13,16 +12,16 @@ fun Application.configureRouting() {
         ) {
             Route.Tasks.route(this)
         }
-        Route.Auth.route(this)
+        route(
+            path = Route.Auth.path
+        ) {
+            Route.Auth.route(this)
+        }
+        route(
+            path = Route.User.path
+        ) {
+            Route.User.route(this)
+        }
     }
-
-
-//    {
-//        route(
-//            path = Route.Auth.path
-//        ){
-//            Route.Auth.route(this)
-//        }
-//    }
 
 }

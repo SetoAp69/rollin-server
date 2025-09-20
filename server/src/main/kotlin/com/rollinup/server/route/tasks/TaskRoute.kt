@@ -1,8 +1,8 @@
 package com.rollinup.server.route.tasks
 
+import com.rollinup.server.datasource.database.repository.task.TaskRepository
 import com.rollinup.server.model.Priority
 import com.rollinup.server.model.Task
-import com.rollinup.server.datasource.database.repository.task.TaskRepository
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.auth.authenticate
 import io.ktor.server.request.receive
@@ -18,7 +18,6 @@ fun Route.taskRoute() {
     val repository by inject<TaskRepository>()
 
     authenticate("auth-jwt") {
-
         get {
             val searchQuery = call.request.queryParameters["search"]
             val tasks = if (searchQuery.isNullOrBlank()) {
