@@ -20,4 +20,11 @@ sealed class Route(
             authRoute()
         }
     )
+
+    object User:Route(
+        path = "/user",
+        route = {
+            userRoute()
+        }
+    )
 }
