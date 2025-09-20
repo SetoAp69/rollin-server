@@ -31,10 +31,10 @@ object Utils {
 
     fun getTokenConfig(): TokenConfig{
         return TokenConfig(
-            issuer = "",
-            audience = "",
+            issuer = "issuer",
+            audience = "audience",
             expiresIn = 0L,
-            secret = ""
+            secret = "secret"
         )
     }
 

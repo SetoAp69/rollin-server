@@ -1,7 +1,8 @@
 package com.rollinup.server.model.auth
 
-data class UserCreateEditRequest(
+data class UserCreateEsdsdsdditRequest(
     val id: String = "",
+    val username:String = "",
     val firstName: String = "",
     val lastName: String = "",
     val role: String = "",

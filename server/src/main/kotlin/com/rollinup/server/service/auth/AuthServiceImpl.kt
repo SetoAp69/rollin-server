@@ -24,10 +24,8 @@ class AuthServiceImpl(
 
         if (user == null) throw (Exception("User Not Found"))
 
-        val saltedHash = hashingService.generateSaltedHash(authRequest.password)
-
         val isValidPassword = hashingService.verify(
-            value = saltedHash.value,
+            value = authRequest.password,
             saltedHash = SaltedHash(
                 value = user.password,
                 salt = user.salt
