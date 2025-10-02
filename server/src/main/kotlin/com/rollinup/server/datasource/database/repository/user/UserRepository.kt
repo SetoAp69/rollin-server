@@ -1,22 +1,25 @@
 package com.rollinup.server.datasource.database.repository.user
 
-import com.rollinup.server.model.auth.UserQueryParams
-import com.rollinup.server.model.request.user.RegisterEditUserRequest
-import com.rollinup.server.model.response.auth.User
+import com.rollinup.server.datasource.database.model.user.UserEntity
+import com.rollinup.server.model.request.user.EditUserRequest
+import com.rollinup.server.model.request.user.RegisterUserRequest
+import com.rollinup.server.model.request.user.UserQueryParams
 
 interface UserRepository {
-     fun basicAuth(userName: String): User?
 
-     fun getAllUsers(queryParams: UserQueryParams): List<User>
+    fun getAllUsers(queryParams: UserQueryParams): List<UserEntity>
 
-     fun getUserById(id: String): User?
+    fun createUser(request: RegisterUserRequest)
 
-     fun getUserByEmailOrUsername(emailOrUsername: String): User?
+    fun editUser(request: EditUserRequest, id: String)
 
-    fun resetPassword(emailOrUsername: String, newPassword: String)
+    fun deleteUser(id: List<String>)
 
-    fun registerUser(createRequest: RegisterEditUserRequest)
+    fun getUserById(id: String): UserEntity?
 
-    fun editUser(editRequest: RegisterEditUserRequest, id: String)
+    fun getUserByEmailOrUsername(emailOrUsername: String): UserEntity?
+
+    fun resetPassword(id: String, newPassword: String, salt: String)
+
 
 }

@@ -8,11 +8,6 @@ import io.ktor.server.routing.routing
 fun Application.configureRouting() {
     routing {
         route(
-            path = Route.Tasks.path
-        ) {
-            Route.Tasks.route(this)
-        }
-        route(
             path = Route.Auth.path
         ) {
             Route.Auth.route(this)
@@ -21,6 +16,11 @@ fun Application.configureRouting() {
             path = Route.User.path
         ) {
             Route.User.route(this)
+        }
+        route(
+            path = Route.Test.path
+        ) {
+            Route.Test.route(this)
         }
     }
 
