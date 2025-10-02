@@ -1,13 +1,26 @@
 package com.rollinup.server.service.user
 
-import com.rollinup.server.model.request.user.RegisterEditUserRequest
+import com.rollinup.server.model.request.user.EditUserRequest
+import com.rollinup.server.model.request.user.RegisterUserRequest
+import com.rollinup.server.model.request.user.UserQueryParams
+import com.rollinup.server.model.response.Response
+import com.rollinup.server.model.response.user.GetAllUserResponse
+import com.rollinup.server.model.response.user.ResetPasswordRequestResponse
+import com.rollinup.server.model.response.user.ValidateResetOtpResponse
 
 interface UserService {
-    fun registerUser(registerEditUserRequest: RegisterEditUserRequest)
+    suspend fun registerUser(requestBody: RegisterUserRequest): Response<Unit>
 
-    fun editUser(registerEditUserRequest: RegisterEditUserRequest, id:String)
+    suspend fun editUser(
+        requestBody: EditUserRequest,
+        id: String
+    ): Response<Unit>
 
-    fun resetPassword(token:String, newPassword:String)
+    suspend fun getAllUser(queryParams: UserQueryParams): Response<GetAllUserResponse>
 
-    fun resetPasswordRequest(usernameOrEmail:String):String
+    suspend fun validateResetOtp(userNameOrEmail: String, otp: String): Response<ValidateResetOtpResponse>
+
+    suspend fun resetPasswordRequest(usernameOrEmail: String): Response<ResetPasswordRequestResponse>
+
+    suspend fun resetPassword(token: String, newPassword: String): Response<Unit>
 }

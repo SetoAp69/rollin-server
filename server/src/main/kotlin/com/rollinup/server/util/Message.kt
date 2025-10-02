@@ -1,0 +1,21 @@
+package com.rollinup.server.util
+
+object Message {
+    const val LOGIN_SUCCESS = "Login success"
+    const val VALIDATE_OTP_SUCCESS = "Success validate otp"
+    const val FAILED_TO_SEND_EMAIL = "Failed to send email"
+    const val EMAIL_SENT = "If email is registered to an account, an OTP will be sent to your email"
+    const val EMAIL_ALREADY_SENT = "Email already sent"
+    const val USER_NOT_FOUND = "User not found"
+    const val INVALID_TOKEN = "Invalid token"
+    const val EXPIRED_TOKEN = "Token is Expired"
+    const val UNAUTHORIZED_TOKEN = "Token is Unauthorized"
+    const val INVALID_USERNAME_OR_PASSWORD = "Invalid username or password"
+    const val UNAUTHORIZED_ACCESS = "Unauthorized access"
+    const val EMAIL_USED = "Email is already used"
+    const val USERNAME_USED = "Username is already used"
+    const val CREATE_USER_SUCCESS = "User created successfully"
+    const val EDIT_USER_SUCCESS = "User data updated successfully"
+    const val INVALID_REQUEST = "Invalid request"
+    const val ILLEGAL_ROLE = "User with this role don't have access to this route"
+}

@@ -6,5 +6,5 @@ interface TokenService {
         vararg claim: TokenClaim
     ):String
 
-    fun validateToken(token: String): Boolean
+    fun validateToken(token: String, config: TokenConfig): Boolean
 }

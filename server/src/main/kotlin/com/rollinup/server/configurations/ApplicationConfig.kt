@@ -1,11 +1,7 @@
 package com.rollinup.server.configurations
 
-import com.rollinup.server.di.DAOModule
-import com.rollinup.server.di.DataSourceModule
-import com.rollinup.server.di.DomainModule
 import com.rollinup.server.di.RepositoryModule
 import com.rollinup.server.di.ServiceModule
-import com.rollinup.server.di.appModule
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
@@ -17,12 +13,8 @@ fun Application.module() {
     install(Koin) {
         modules(
             modules = listOf(
-                appModule,
-                DAOModule.module,
-                DataSourceModule.module,
                 RepositoryModule.module,
                 ServiceModule.module,
-                DomainModule.module
             )
 
         )
@@ -31,7 +23,8 @@ fun Application.module() {
     install(ContentNegotiation) {
         json()
     }
-
+    configureValidator()
+    configureStatusPage()
     configureAuthentication()
     configureDatabase()
     configureRouting()

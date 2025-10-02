@@ -1,13 +1,12 @@
 package com.rollinup.server.service.auth
 
-import com.rollinup.server.datasource.database.model.user.UserDTO
-import com.rollinup.server.model.auth.LoginRequest
-import com.rollinup.server.model.auth.UserQueryParams
+import com.rollinup.server.model.request.auth.LoginRequest
+import com.rollinup.server.model.response.Response
+import com.rollinup.server.model.response.auth.LoginResponse
+import com.rollinup.server.model.response.auth.RefreshTokenResponse
 
 interface AuthService {
-    suspend fun basicAuth(authRequest: LoginRequest): UserDTO
+    suspend fun login(loginRequest: LoginRequest): Response<LoginResponse>
 
-    suspend fun getAllUsers(queryParams: UserQueryParams): List<UserDTO>
-
-    suspend fun getUserById(id: String): UserDTO
+    suspend fun refreshToken(token:String):Response<RefreshTokenResponse>
 }
