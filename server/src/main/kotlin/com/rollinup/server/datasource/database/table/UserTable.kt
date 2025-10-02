@@ -29,4 +29,28 @@ object UserTable : Table("users") {
         fromDb = { gender -> Gender.fromValue(gender as String) },
         toDb = { gender -> PGEnum("gender", gender) }
     )
+
+    val searchField
+        get() = listOf(
+            username,
+            email,
+            firstName,
+            lastName,
+            address,
+            phoneNumber
+        )
+
+    val sortField
+        get() = mapOf(
+            "username" to username,
+            "email" to email,
+            "first_name" to firstName,
+            "last_name" to lastName,
+            "gender" to gender
+        )
+
+    val filterField
+        get() = listOf(
+            gender,
+        )
 }

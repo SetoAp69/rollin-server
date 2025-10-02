@@ -1,12 +1,13 @@
 package com.rollinup.server.datasource.database.dao.refreshtoken
 
-import com.rollinup.server.datasource.database.model.user.UserDTO
+import com.rollinup.server.model.response.user.UserDTO
 
-interface RefreshTokenDao {
-    fun saveToken(token:String, id:String)
-
-    fun dropToken(token:String)
-
-    fun findUserByToken(token:String): UserDTO?
-
-}
+//
+//interface RefreshTokenDao {
+//    fun saveToken(token:String, id:String)
+//
+//    suspend fun dropToken(token:String)
+//
+//    fun findUserByToken(token:String): UserDTO?
+//
+//}

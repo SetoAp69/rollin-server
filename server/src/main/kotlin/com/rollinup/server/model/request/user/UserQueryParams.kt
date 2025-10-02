@@ -1,11 +1,22 @@
-package com.rollinup.server.model.auth
+package com.rollinup.server.model.request.user
 
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class UserQueryParams(
-    val search:String? = null,
-    val page:Int? = null,
-    val limit:Int? = null,
-    val sortBy:String? = null,
-    val sortOrder:Int? = null,
-    val gender:List<String>? = null,
-    val role:List<String>? = null,
+    @SerialName("search")
+    val search: String? = null,
+    @SerialName("page")
+    val page: Int? = null,
+    @SerialName("limit")
+    val limit: Int? = null,
+    @SerialName("sortBy")
+    val sortBy: String? = null,
+    @SerialName("sortOrder")
+    val sortOrder: String? = null,
+    @SerialName("gender")
+    val gender: List<String>? = null,
+    @SerialName("role")
+    val role: List<String>? = null,
 )

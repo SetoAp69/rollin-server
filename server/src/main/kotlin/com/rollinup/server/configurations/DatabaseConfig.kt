@@ -1,30 +1,25 @@
 package com.rollinup.server.configurations
 
+import com.rollinup.server.util.Config
 import io.ktor.server.application.Application
 import org.jetbrains.exposed.v1.core.DatabaseConfig
 import org.jetbrains.exposed.v1.core.SqlLogger
 import org.jetbrains.exposed.v1.core.Transaction
 import org.jetbrains.exposed.v1.core.statements.StatementContext
 import org.jetbrains.exposed.v1.jdbc.Database
-import org.koin.ktor.ext.inject
 
-fun Application.configureDatabase(){
-    val config by inject<Configuration>()
+fun Application.configureDatabase() {
 
-    val dbUrl = config.fetchProperty("DATABASE_URL")
-    val dbUsername = config.fetchProperty("DATABASE_USERNAME")
-    val dbPassword = config.fetchProperty("DATABASE_PASSWORD")
+    val config = Config.getDbConfig()
 
     Database.connect(
-        url = dbUrl,
-        user =  dbUsername,
-        password = dbPassword,
-//        setupConnection ={it->
-//
-//        } ,
+        url = config.url,
+        user = config.username,
+        password = config.password,
+
         databaseConfig = DatabaseConfig(
             body = {
-                sqlLogger = object: SqlLogger {
+                sqlLogger = object : SqlLogger {
                     override fun log(
                         context: StatementContext,
                         transaction: Transaction
@@ -34,8 +29,7 @@ fun Application.configureDatabase(){
 
                 }
             }
-        ) ,
-//        connectionAutoRegistration = ,
-//        manager = ,
-    )
+        ),
+
+        )
 }
