@@ -80,6 +80,8 @@ class AuthServiceImpl(
                 refreshToken = refreshToken
             )
 
+            refreshTokenRepository.save(token = refreshToken, id = user.id)
+
             return@suspendTransaction Response(
                 status = 200,
                 message = Message.LOGIN_SUCCESS,
