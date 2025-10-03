@@ -23,8 +23,8 @@ import com.rollinup.server.util.Config
 import com.rollinup.server.util.Message
 import com.rollinup.server.util.Utils
 import com.rollinup.server.util.Utils.toLocalDateTime
+import com.rollinup.server.util.manager.TransactionManager
 import com.rollinup.server.util.successGettingResponse
-import com.rollinup.server.util.suspendTransaction
 import com.rollinup.server.util.toCensoredEmail
 import java.time.ZoneOffset
 
@@ -34,10 +34,11 @@ class UserServiceImpl(
     private val hashingService: HashingService,
     private val tokenService: TokenService,
     private val emailService: EmailService,
-    private val mapper: UserMapper
+    private val mapper: UserMapper,
+    private val transactionManager: TransactionManager
 ) : UserService {
     override suspend fun registerUser(requestBody: RegisterUserRequest): Response<Unit> =
-        suspendTransaction {
+        transactionManager.suspendTransaction {
             val isEmailUsed = userRepository.getUserByEmailOrUsername(
                 emailOrUsername = requestBody.email
             )
@@ -65,7 +66,7 @@ class UserServiceImpl(
     override suspend fun editUser(
         requestBody: EditUserRequest,
         id: String
-    ): Response<Unit> = suspendTransaction {
+    ): Response<Unit> = transactionManager.suspendTransaction {
         val userData = userRepository.getUserById(id)
 
         if (userData == null) {
@@ -85,7 +86,7 @@ class UserServiceImpl(
     }
 
     override suspend fun getAllUser(queryParams: UserQueryParams): Response<GetAllUserResponse> =
-        suspendTransaction {
+        transactionManager.suspendTransaction {
             val data = userRepository.getAllUsers(
                 queryParams = queryParams
             )
@@ -105,7 +106,7 @@ class UserServiceImpl(
     override suspend fun validateResetOtp(
         userNameOrEmail: String,
         otp: String
-    ): Response<ValidateResetOtpResponse> = suspendTransaction {
+    ): Response<ValidateResetOtpResponse> = transactionManager.suspendTransaction {
         val user = userRepository.getUserByEmailOrUsername(userNameOrEmail)
             ?: throw CommonException(Message.USER_NOT_FOUND)
 
@@ -154,7 +155,7 @@ class UserServiceImpl(
     }
 
     override suspend fun resetPasswordRequest(usernameOrEmail: String): Response<ResetPasswordRequestResponse> =
-        suspendTransaction {
+        transactionManager.suspendTransaction {
             val response = mapper.mapResetPasswordRequestResponse(
                 email = usernameOrEmail.toCensoredEmail()
             )
@@ -202,31 +203,32 @@ class UserServiceImpl(
     override suspend fun resetPassword(
         token: String,
         newPassword: String
-    ): Response<Unit> = suspendTransaction {
-        val tokenClaim = tokenService.validateToken(
-            token = token,
-            config = Config.getTokenConfig()
-        )
+    ): Response<Unit> =
+        transactionManager.suspendTransaction {
+            val tokenClaim = tokenService.validateToken(
+                token = token,
+                config = Config.getTokenConfig()
+            )
 
-        if (!tokenClaim)
-            throw InvalidTokenExceptions
+            if (!tokenClaim)
+                throw InvalidTokenExceptions
 
-        val id = JWT.decode(token).getClaim("id").asString()
-        val user = userRepository.getUserById(id)
-            ?: throw CommonException(Message.USER_NOT_FOUND)
+            val id = JWT.decode(token).getClaim("id").asString()
+            val user = userRepository.getUserById(id)
+                ?: throw CommonException(Message.USER_NOT_FOUND)
 
-        val saltedPassword = hashingService.generateSaltedHash(newPassword)
+            val saltedPassword = hashingService.generateSaltedHash(newPassword)
 
-        userRepository.resetPassword(
-            id = user.id,
-            newPassword = saltedPassword.value,
-            salt = saltedPassword.salt
-        )
+            userRepository.resetPassword(
+                id = user.id,
+                newPassword = saltedPassword.value,
+                salt = saltedPassword.salt
+            )
 
-        return@suspendTransaction Response(
-            status = 200,
-            message = Message.EDIT_USER_SUCCESS,
-            data = Unit
-        )
-    }
+            return@suspendTransaction Response(
+                status = 200,
+                message = Message.EDIT_USER_SUCCESS,
+                data = Unit
+            )
+        }
 }

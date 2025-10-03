@@ -12,6 +12,8 @@ import com.rollinup.server.service.security.HashingService
 import com.rollinup.server.service.security.HashingServiceImpl
 import com.rollinup.server.service.user.UserService
 import com.rollinup.server.service.user.UserServiceImpl
+import com.rollinup.server.util.manager.TransactionManager
+import com.rollinup.server.util.manager.TransactionManagerImpl
 import org.koin.dsl.module
 
 object ServiceModule {
@@ -20,8 +22,12 @@ object ServiceModule {
         single<UserMapper> {
             UserMapper()
         }
+
         single { AuthMapper() }
 
+        single<TransactionManager> {
+            TransactionManagerImpl()
+        }
 
         single<TokenService> {
             JWTService()
@@ -42,7 +48,8 @@ object ServiceModule {
                 hashingService = get(),
                 tokenService = get(),
                 emailService = get(),
-                mapper = get()
+                mapper = get(),
+                transactionManager = get(),
             )
         }
 
@@ -53,6 +60,7 @@ object ServiceModule {
                 userRepository = get(),
                 refreshTokenRepository = get(),
                 authMapper = get(),
+                transactionManager = get(),
             )
         }
 
