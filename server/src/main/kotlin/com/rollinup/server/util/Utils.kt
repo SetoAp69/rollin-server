@@ -1,7 +1,6 @@
 package com.rollinup.server.util
 
 import com.rollinup.server.Constant
-import com.rollinup.server.model.Task
 import com.rollinup.server.service.jwt.TokenConfig
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
