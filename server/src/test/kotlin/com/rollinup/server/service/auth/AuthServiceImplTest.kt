@@ -19,7 +19,7 @@ import com.rollinup.server.service.security.HashingService
 import com.rollinup.server.service.security.SaltedHash
 import com.rollinup.server.util.Config
 import com.rollinup.server.util.Message
-import com.rollinup.server.util.suspendTransaction
+import com.rollinup.server.util.manager.TransactionManager
 import io.mockk.MockKAnnotations
 import io.mockk.Runs
 import io.mockk.coEvery
@@ -27,7 +27,6 @@ import io.mockk.coVerify
 import io.mockk.impl.annotations.MockK
 import io.mockk.just
 import io.mockk.mockk
-import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import kotlinx.coroutines.test.runTest
 import org.jetbrains.exposed.v1.core.Transaction
@@ -53,6 +52,9 @@ class AuthServiceImplTest {
     @MockK
     private var refreshTokenRepository: RefreshTokenRepository = mockk()
 
+    @MockK
+    private var transactionManager: TransactionManager = mockk()
+
 
     private var authMapper: AuthMapper = AuthMapper()
 
@@ -67,19 +69,6 @@ class AuthServiceImplTest {
                 saltedHash = saltedHash
             )
         } returns result
-    }
-
-    private fun arrangeHashing(
-        value: String,
-        salt: String,
-        hash: String
-    ) {
-        coEvery {
-            hashingService.generateSaltedHash(value)
-        } returns SaltedHash(
-            value = hash,
-            salt = salt
-        )
     }
 
     //User Repo
@@ -156,13 +145,12 @@ class AuthServiceImplTest {
             jwtService = jwtService,
             userRepository = userRepository,
             refreshTokenRepository = refreshTokenRepository,
-            authMapper = authMapper
+            authMapper = authMapper,
+            transactionManager = transactionManager
         )
 
-        mockkStatic("com.rollinup.server.util.SuspendTransactionKt")
-
         coEvery {
-            suspendTransaction<Any>(any())
+            transactionManager.suspendTransaction<Any>(any())
         } answers {
             val block = args.first() as Function1<Transaction, Any>
 

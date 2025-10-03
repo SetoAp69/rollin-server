@@ -15,20 +15,21 @@ import com.rollinup.server.service.security.HashingService
 import com.rollinup.server.service.security.SaltedHash
 import com.rollinup.server.util.Config
 import com.rollinup.server.util.Message
+import com.rollinup.server.util.manager.TransactionManager
 import com.rollinup.server.util.notFoundException
 import com.rollinup.server.util.successCreateResponse
-import com.rollinup.server.util.suspendTransaction
 
 class AuthServiceImpl(
     private val hashingService: HashingService,
     private val jwtService: TokenService,
     private val userRepository: UserRepository,
     private val refreshTokenRepository: RefreshTokenRepository,
-    private val authMapper: AuthMapper
+    private val authMapper: AuthMapper,
+    private val transactionManager: TransactionManager
 ) : AuthService {
 
     override suspend fun login(loginRequest: LoginRequest): Response<LoginResponse> =
-        suspendTransaction {
+        transactionManager.suspendTransaction {
             val user = userRepository.getUserByEmailOrUsername(loginRequest.username)
                 ?: throw "User".notFoundException()
 
@@ -90,7 +91,7 @@ class AuthServiceImpl(
         }
 
     override suspend fun refreshToken(token: String): Response<RefreshTokenResponse> =
-        suspendTransaction {
+        transactionManager.suspendTransaction {
             val isTokenValid = jwtService.validateToken(token, Config.getTokenConfig())
 
             val user = refreshTokenRepository.findUserId(token)
