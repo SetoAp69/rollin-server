@@ -22,7 +22,7 @@ import org.koin.ktor.ext.inject
 fun Route.userRouteNew() {
     val userService by inject<UserService>()
 
-    authenticate {
+    authenticate("auth-jwt") {
         withRole(Role.ADMIN) {
             post("/register") {
                 val request = call.receive<RegisterUserRequest>()
