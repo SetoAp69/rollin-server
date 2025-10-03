@@ -9,6 +9,7 @@ import com.rollinup.server.model.request.user.ResetPasswordRequestRequest
 import com.rollinup.server.model.request.user.UserQueryParams
 import com.rollinup.server.model.request.user.ValidateOtpRequest
 import com.rollinup.server.service.user.UserService
+import com.rollinup.server.util.withClaim
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.auth.authenticate
 import io.ktor.server.request.receive
@@ -21,7 +22,6 @@ import org.koin.ktor.ext.inject
 
 fun Route.userRouteNew() {
     val userService by inject<UserService>()
-
     authenticate("auth-jwt") {
         withRole(Role.ADMIN) {
             post("/register") {
@@ -39,25 +39,26 @@ fun Route.userRouteNew() {
     authenticate("auth-jwt") {
         withRole(Role.ADMIN, Role.TEACHER) {
             get {
-                val queryParams = UserQueryParams(
-                    search = call.queryParameters["search"],
-                    page = call.queryParameters["page"]?.toIntOrNull(),
-                    limit = call.queryParameters["limit"]?.toIntOrNull(),
-                    sortBy = call.queryParameters["sortBy"],
-                    sortOrder = call.queryParameters["sortOrder"],
-                    gender = call.queryParameters["gender"]?.split(","),
-                    role = call.queryParameters["role"]?.split(",")
-                )
-                val response = userService.getAllUser(queryParams)
+                withClaim { claim ->
+                    val queryParams = UserQueryParams(
+                        search = call.queryParameters["search"],
+                        page = call.queryParameters["page"]?.toIntOrNull(),
+                        limit = call.queryParameters["limit"]?.toIntOrNull(),
+                        sortBy = call.queryParameters["sortBy"],
+                        sortOrder = call.queryParameters["sortOrder"],
+                        gender = call.queryParameters["gender"]?.split(","),
+                        role = call.queryParameters["role"]?.split(",")
+                    )
+                    val response = userService.getAllUser(queryParams)
 
-                call.respond(
-                    status = response.statusCode,
-                    message = response
-                )
+                    call.respond(
+                        status = response.statusCode,
+                        message = response
+                    )
+                }
             }
         }
     }
-
 
     authenticate("auth-jwt") {
         withRole(Role.ADMIN) {
@@ -66,7 +67,6 @@ fun Route.userRouteNew() {
                     ?: throw IllegalArgumentException("id")
 
                 val editRequest = call.receive<EditUserRequest>()
-
                 val response = userService.editUser(
                     requestBody = editRequest,
                     id = id

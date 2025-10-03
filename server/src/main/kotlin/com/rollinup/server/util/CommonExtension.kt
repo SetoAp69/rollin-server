@@ -1,6 +1,11 @@
 package com.rollinup.server.util
 
+import JwtAuthClaim
 import com.rollinup.server.CommonException
+import io.ktor.server.auth.jwt.JWTPrincipal
+import io.ktor.server.auth.principal
+import io.ktor.server.routing.RoutingCall
+import io.ktor.server.routing.RoutingContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jetbrains.exposed.v1.core.Transaction
@@ -12,6 +17,29 @@ suspend fun <T> suspendTransaction(block: Transaction.() -> T): T =
             block()
         }
     }
+
+fun RoutingCall.getAuthClaim(): JwtAuthClaim {
+    fun claim(name: String): String =
+        this.principal<JWTPrincipal>()
+            ?.payload
+            ?.getClaim(name)
+            ?.asString()
+            ?: throw IllegalStateException("Invalid token")
+
+    return JwtAuthClaim(
+        id = claim("id"),
+        username = claim("username"),
+        email = claim("email"),
+        _role = claim("role")
+    )
+}
+
+suspend fun RoutingContext.withClaim(
+    body: suspend RoutingContext.(JwtAuthClaim) -> Unit
+) {
+    val claim = call.getAuthClaim()
+    body(claim)
+}
 
 
 fun String.notFoundException(): CommonException {
@@ -33,6 +61,7 @@ fun String.successCreateResponse(): String {
 fun String.successEditResponse(): String {
     return "$this data successfully updated"
 }
+
 fun String.toCensoredEmail(): String {
     val email = this.substringBefore("@")
     return "${email.firstOrNull() ?: "*"}*****${email.lastOrNull() ?: "*"}@***.***"
