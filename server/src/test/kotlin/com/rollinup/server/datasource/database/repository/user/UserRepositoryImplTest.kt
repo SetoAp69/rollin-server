@@ -1,11 +1,12 @@
 //package com.rollinup.server.datasource.database.repository.user
 //
-//import com.rollinup.server.datasource.database.repository.user.UserRepository
 //import com.rollinup.server.datasource.database.model.user.Gender
+//import com.rollinup.server.datasource.database.model.user.UserEntity
 //import com.rollinup.server.datasource.database.table.RoleTable
 //import com.rollinup.server.datasource.database.table.UserTable
+//import com.rollinup.server.model.Role
 //import com.rollinup.server.model.request.user.UserQueryParams
-//import com.rollinup.server.model.response.user.UserDTO
+//import com.rollinup.server.util.suspendTransaction
 //import io.mockk.MockKAnnotations
 //import io.mockk.coEvery
 //import io.mockk.every
@@ -24,10 +25,7 @@
 //
 //class UserRepositoryImplTest {
 //
-//    private lateinit var userRepositoryASDASD: UserRepositoryASDASD
-//
-//    @MockK
-//    private lateinit var userDao: UserRepository
+//    private lateinit var userRepository: UserRepository
 //
 //    val x = mockkObject(UserTable)
 //
@@ -60,9 +58,7 @@
 //    @Before
 //    fun setUp() {
 //        MockKAnnotations.init(this)
-//        userRepositoryASDASD = UserRepositoryASDASDImpl(
-//            dao = userDao
-//        )
+//        userRepository = UserRepositoryImpl()
 //
 //    }
 //
@@ -75,24 +71,24 @@
 //    fun `getAllUsers should return list of users`() = runTest {
 //        //Arrange
 //        val expectedResult = listOf(
-//            UserDTO(
+//            UserEntity(
 //                id = "123e4567-e89b-12d3-a456-426614174000",
 //                userName = "userName1",
 //                email = "email1",
 //                firstName = "firstName1",
 //                lastName = "lastName1",
-//                role = "role1",
+//                role = Role.STUDENT,
 //                gender = "M",
 //                password = "password1",
 //                salt = "salt1"
 //            ),
-//            UserDTO(
+//            UserEntity(
 //                id = "123e4567-e89b-12d3-a456-426614174001",
 //                userName = "userName2",
 //                email = "email2",
 //                firstName = "firstName2",
 //                lastName = "lastName2",
-//                role = "role2",
+//                role = Role.ADMIN,
 //                gender = "F",
 //                password = "password2",
 //                salt = "salt2"
@@ -104,7 +100,7 @@
 //            email = "email1",
 //            firstName = "firstName1",
 //            lastName = "lastName1",
-//            role = "role1",
+//            role = "student",
 //            gender = "M",
 //            password = "password1",
 //            salt = "salt1"
@@ -116,7 +112,7 @@
 //            email = "email2",
 //            firstName = "firstName2",
 //            lastName = "lastName2",
-//            role = "role2",
+//            role = "admin",
 //            gender = "F",
 //            password = "password2",
 //            salt = "salt2"
@@ -130,12 +126,11 @@
 //            mockkQuery.iterator()
 //        } returns listRow.iterator()
 //
-//        coEvery {
-//            userDao.getAllUsers(queryParams)
-//        } returns mockkQuery
 //
 //        //ACT
-//        val result = userRepositoryASDASD.getAllUsers(queryParams)
+//        val result =
+//            userRepository.getAllUsers(queryParams)
+//
 //
 //        //ASSERT
 //        assertEquals(

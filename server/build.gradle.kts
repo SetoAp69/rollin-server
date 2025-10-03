@@ -31,14 +31,12 @@ kover {
         "com.rollinup.server.util.*",
         "com.rollinup.server.socket.*",
         "com.rollinup.server.*.di.*",
-        "com.rollinup.server.datasource.apiservice.*",
         "com.rollinup.server.configurations.*",
-        "com.rollinup.server.datasource.database.table.*",
+        "com.rollinup.server.datasource.*",
         "kotlinx.coroutines.*",
     )
 
     val includedPackages = listOf(
-        "com.rollinup.server.datasource.database.*",
         "com.rollinup.server.model.*",
         "com.rollinup.server.route.*",
         "com.rollinup.server.service.*"
