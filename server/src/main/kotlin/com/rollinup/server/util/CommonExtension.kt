@@ -6,17 +6,6 @@ import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.principal
 import io.ktor.server.routing.RoutingCall
 import io.ktor.server.routing.RoutingContext
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import org.jetbrains.exposed.v1.core.Transaction
-import org.jetbrains.exposed.v1.jdbc.transactions.transaction
-
-suspend fun <T> suspendTransaction(block: Transaction.() -> T): T =
-    withContext(context = Dispatchers.IO) {
-        transaction {
-            block()
-        }
-    }
 
 fun RoutingCall.getAuthClaim(): JwtAuthClaim {
     fun claim(name: String): String =
@@ -43,7 +32,7 @@ suspend fun RoutingContext.withClaim(
 
 
 fun String.notFoundException(): CommonException {
-    return CommonException("can't found $this data")
+    return CommonException("can't find $this data")
 }
 
 fun String.isExistException(): CommonException {

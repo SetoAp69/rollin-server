@@ -28,13 +28,6 @@ object Utils {
         return lengthValid && hasUppercase && hasLowercase && hasDigit && hasSymbol
     }
 
-    suspend inline fun <reified T> HttpResponse.handleBody(): T {
-        if (this.status.value in 200..299) {
-            return body<T>()
-        } else {
-            throw Exception(this.status.description)
-        }
-    }
 
     fun generateRandom(digit: Int): String {
         val digit = if (digit < 5) 5 else digit
