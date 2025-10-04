@@ -15,7 +15,6 @@ class UserMapper {
         return GetAllUserResponse(
             record = data.size,
             page = queryParams.page ?: 1,
-            message = "",
             data = data.map {
                 UserDTO(
                     id = it.id,
