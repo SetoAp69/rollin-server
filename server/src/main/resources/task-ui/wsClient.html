@@ -99,7 +99,9 @@
 <table rules="all">
     <thead>
     <tr>
-        <th>Name</th><th>Description</th><th>Priority</th>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Priority</th>
     </tr>
     </thead>
     <tbody id="tasksTableBody">
@@ -110,13 +112,13 @@
     <form onsubmit="return sendTaskToServer()">
         <div>
             <label for="newTaskName">Name: </label>
-            <input type="text" id="newTaskName"
-                   name="newTaskName" size="10">
+            <input id="newTaskName" name="newTaskName"
+                   size="10" type="text">
         </div>
         <div>
             <label for="newTaskDescription">Description: </label>
-            <input type="text" id="newTaskDescription"
-                   name="newTaskDescription" size="20">
+            <input id="newTaskDescription" name="newTaskDescription"
+                   size="20" type="text">
         </div>
         <div>
             <label for="newTaskPriority">Priority: </label>

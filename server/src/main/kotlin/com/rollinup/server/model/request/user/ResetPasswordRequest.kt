@@ -11,14 +11,14 @@ data class ResetPasswordRequest(
     val token: String = "",
     @SerialName("newPassword")
     val newPassword: String = ""
-){
+) {
     private object ValidationMessages {
         const val TOKEN_BLANK = "Token cannot be empty."
-        const val PASSWORD_INVALID= "Password format is invalid."
+        const val PASSWORD_INVALID = "Password format is invalid."
     }
 
-    fun validation(): ValidationResult{
-        return when{
+    fun validation(): ValidationResult {
+        return when {
             token.isBlank() -> ValidationResult.Invalid(ValidationMessages.TOKEN_BLANK)
             newPassword.validatePassword() -> ValidationResult.Invalid(ValidationMessages.PASSWORD_INVALID)
             else -> ValidationResult.Valid

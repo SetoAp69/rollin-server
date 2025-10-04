@@ -4,7 +4,7 @@ interface TokenService {
     fun generateToken(
         config: TokenConfig,
         vararg claim: TokenClaim
-    ):String
+    ): String
 
     fun validateToken(token: String, config: TokenConfig): Boolean
 }

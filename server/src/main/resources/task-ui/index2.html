@@ -164,7 +164,7 @@
     <span>View all the tasks</span>
     <input type="submit" value="Go">
 </form>
-<form name="priorityForm" action="javascript:displayTasksWithPriority()">
+<form action="javascript:displayTasksWithPriority()" name="priorityForm">
     <span>View tasks with priority</span>
     <select name="priority">
         <option name="Low">Low</option>
@@ -174,12 +174,12 @@
     </select>
     <input type="submit" value="Go">
 </form>
-<form name="addTaskForm" action="javascript:addNewTask()">
+<form action="javascript:addNewTask()" name="addTaskForm">
     <span>Create new task with</span>
     <label for="newTaskName">name</label>
-    <input type="text" id="newTaskName" name="newTaskName" size="10">
+    <input id="newTaskName" name="newTaskName" size="10" type="text">
     <label for="newTaskDescription">description</label>
-    <input type="text" id="newTaskDescription" name="newTaskDescription" size="20">
+    <input id="newTaskDescription" name="newTaskDescription" size="20" type="text">
     <label for="newTaskPriority">priority</label>
     <select id="newTaskPriority" name="newTaskPriority">
         <option name="Low">Low</option>

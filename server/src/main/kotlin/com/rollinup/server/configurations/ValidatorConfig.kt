@@ -1,7 +1,7 @@
 package com.rollinup.server.configurations
 
-import com.rollinup.server.model.request.user.EditUserRequest
 import com.rollinup.server.model.request.auth.LoginRequest
+import com.rollinup.server.model.request.user.EditUserRequest
 import com.rollinup.server.model.request.user.RefreshTokenRequest
 import com.rollinup.server.model.request.user.RegisterUserRequest
 import com.rollinup.server.model.request.user.ResetPasswordRequest

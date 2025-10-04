@@ -38,10 +38,18 @@ data class EditUserRequest(
 
     fun validation(): ValidationResult {
         return when {
-            userName?.isBlank() ?: false -> ValidationResult.Invalid(ValidationMessages.USERNAME_BLANK)
-            firstName?.isBlank() ?: false -> ValidationResult.Invalid(ValidationMessages.FIRST_NAME_BLANK)
-            lastName?.isBlank() ?: false -> ValidationResult.Invalid(ValidationMessages.LAST_NAME_BLANK)
-            email?.isEmail() ?: false -> ValidationResult.Invalid(ValidationMessages.INVALID_EMAIL_FORMAT)
+            userName?.isBlank()
+                ?: false -> ValidationResult.Invalid(ValidationMessages.USERNAME_BLANK)
+
+            firstName?.isBlank()
+                ?: false -> ValidationResult.Invalid(ValidationMessages.FIRST_NAME_BLANK)
+
+            lastName?.isBlank()
+                ?: false -> ValidationResult.Invalid(ValidationMessages.LAST_NAME_BLANK)
+
+            email?.isEmail()
+                ?: false -> ValidationResult.Invalid(ValidationMessages.INVALID_EMAIL_FORMAT)
+
             role?.isBlank() ?: false -> ValidationResult.Invalid(ValidationMessages.ROLE_BLANK)
             else -> ValidationResult.Valid
         }

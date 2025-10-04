@@ -18,7 +18,10 @@ interface UserService {
 
     suspend fun getAllUser(queryParams: UserQueryParams): Response<GetAllUserResponse>
 
-    suspend fun validateResetOtp(userNameOrEmail: String, otp: String): Response<ValidateResetOtpResponse>
+    suspend fun validateResetOtp(
+        userNameOrEmail: String,
+        otp: String
+    ): Response<ValidateResetOtpResponse>
 
     suspend fun resetPasswordRequest(usernameOrEmail: String): Response<ResetPasswordRequestResponse>
 
