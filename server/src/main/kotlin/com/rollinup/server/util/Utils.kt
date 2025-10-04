@@ -1,12 +1,9 @@
 package com.rollinup.server.util
 
 import com.rollinup.server.Constant
-import com.rollinup.server.service.jwt.TokenConfig
-import io.ktor.client.call.body
-import io.ktor.client.statement.HttpResponse
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import java.time.Instant
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 
@@ -49,6 +46,14 @@ object Utils {
         val formattedDate = LocalDateTime.parse(this, formatter)
 
         return formattedDate
+    }
+
+
+    fun Long.toFormattedDateString(): String {
+        val instant = Instant.ofEpochMilli(this)
+        val formatter = DateTimeFormatter.ofPattern(Constant.DATABASE_DATE_FORMAT)
+            .withZone(ZoneOffset.UTC)
+        return formatter.format(instant)
     }
 
 }
