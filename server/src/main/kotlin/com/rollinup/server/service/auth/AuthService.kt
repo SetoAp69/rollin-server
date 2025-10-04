@@ -8,5 +8,5 @@ import com.rollinup.server.model.response.auth.RefreshTokenResponse
 interface AuthService {
     suspend fun login(loginRequest: LoginRequest): Response<LoginResponse>
 
-    suspend fun refreshToken(token:String):Response<RefreshTokenResponse>
+    suspend fun refreshToken(token: String): Response<RefreshTokenResponse>
 }

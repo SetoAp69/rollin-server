@@ -8,14 +8,14 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ResetPasswordRequestRequest(
     @SerialName("email")
-    val email:String = ""
-){
+    val email: String = ""
+) {
     private object ValidationMessages {
         const val EMAIL_INVALID = "Email format is invalid."
     }
 
-    fun validation(): ValidationResult{
-        return when{
+    fun validation(): ValidationResult {
+        return when {
             !email.isEmail() -> ValidationResult.Invalid(ValidationMessages.EMAIL_INVALID)
             else -> ValidationResult.Valid
         }

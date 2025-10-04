@@ -5,7 +5,6 @@ import com.rollinup.server.datasource.database.model.user.PGEnum
 import org.jetbrains.exposed.v1.core.Column
 import org.jetbrains.exposed.v1.core.ReferenceOption
 import org.jetbrains.exposed.v1.core.Table
-import org.jetbrains.exposed.v1.core.dao.id.IntIdTable
 
 object UserTable : Table("users") {
     val user_id = uuid("user_id")
@@ -15,7 +14,7 @@ object UserTable : Table("users") {
     val lastName = varchar("last_name", 50)
     val address = varchar("address", 100)
     val password = varchar("password", 128)
-    val salt = varchar("salt",64)
+    val salt = varchar("salt", 64)
     val phoneNumber = varchar("phone_number", 15)
     val role = reference(
         name = "role",
