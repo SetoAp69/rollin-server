@@ -42,7 +42,7 @@ kover {
         "com.rollinup.server.service.*"
     )
 
-    reports{
+    reports {
         filters {
             excludes {
                 packages(
@@ -57,7 +57,6 @@ kover {
         }
 
     }
-
 
 
 }

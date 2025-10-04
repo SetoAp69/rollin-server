@@ -20,8 +20,8 @@ class JWTService : TokenService {
         return token.sign(Algorithm.HMAC256(config.secret))
     }
 
-    override fun validateToken(token: String, config:TokenConfig): Boolean {
-        try{
+    override fun validateToken(token: String, config: TokenConfig): Boolean {
+        try {
             val algorithm = Algorithm.HMAC256(config.secret)
             val verificator = JWT.require(algorithm)
                 .withIssuer(config.issuer)
@@ -32,7 +32,7 @@ class JWTService : TokenService {
             val isExpired = decoded.expiresAt.before(Date())
 
             return !isExpired
-        } catch (e: JWTVerificationException){
+        } catch (e: JWTVerificationException) {
             return false
         }
     }

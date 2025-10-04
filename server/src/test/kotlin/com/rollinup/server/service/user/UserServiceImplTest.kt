@@ -2,7 +2,6 @@ package com.rollinup.server.service.user
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
-import com.google.common.base.CharMatcher.any
 import com.rollinup.server.CommonException
 import com.rollinup.server.Constant
 import com.rollinup.server.InvalidTokenExceptions
@@ -21,7 +20,6 @@ import com.rollinup.server.service.jwt.TokenService
 import com.rollinup.server.service.security.HashingService
 import com.rollinup.server.service.security.SaltedHash
 import com.rollinup.server.util.Message
-import com.rollinup.server.util.Utils
 import com.rollinup.server.util.Utils.toFormattedDateString
 import com.rollinup.server.util.manager.TransactionManager
 import com.rollinup.server.util.successGettingResponse
@@ -38,9 +36,6 @@ import org.jetbrains.exposed.v1.core.Transaction
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneOffset
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
@@ -329,7 +324,7 @@ class UserServiceImplTest {
         val storedToken = "hashedOtp"
         val storedSalt = "salt"
         val resetToken = "newResetToken"
-        val expiredAt = (System.currentTimeMillis()+Constant.OTP_DURATION)
+        val expiredAt = (System.currentTimeMillis() + Constant.OTP_DURATION)
             .toFormattedDateString()
 
         val userEntity = UserEntity(id = userId)
@@ -415,7 +410,7 @@ class UserServiceImplTest {
         val userId = "userId"
         val storedToken = "hashedOtp"
         val storedSalt = "salt"
-        val expiredAt = (System.currentTimeMillis()+Constant.OTP_DURATION)
+        val expiredAt = (System.currentTimeMillis() + Constant.OTP_DURATION)
             .toFormattedDateString()
 
         val userEntity = UserEntity(id = userId)
@@ -494,7 +489,8 @@ class UserServiceImplTest {
             val usernameOrEmail = "test@test.com"
             val userId = "userId"
             val userEntity = UserEntity(id = userId)
-            val expiresAt = (System.currentTimeMillis()+ Constant.OTP_DURATION).toFormattedDateString()
+            val expiresAt =
+                (System.currentTimeMillis() + Constant.OTP_DURATION).toFormattedDateString()
             val existingToken = ResetPasswordEntity(
                 token = "token",
                 salt = "salt",

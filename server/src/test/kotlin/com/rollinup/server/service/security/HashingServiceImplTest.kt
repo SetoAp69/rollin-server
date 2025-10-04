@@ -21,7 +21,11 @@ class HashingServiceImplTest {
         // Assert
         assertTrue(saltedHash.value.isNotBlank(), "Hash should not be blank")
         assertTrue(saltedHash.salt.isNotBlank(), "Salt should not be blank")
-        assertEquals(saltLength * 2, saltedHash.salt.length, "Salt hex string should be 64 characters long")
+        assertEquals(
+            saltLength * 2,
+            saltedHash.salt.length,
+            "Salt hex string should be 64 characters long"
+        )
     }
 
     @Test
@@ -69,7 +73,15 @@ class HashingServiceImplTest {
         val saltedHash2 = hashingService.generateSaltedHash(password)
 
         // Assert
-        assertNotEquals(saltedHash1.salt, saltedHash2.salt, "Salts should be different for each generation")
-        assertNotEquals(saltedHash1.value, saltedHash2.value, "Hashes should be different for each generation")
+        assertNotEquals(
+            saltedHash1.salt,
+            saltedHash2.salt,
+            "Salts should be different for each generation"
+        )
+        assertNotEquals(
+            saltedHash1.value,
+            saltedHash2.value,
+            "Hashes should be different for each generation"
+        )
     }
 }

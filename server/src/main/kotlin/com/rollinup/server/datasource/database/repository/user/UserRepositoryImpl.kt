@@ -184,7 +184,7 @@ class UserRepositoryImpl : UserRepository {
             email = this[UserTable.email],
             firstName = this[UserTable.firstName],
             lastName = this[UserTable.lastName],
-            role = Role.fromValue(this[RoleTable.name])?:Role.STUDENT,
+            role = Role.fromValue(this[RoleTable.name]) ?: Role.STUDENT,
             gender = this[UserTable.gender].name,
             password = this[UserTable.password],
             salt = this[UserTable.salt]
