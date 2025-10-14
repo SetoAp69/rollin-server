@@ -18,3 +18,4 @@ captures
 **/xcshareddata/WorkspaceSettings.xcsettings
 server/src/main/resources/env.properties
 docker/*.Dockerfile
+docker
