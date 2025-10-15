@@ -1,0 +1,52 @@
+
+name: Build, Test, and Deploy to Render
+
+
+on:
+  push:
+    branches: ["main"]
+
+
+env:
+  IMAGE_NAME = ghcr.io/${{github.repository}}
+
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Make gradlew
+        run: chmod + x ./gradlew
+
+      - name: Run unit test
+        run: ./gradlew test
+
+      - name: Log in to Container Reqistry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GITHUB_USERNAME }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ./docker/production.Dockerfile
+          push: true
+          tags: ${{ env.IMAGE_NAME }}:latest,${{env.IMAGE_NAME}}:${{github.sha}}
+
