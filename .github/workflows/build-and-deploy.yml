@@ -8,7 +8,7 @@ on:
 
 
 env:
-  IMAGE_NAME = ghcr.io/${{github.repository}}
+  IMAGE_NAME: ghcr.io/${{ github.repository }}
 
 
 jobs:
