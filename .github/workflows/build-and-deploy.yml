@@ -48,5 +48,5 @@ jobs:
           context: .
           file: ./docker/production.Dockerfile
           push: true
-          tags: ${{ env.IMAGE_NAME }}
+          tags: ${{env.IMAGE_NAME}}
 
