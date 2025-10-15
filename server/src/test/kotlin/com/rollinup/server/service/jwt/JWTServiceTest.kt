@@ -1,9 +1,12 @@
 package com.rollinup.server.service.jwt
 
 import com.auth0.jwt.JWT
+import com.rollinup.server.MockkEnvironment
+import com.rollinup.server.mockkEnvironment
 import com.rollinup.server.util.Config
 import io.mockk.every
 import io.mockk.mockkObject
+import io.mockk.unmockkAll
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -12,16 +15,19 @@ import kotlin.test.assertEquals
 
 class JWTServiceTest {
     private lateinit var jwtService: TokenService
+    private val envMockk = MockkEnvironment()
 
     @Before
     fun setUp() {
+        envMockk.setup()
         jwtService = JWTService()
         mockkObject(Config)
     }
 
     @After
     fun tearDown() {
-
+        envMockk.teardown()
+        unmockkAll()
     }
 
     @Test

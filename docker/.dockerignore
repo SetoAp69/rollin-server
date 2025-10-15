@@ -17,5 +17,4 @@ captures
 !*.xcworkspace/contents.xcworkspacedata
 **/xcshareddata/WorkspaceSettings.xcsettings
 server/src/main/resources/env.properties
-docker/*.Dockerfile
 etc/secrets

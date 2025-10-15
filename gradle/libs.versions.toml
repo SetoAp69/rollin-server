@@ -13,6 +13,8 @@ gson = "2.11.0"
 apache-mail = "2.0.0-M1"
 kover = "0.9.2"
 mockk = "1.14.5"
+systemLambda = "1.2.1"
+testNG = "2.1.8"
 
 
 [libraries]
@@ -75,10 +77,15 @@ postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" 
 #jsonpath
 json-path = { group = "com.jayway.jsonpath", name = "json-path", version.ref = "jsonPath" }
 
+system-lambda = {group = "com.github.stefanbirkner", name="system-lambda", version.ref="systemLambda"}
+
 #koin
 koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koin" }
 koin-ktor = { group = "io.insert-koin", name = "koin-ktor", version.ref = "koin" }
 koin-logger = { group = "io.insert-koin", name = "koin-logger-slf4j", version.ref = "koin" }
+
+#System stubs
+system-stubs-testng = {group = "uk.org.webcompere", name = "system-stubs-testng", version.ref ="testNG"}
 
 [plugins]
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

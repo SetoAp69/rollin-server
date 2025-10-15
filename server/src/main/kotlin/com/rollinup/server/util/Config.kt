@@ -5,40 +5,34 @@ import com.typesafe.config.ConfigFactory
 import io.ktor.server.config.HoconApplicationConfig
 
 object Config {
-    private val config by lazy {
-        HoconApplicationConfig(ConfigFactory.load())
-    }
-
-    fun fetchProperty(key: String) = config.property(key).getString()
-
     val smtpConfig
         get() = SmtpConfig(
-            port = fetchProperty("SMTP_PORT").toIntOrNull() ?: 457,
-            hostName = fetchProperty("SMTP_HOST_NAME"),
-            userName = fetchProperty("SMTP_USERNAME"),
-            password = fetchProperty("SMTP_PASSWORD"),
-            sender = fetchProperty("SMTP_SENDER")
+            port = System.getenv("SMTP_PORT").toIntOrNull() ?: 457,
+                hostName = System.getenv("SMTP_HOST_NAME"),
+            userName = System.getenv("SMTP_USERNAME"),
+            password = System.getenv("SMTP_PASSWORD"),
+            sender = System.getenv("SMTP_SENDER")
         )
 
 
     fun getUploadDir(path: String): String {
-        return "${fetchProperty("UPLOAD_DIR")}/$path/"
+        return "${System.getenv("UPLOAD_DIR")}/$path/"
     }
 
     fun getTokenConfig(): TokenConfig {
         return TokenConfig(
-            issuer = fetchProperty("JWT_ISSUER"),
-            audience = fetchProperty("JWT_AUDIENCE"),
+             issuer = System.getenv("JWT_ISSUER"),
+            audience = System.getenv("JWT_AUDIENCE"),
             expiresIn = 0L,
-            secret = fetchProperty("JWT_SECRET"),
-            realm = fetchProperty("JWT_REALM")
+            secret = System.getenv("JWT_SECRET"),
+            realm = System.getenv("JWT_REALM")
         )
     }
 
     fun getDbConfig() = DBConfig(
-        url = fetchProperty("DATABASE_URL"),
-        username = fetchProperty("DATABASE_USERNAME"),
-        password = fetchProperty("DATABASE_PASSWORD")
+        url = System.getenv("DB_URL"),
+        username = System.getenv("DB_USERNAME"),
+        password = System.getenv("DB_PASSWORD")
     )
 }
 
