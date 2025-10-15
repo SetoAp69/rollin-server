@@ -1,5 +1,9 @@
 package com.rollinup.server.service.security
 
+import com.rollinup.server.MockkEnvironment
+import com.rollinup.server.mockkEnvironment
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
@@ -8,6 +12,18 @@ import kotlin.test.assertTrue
 class HashingServiceImplTest {
 
     private val hashingService = HashingServiceImpl()
+
+    private val envMockk = MockkEnvironment()
+
+    @Before
+    fun setUp(){
+        envMockk.setup()
+    }
+
+    @After
+    fun teardown(){
+        envMockk.teardown()
+    }
 
     @Test
     fun `generateSaltedHash should return a valid hash and salt`() {

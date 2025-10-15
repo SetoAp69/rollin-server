@@ -2,10 +2,12 @@ package com.rollinup.server.service.auth
 
 import com.rollinup.server.CommonException
 import com.rollinup.server.Constant
+import com.rollinup.server.MockkEnvironment
 import com.rollinup.server.datasource.database.model.user.UserEntity
 import com.rollinup.server.datasource.database.repository.refreshtoken.RefreshTokenRepository
 import com.rollinup.server.datasource.database.repository.user.UserRepository
 import com.rollinup.server.mapper.AuthMapper
+import com.rollinup.server.mockkEnvironment
 import com.rollinup.server.model.Role
 import com.rollinup.server.model.request.auth.LoginRequest
 import com.rollinup.server.model.response.Response
@@ -55,8 +57,9 @@ class AuthServiceImplTest {
     @MockK
     private var transactionManager: TransactionManager = mockk()
 
-
     private var authMapper: AuthMapper = AuthMapper()
+
+    private val envMock = MockkEnvironment()
 
     private fun arrangeHashVerification(
         value: String,
@@ -139,6 +142,7 @@ class AuthServiceImplTest {
 
     @Before
     fun setUp() {
+        envMock.setup()
         MockKAnnotations.init(this)
         authService = AuthServiceImpl(
             hashingService = hashingService,
@@ -163,6 +167,7 @@ class AuthServiceImplTest {
     @After
     fun tearDown() {
         unmockkAll()
+        envMock.teardown()
     }
 
 

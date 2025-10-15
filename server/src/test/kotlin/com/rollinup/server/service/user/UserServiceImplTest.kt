@@ -5,6 +5,7 @@ import com.auth0.jwt.algorithms.Algorithm
 import com.rollinup.server.CommonException
 import com.rollinup.server.Constant
 import com.rollinup.server.InvalidTokenExceptions
+import com.rollinup.server.MockkEnvironment
 import com.rollinup.server.datasource.database.model.resetpassword.ResetPasswordEntity
 import com.rollinup.server.datasource.database.model.user.UserEntity
 import com.rollinup.server.datasource.database.repository.resetpassword.ResetPasswordRepository
@@ -61,6 +62,8 @@ class UserServiceImplTest {
     private lateinit var transactionManager: TransactionManager
 
     private var mapper = UserMapper()
+
+    private val envMockk = MockkEnvironment()
 
     //region Arrange Helpers
 
@@ -130,6 +133,7 @@ class UserServiceImplTest {
 
     @Before
     fun setUp() {
+        envMockk.setup()
         MockKAnnotations.init(this)
         // Mock the TransactionManager to simply execute the block passed to it
         arrangeSuspendTransaction()
@@ -148,6 +152,7 @@ class UserServiceImplTest {
     @After
     fun tearDown() {
         unmockkAll()
+        envMockk.teardown()
     }
 
     //region registerUser Tests

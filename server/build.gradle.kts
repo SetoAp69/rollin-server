@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.org.apache.commons.lang3.Functions.test
+
 plugins {
     alias(libs.plugins.kotlinJvm)
     alias(libs.plugins.ktor)
@@ -7,7 +9,7 @@ plugins {
 }
 
 group = "com.rollinup.server"
-version = "1.0.0"
+version = "0.0.1"
 
 
 project.ext.set("development", "development")
@@ -16,7 +18,6 @@ application {
 
     ktor {
         development = true
-
     }
 
 
@@ -57,7 +58,6 @@ kover {
         }
 
     }
-
 
 }
 
@@ -120,6 +120,8 @@ dependencies {
     testImplementation(libs.ktor.serverTestHost)
     testImplementation(libs.json.path)
     testImplementation(libs.mockk)
+    testImplementation(libs.system.lambda)
+    testImplementation(libs.system.stubs.testng)
 
 }
 
