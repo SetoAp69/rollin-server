@@ -1,12 +1,13 @@
 package com.rollinup.server.route
 
+import com.rollinup.server.route.attendance.attendanceRoute
 import com.rollinup.server.route.auth.authRoute
 import com.rollinup.server.route.test.testRoute
 import com.rollinup.server.route.user.userRouteNew
 
 sealed class Route(
     val path: String,
-    val route: io.ktor.server.routing.Route.() -> Unit
+    val route: io.ktor.server.routing.Route.() -> Unit,
 ) {
     object Auth : Route(
         path = "/auth",
@@ -26,6 +27,13 @@ sealed class Route(
         path = "/test",
         route = {
             testRoute()
+        }
+    )
+
+    object Attendance : Route(
+        path = "/attendance",
+        route = {
+            attendanceRoute()
         }
     )
 }

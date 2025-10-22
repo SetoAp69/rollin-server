@@ -49,7 +49,7 @@ fun Application.configureStatusPage() {
                         status = HttpStatusCode.InternalServerError,
                         message = Response(
                             status = 500,
-                            message = "Something went wrong",
+                            message = error.message.toString(),
                             data = Unit
                         )
                     )

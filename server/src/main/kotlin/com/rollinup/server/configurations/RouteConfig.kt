@@ -22,6 +22,11 @@ fun Application.configureRouting() {
         ) {
             Route.Test.route(this)
         }
+        route(
+            path = Route.Attendance.path
+        ){
+            Route.Attendance.route(this)
+        }
     }
 }
 

@@ -1,7 +1,10 @@
 package com.rollinup.server.di
 
+import com.rollinup.server.mapper.AttendanceMapper
 import com.rollinup.server.mapper.AuthMapper
 import com.rollinup.server.mapper.UserMapper
+import com.rollinup.server.service.attendance.AttendanceService
+import com.rollinup.server.service.attendance.AttendanceServiceImpl
 import com.rollinup.server.service.auth.AuthService
 import com.rollinup.server.service.auth.AuthServiceImpl
 import com.rollinup.server.service.email.EmailService
@@ -24,6 +27,8 @@ object ServiceModule {
         }
 
         single { AuthMapper() }
+
+        single{ AttendanceMapper() }
 
         single<TransactionManager> {
             TransactionManagerImpl()
@@ -61,6 +66,14 @@ object ServiceModule {
                 refreshTokenRepository = get(),
                 authMapper = get(),
                 transactionManager = get(),
+            )
+        }
+
+        single<AttendanceService> {
+            AttendanceServiceImpl(
+                attendanceRepository = get(),
+                transactionManager = get(),
+                mapper = get(),
             )
         }
 

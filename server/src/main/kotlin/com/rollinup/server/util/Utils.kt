@@ -1,8 +1,10 @@
 package com.rollinup.server.util
 
 import com.rollinup.server.Constant
+import kotlinx.serialization.json.Json
 import java.time.Instant
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.UUID
@@ -56,4 +58,18 @@ object Utils {
         return formatter.format(instant)
     }
 
+    fun getUploadDir(path: String): String {
+        return "${System.getenv("UPLOAD_DIR")}/$path/"
+    }
+
+    fun <T> decodeJsonList(string: String?): List<T>? {
+        if (string.isNullOrBlank()) return null
+        val list: List<T> = Json.decodeFromString(string)
+        return list.ifEmpty { null }
+    }
+
+    fun getOffset(): ZoneOffset {
+//        return ZoneOffset.UTC
+        return ZoneId.of("Asia/Jakarta").rules.getOffset(Instant.now())
+    }
 }

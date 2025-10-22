@@ -9,6 +9,7 @@ import org.jetbrains.exposed.v1.core.Table
 object UserTable : Table("users") {
     val user_id = uuid("user_id")
     val username = varchar("username", 50)
+    val studentId = varchar("student_id",30).nullable()
     val email = varchar("email", 100)
     val firstName = varchar("first_name", 50)
     val lastName = varchar("last_name", 50)
@@ -27,6 +28,16 @@ object UserTable : Table("users") {
         name = "gender",
         fromDb = { gender -> Gender.fromValue(gender as String) },
         toDb = { gender -> PGEnum("gender", gender) }
+    )
+
+    val device = varchar("device", 30).nullable()
+    val profilePicture = varchar("profile_pictures", 120).nullable()
+    val classX = reference(
+        name = "class",
+        refColumn = ClassTable._id,
+        onDelete = ReferenceOption.CASCADE ,
+        onUpdate = ReferenceOption.CASCADE,
+        fkName = "fk_user_class"
     )
 
     val searchField
@@ -53,3 +64,8 @@ object UserTable : Table("users") {
             gender,
         )
 }
+/*
+* 21 x 30 = 630
+* 18 x 30 = 540
+*
+* */

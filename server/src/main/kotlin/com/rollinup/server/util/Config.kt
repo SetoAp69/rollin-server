@@ -8,7 +8,7 @@ object Config {
     val smtpConfig
         get() = SmtpConfig(
             port = System.getenv("SMTP_PORT").toIntOrNull() ?: 457,
-                hostName = System.getenv("SMTP_HOST_NAME"),
+                hostName = System.getenv("SMTP_HOST"),
             userName = System.getenv("SMTP_USERNAME"),
             password = System.getenv("SMTP_PASSWORD"),
             sender = System.getenv("SMTP_SENDER")

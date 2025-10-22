@@ -18,4 +18,6 @@ object Message {
     const val EDIT_USER_SUCCESS = "User data updated successfully"
     const val INVALID_REQUEST = "Invalid request"
     const val ILLEGAL_ROLE = "User with this role don't have access to this route"
+    const val INVALID_PATH_PARAMETER = "Invalid path parameter"
+    const val INVALID_REQUEST_BODY = "Invalid request body"
 }
