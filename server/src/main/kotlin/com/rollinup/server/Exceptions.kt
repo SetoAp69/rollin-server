@@ -8,6 +8,8 @@ class CommonException(message: String) : Exception(message)
 
 class UnauthorizedTokenException() : Exception()
 
+class InvalidSettingException() : Exception()
+
 class IllegalRoleException() : Exception()
 
 class IllegalPathParameterException(path: String) : Exception(path)

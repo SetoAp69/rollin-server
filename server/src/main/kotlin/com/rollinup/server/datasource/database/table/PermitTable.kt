@@ -22,7 +22,8 @@ object PermitTable : Table("permit") {
         fromDb = { type -> PermitType.fromValue(type as String) },
         toDb = { type -> PGEnum("permit_type", type) }
     )
-    val reason = varchar("reason", 30)
+    val name = text("name")
+    val reason = varchar("reason", 30).nullable()
     val note = varchar("note", 120).nullable()
     val startTime = timestampWithTimeZone("start_time")
     val endTime = timestampWithTimeZone("end_time")

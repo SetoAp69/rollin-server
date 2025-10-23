@@ -122,7 +122,6 @@ fun Route.testRoute() {
             order = call.queryParameters["order"],
             search = call.queryParameters["search"],
             status = call.queryParameters["status"]?.split(","),
-            xClass = call.queryParameters["class"]?.split(",")?.map{it.toInt()},
             dateRange = call.queryParameters["dateRange"]?.split(",")?.map { it->
                 it.toLong()
             },

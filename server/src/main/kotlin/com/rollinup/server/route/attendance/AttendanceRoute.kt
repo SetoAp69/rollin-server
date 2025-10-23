@@ -4,6 +4,8 @@ import com.rollinup.server.IllegalPathParameterException
 import com.rollinup.server.configurations.withRole
 import com.rollinup.server.model.Role
 import com.rollinup.server.model.request.attendance.AttendanceQueryParams
+import com.rollinup.server.model.request.attendance.GetAttendanceByClassQueryParams
+import com.rollinup.server.model.request.attendance.GetAttendanceByStudentQueryParams
 import com.rollinup.server.service.attendance.AttendanceService
 import com.rollinup.server.util.Utils.decodeJsonList
 import com.rollinup.server.util.withClaim
@@ -18,22 +20,76 @@ import org.koin.ktor.ext.inject
 fun Route.attendanceRoute() {
     val attendanceService by inject<AttendanceService>()
 
+//    authenticate("auth-jwt") {
+//        withRole(Role.ADMIN, Role.TEACHER, Role.STUDENT) {
+//            get {
+//                withClaim {
+//                    val queryParams = AttendanceQueryParams(
+//                        limit = call.queryParameters["limit"]?.toIntOrNull(),
+//                        page = call.queryParameters["page"]?.toIntOrNull(),
+//                        sortBy = call.queryParameters["sortBy"],
+//                        order = call.queryParameters["order"],
+//                        search = call.queryParameters["search"],
+//                        status = decodeJsonList(call.queryParameters["status"]),
+//                        dateRange = decodeJsonList(call.queryParameters["dateRange"]),
+//                        studentId = call.queryParameters["studentId"]
+//                    )
+//                    val response = attendanceService.getAttendance(queryParams = queryParams)
+//                    call.respond(status = response.statusCode, message = response)
+//                }
+//            }
+//        }
+//    }
+
     authenticate("auth-jwt") {
-        withRole(Role.ADMIN, Role.TEACHER, Role.STUDENT) {
-            get {
-                withClaim {
-                    val queryParams = AttendanceQueryParams(
+        withRole(Role.ADMIN, Role.STUDENT, Role.TEACHER) {
+            get("/by-student/{studentId}") {
+                withClaim { claim ->
+                    val studentId = call.pathParameters["studentId"]
+                        ?: throw IllegalPathParameterException("studentId")
+
+                    if (claim.role == Role.STUDENT && claim.id != studentId)
+                        throw IllegalPathParameterException("studentId")
+
+                    val queryParams = GetAttendanceByStudentQueryParams(
+                        search = call.queryParameters["search"],
                         limit = call.queryParameters["limit"]?.toIntOrNull(),
                         page = call.queryParameters["page"]?.toIntOrNull(),
+                        dateRange = decodeJsonList(call.queryParameters["dateRange"])
+                    )
+
+                    val response = attendanceService.getAttendanceListByStudent(
+                        queryParams = queryParams,
+                        studentId = studentId
+                    )
+                    call.respond(status = response.statusCode, message = response)
+                }
+            }
+        }
+    }
+
+    authenticate("auth-jwt") {
+        withRole(Role.ADMIN, Role.TEACHER) {
+            get("/by-class/{classKey}") {
+                withClaim { claim ->
+                    val classKey = call.pathParameters["classKey"]?.toIntOrNull()
+                        ?: throw IllegalPathParameterException("studentId")
+
+                    val queryParams = GetAttendanceByClassQueryParams(
+                        search = call.queryParameters["search"],
+                        limit = call.queryParameters["limit"]?.toIntOrNull(),
+                        page = call.queryParameters["page"]?.toIntOrNull(),
+                        date = call.queryParameters["date"]?.toLongOrNull(),
                         sortBy = call.queryParameters["sortBy"],
                         order = call.queryParameters["order"],
-                        search = call.queryParameters["search"],
                         status = decodeJsonList(call.queryParameters["status"]),
-                        xClass = decodeJsonList(call.queryParameters["class"]),
-                        dateRange = decodeJsonList(call.queryParameters["dateRange"]),
-                        studentId = call.queryParameters["studentId"]
                     )
-                    val response = attendanceService.getAttendance(queryParams = queryParams)
+
+                    val response = attendanceService.getAttendanceListByClass(
+                        queryParams = queryParams,
+                        classKey = classKey
+                    )
+
                     call.respond(status = response.statusCode, message = response)
                 }
             }

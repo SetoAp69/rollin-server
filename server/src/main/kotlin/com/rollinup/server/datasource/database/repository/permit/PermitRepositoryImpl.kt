@@ -1,33 +1,130 @@
 package com.rollinup.server.datasource.database.repository.permit
 
-import com.rollinup.server.datasource.database.model.AttendanceStatus
-import com.rollinup.server.datasource.database.model.permit.PermitEntity
-import com.rollinup.server.datasource.database.table.AttendanceTable
+import com.rollinup.server.datasource.database.model.permit.PermitByIdEntity
+import com.rollinup.server.datasource.database.model.permit.PermitListEntity
 import com.rollinup.server.datasource.database.table.ClassTable
 import com.rollinup.server.datasource.database.table.PermitTable
 import com.rollinup.server.datasource.database.table.UserTable
 import com.rollinup.server.model.ApprovalStatus
-import com.rollinup.server.model.PermitType
-import com.rollinup.server.model.request.attendance.AttendanceQueryParams
+import com.rollinup.server.model.request.permit.CreatePermitBody
+import com.rollinup.server.model.request.permit.EditPermitBody
+import com.rollinup.server.model.request.permit.GetPermitQueryParams
+import com.rollinup.server.util.Utils
 import com.rollinup.server.util.addFilter
 import com.rollinup.server.util.likePattern
 import org.jetbrains.exposed.v1.core.JoinType
+import org.jetbrains.exposed.v1.core.SqlExpressionBuilder.inList
 import org.jetbrains.exposed.v1.core.alias
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.compoundOr
-import org.jetbrains.exposed.v1.core.statements.UpsertSqlExpressionBuilder.inList
 import org.jetbrains.exposed.v1.jdbc.andWhere
-import org.jetbrains.exposed.v1.jdbc.select
+import org.jetbrains.exposed.v1.jdbc.deleteWhere
+import org.jetbrains.exposed.v1.jdbc.insert
+import org.jetbrains.exposed.v1.jdbc.selectAll
+import org.jetbrains.exposed.v1.jdbc.update
 import java.time.Instant
 import java.time.OffsetDateTime
-import java.time.ZoneId
-import java.time.ZoneOffset
 import java.util.UUID
 
 class PermitRepositoryImpl() : PermitRepository {
-    override fun getPermitList(queryParams: AttendanceQueryParams): List<PermitEntity> {
+    override fun getPermitList(
+        queryParams: GetPermitQueryParams,
+        studentId: String?,
+        classKey: Int?,
+    ): List<PermitListEntity> {
+        val query = PermitTable
+            .join(
+                otherTable = UserTable,
+                joinType = JoinType.INNER,
+                onColumn = PermitTable.user_id,
+                otherColumn = UserTable.user_id
+            )
+            .join(
+                otherTable = ClassTable,
+                joinType = JoinType.INNER,
+                onColumn = ClassTable._id,
+                otherColumn = UserTable.classX
+            )
+            .selectAll()
+
+
+        query.addFilter(studentId) {
+            if (it.isNotBlank()) {
+                andWhere {
+                    UserTable.user_id eq UUID.fromString(it)
+                }
+            }
+        }
+
+        query.addFilter(classKey) {
+            andWhere {
+                ClassTable.key eq it
+            }
+        }
+
+        with(queryParams) {
+            query.addFilter(isActive) {
+                andWhere {
+                    if (it)
+                        PermitTable.approvalStatus eq ApprovalStatus.APPROVAL_PENDING
+                    else
+                        PermitTable.approvalStatus neq ApprovalStatus.APPROVAL_PENDING
+                }
+            }
+
+            query.addFilter(dateRange) { dRange ->
+                andWhere {
+                    val dates = dRange.map { Utils.getOffsetDateTime(it) }
+
+                    (PermitTable.startTime.greaterEq(dates.first())) and (PermitTable.endTime.lessEq(
+                        dates.last()
+                    ))
+                }
+            }
+
+
+            query.addFilter(date) {
+                andWhere {
+                    val d = Utils.getOffsetDateTime(it)
+                    (PermitTable.startTime.greaterEq(d)) and (PermitTable.endTime.lessEq(d))
+                }
+            }
+
+            query.addFilter(search) { s ->
+                if (s.isNotBlank()) {
+                    andWhere {
+                        listOf(
+                            UserTable.firstName like s.likePattern(),
+                            UserTable.lastName like s.likePattern(),
+                            ClassTable.name like s.likePattern(),
+                            PermitTable.reason like s.likePattern(),
+                            PermitTable.approvalStatus inList ApprovalStatus.like(s)
+                        ).compoundOr()
+                    }
+                }
+            }
+
+            query.addFilter(status) { status ->
+                andWhere {
+                    PermitTable.approvalStatus inList status.map { ApprovalStatus.fromValue(it) }
+                }
+            }
+        }
+
+        return query
+            .sortedByDescending {
+                PermitTable.createdAt
+            }
+            .map { row ->
+                PermitListEntity.fromResultRow(row)
+            }
+
+    }
+
+    override fun getPermitById(id: String): PermitByIdEntity? {
         val student = UserTable.alias("student")
         val approver = UserTable.alias("approver")
+
         val query = PermitTable
             .join(
                 otherTable = student,
@@ -37,90 +134,106 @@ class PermitRepositoryImpl() : PermitRepository {
             )
             .join(
                 otherTable = ClassTable,
-                joinType = JoinType.LEFT,
+                joinType = JoinType.INNER,
                 onColumn = ClassTable._id,
                 otherColumn = student[UserTable.classX]
             )
             .join(
                 otherTable = approver,
                 joinType = JoinType.LEFT,
-                onColumn = PermitTable.approvedBy,
-                otherColumn = approver[UserTable.user_id]
+                onColumn = approver[UserTable.user_id],
+                otherColumn = PermitTable.approvedBy
             )
-            .join(
-                otherTable = AttendanceTable,
-                joinType = JoinType.LEFT,
-                onColumn = PermitTable.attendanceId,
-                otherColumn = AttendanceTable._id
-            )
-            .select(
-                PermitTable.columns
-                        + student[UserTable.user_id]
-                        + student[UserTable.username]
-                        + student[UserTable.firstName]
-                        + student[UserTable.lastName]
-                        + approver[UserTable.user_id]
-                        + approver[UserTable.username]
-                        + approver[UserTable.firstName]
-                        + approver[UserTable.lastName]
-            )
+            .selectAll()
 
-
-        query.addFilter(queryParams.search) { it ->
-            if (it.isNotBlank()) {
-                andWhere {
-                    listOf(
-                        student[UserTable.firstName] like it.likePattern(),
-                        approver[UserTable.firstName] like it.likePattern(),
-                        approver[UserTable.lastName] like it.likePattern(),
-                        ClassTable.name like it.likePattern(),
-                        AttendanceTable.status inList AttendanceStatus.like(it),
-                        PermitTable.approvalStatus inList ApprovalStatus.like(it),
-                        PermitTable.type inList PermitType.like(it)
-                    ).compoundOr()
-                }
-            }
-        }
-        query.addFilter(queryParams.studentId){
-            if(it.isNotBlank()){
-                andWhere {
-                    PermitTable.user_id eq UUID.fromString(it)
-                }
-            }
-        }
-        query.addFilter(queryParams.xClass) {
-            andWhere {
-                ClassTable.key inList it
-            }
-        }
-        query.addFilter(queryParams.status){status->
-            andWhere {
-                val statusList = status.map { ApprovalStatus.fromValue(it)  }
-                PermitTable.approvalStatus inList statusList
-            }
-        }
-        query.addFilter(queryParams.dateRange){dateRange->
-            andWhere {
-                val from = OffsetDateTime.ofInstant(
-                    Instant.ofEpochMilli(dateRange.first()),
-                    ZoneOffset.UTC
-                )
-                val to = OffsetDateTime.ofInstant(
-                    Instant.ofEpochMilli(dateRange.last()),
-                    ZoneOffset.UTC
-                )
-                PermitTable.startTime.greaterEq(from) and PermitTable.endTime.lessEq(to)
-            }
-        }
-
-        val result = query.map { row->
-            PermitEntity.fromResultRow(
-                row = row ,
-                student = student,
-                approver = approver
-            )
+        val result = query.firstOrNull()?.let { row ->
+            PermitByIdEntity.fromResultRow(row = row, student = student, approver = approver)
         }
 
         return result
     }
+
+    override fun createPermit(body: CreatePermitBody): String {
+        val from = OffsetDateTime.ofInstant(
+            Instant.ofEpochMilli(body.duration.first()),
+            Utils.getOffset()
+        )
+
+        val to = OffsetDateTime.ofInstant(
+            Instant.ofEpochMilli(body.duration.last()),
+            Utils.getOffset()
+        )
+
+        val approvedAt = body.approvedAt?.let {
+            OffsetDateTime.ofInstant(Instant.ofEpochMilli(it), Utils.getOffset())
+        }
+
+        val newPermitId = PermitTable.insert { statement ->
+            statement[user_id] = UUID.fromString(body.studentId)
+            statement[startTime] = from
+            statement[endTime] = to
+            statement[reason] = body.reason
+            statement[type] = body.type
+            statement[note] = body.note
+            statement[attachment] = body.attachment
+            statement[approvedBy] = body.approvedBy?.let { UUID.fromString(it) }
+            statement[approvalStatus] = body.approvalStatus ?: ApprovalStatus.APPROVAL_PENDING
+            statement[this.approvedAt] = approvedAt
+            statement[approvalNote] = body.approvalNote
+        }[PermitTable._id]
+
+        return newPermitId.toString()
+
+    }
+
+    override fun editPermit(
+        id: String,
+        body: EditPermitBody,
+    ) {
+        PermitTable.update(
+            where = {
+                PermitTable._id eq UUID.fromString(id)
+            }
+        ) { statement ->
+            with(body) {
+                duration?.let {
+                    val from = OffsetDateTime.ofInstant(
+                        Instant.ofEpochMilli(it.first()),
+                        Utils.getOffset()
+                    )
+                    val to = OffsetDateTime.ofInstant(
+                        Instant.ofEpochMilli(it.first()),
+                        Utils.getOffset()
+                    )
+                    statement[PermitTable.startTime] = from
+                    statement[PermitTable.endTime] = to
+                }
+                reason?.let { statement[PermitTable.reason] = it }
+                type?.let { statement[PermitTable.type] = it }
+                attachment?.let { statement[PermitTable.attachment] = it }
+                note?.let { statement[PermitTable.note] = it }
+                approvedBy?.let { statement[PermitTable.approvedBy] = UUID.fromString(it) }
+                approvalNote?.let { statement[PermitTable.approvalNote] = it }
+                approvalStatus?.let { statement[PermitTable.approvalStatus] = it }
+                approvedAt?.let {
+                    val approvedAt = OffsetDateTime.ofInstant(
+                        Instant.ofEpochMilli(it),
+                        Utils.getOffset()
+                    )
+                    statement[PermitTable.approvedAt] = approvedAt
+                }
+
+            }
+        }
+    }
+
+    override fun deletePermit(listId: List<String>) {
+        val uuidList = listId.map { UUID.fromString(it) }
+
+        PermitTable.deleteWhere {
+            PermitTable._id inList uuidList
+        }
+    }
+
+
 }

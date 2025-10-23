@@ -3,7 +3,9 @@ package com.rollinup.server.util
 import com.rollinup.server.Constant
 import kotlinx.serialization.json.Json
 import java.time.Instant
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
@@ -58,8 +60,35 @@ object Utils {
         return formatter.format(instant)
     }
 
+    fun getOffsetDateTime(epochMilli: Long, offset: ZoneOffset = getOffset()): OffsetDateTime {
+        return OffsetDateTime.ofInstant(
+            Instant.ofEpochMilli(epochMilli),
+            offset
+        )
+    }
+
+    fun generateDateRange(start: OffsetDateTime, end: OffsetDateTime): List<LocalDate> {
+        val dates = mutableListOf<LocalDate>()
+        var currentDate = start.toLocalDate()
+        val endDate = end.toLocalDate()
+
+        while (currentDate <= endDate) {
+            dates.add(currentDate)
+            currentDate = currentDate.plusDays(1)
+        }
+        return dates
+    }
+
     fun getUploadDir(path: String): String {
-        return "${System.getenv("UPLOAD_DIR")}/$path/"
+        val date = LocalDate
+            .ofInstant(Instant.now(), getOffset())
+            .toString()
+            .replace("-", "")
+        return "${System.getenv("UPLOAD_DIR")}/$path/$date/"
+    }
+
+    fun getCacheDir(path: String, fileName: String): String {
+        return "${System.getenv("CACHE_DIR")}/$path/$fileName"
     }
 
     fun <T> decodeJsonList(string: String?): List<T>? {
@@ -72,4 +101,5 @@ object Utils {
 //        return ZoneOffset.UTC
         return ZoneId.of("Asia/Jakarta").rules.getOffset(Instant.now())
     }
+
 }

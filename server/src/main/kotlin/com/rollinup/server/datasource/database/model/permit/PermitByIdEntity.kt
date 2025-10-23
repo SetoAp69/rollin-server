@@ -1,6 +1,5 @@
 package com.rollinup.server.datasource.database.model.permit
 
-import com.rollinup.server.datasource.database.table.AttendanceTable
 import com.rollinup.server.datasource.database.table.PermitTable
 import com.rollinup.server.datasource.database.table.UserTable
 import com.rollinup.server.model.ApprovalStatus
@@ -8,8 +7,9 @@ import com.rollinup.server.model.PermitType
 import org.jetbrains.exposed.v1.core.Alias
 import org.jetbrains.exposed.v1.core.ResultRow
 
-data class PermitEntity(
+data class PermitByIdEntity(
     val id: String = "",
+    val name: String = "",
     val user: User = User(),
     val approvalStatus: ApprovalStatus = ApprovalStatus.APPROVAL_PENDING,
     val type: PermitType = PermitType.DISPENSATION,
@@ -17,8 +17,6 @@ data class PermitEntity(
     val note: String? = null,
     val permitStart: String = "",
     val permitEnd: String = "",
-    val attendanceId: String? = null,
-    val checkedInTime: String? = null,
     val approvedBy: User? = null,
     val approvalNote: String? = null,
     val createdAt: String = "",
@@ -37,9 +35,10 @@ data class PermitEntity(
             row: ResultRow,
             student: Alias<UserTable>,
             approver: Alias<UserTable>,
-        ): PermitEntity {
-            return PermitEntity(
+        ): PermitByIdEntity {
+            return PermitByIdEntity(
                 id = row[PermitTable._id].toString(),
+                name = row[PermitTable.name],
                 user = User(
                     id = row[student[UserTable.user_id]].toString(),
                     name = row[student[UserTable.firstName]] + " " + row[student[UserTable.lastName]],
@@ -51,7 +50,6 @@ data class PermitEntity(
                 note = row[PermitTable.note],
                 permitStart = row[PermitTable.startTime].toString(),
                 permitEnd = row[PermitTable.endTime].toString(),
-                attendanceId = row.getOrNull(AttendanceTable._id)?.toString(),
                 approvedBy = row.getOrNull(PermitTable.approvedBy).let {
                     if (it == null) null
                     else User(
@@ -63,7 +61,6 @@ data class PermitEntity(
                 approvalNote = row.getOrNull(PermitTable.approvalNote),
                 createdAt = row[PermitTable.createdAt].toString(),
                 updatedAt = row[PermitTable.updatedAt].toString(),
-                checkedInTime = row.getOrNull(AttendanceTable.checkedInAt)?.toString(),
                 approvedAt = row.getOrNull(PermitTable.approvedAt)?.toString()
             )
         }

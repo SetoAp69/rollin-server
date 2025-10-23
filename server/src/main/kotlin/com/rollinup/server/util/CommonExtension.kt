@@ -52,12 +52,16 @@ fun String.successEditResponse(): String {
     return "$this data successfully updated"
 }
 
+fun String.uploadFileException(): CommonException {
+    return CommonException("failed to upload $this file ")
+}
+
 fun String.toCensoredEmail(): String {
     val email = this.substringBefore("@")
     return "${email.firstOrNull() ?: "*"}*****${email.lastOrNull() ?: "*"}@***.***"
 }
 
-fun String.likePattern():String{
+fun String.likePattern(): String {
     return "%$this%"
 }
 
@@ -67,8 +71,15 @@ inline fun <T> Query.addFilter(value: List<T>?, block: Query.(List<T>) -> Unit) 
     }
 }
 
-inline fun <T> Query.addFilter(value: T?, block:Query.(T) ->Unit){
-    if(value!=null){
+inline fun <T> Query.addFilter(value: T?, block: Query.(T) -> Unit) {
+    if (value != null) {
         this.block(value)
     }
+}
+
+fun Query.addOffset(limit: Int?, page: Int?) {
+    if (listOf(limit, page).all { it != null && it != 0 })
+        this.offset(
+            (page!! * limit!!).toLong()
+        )
 }
