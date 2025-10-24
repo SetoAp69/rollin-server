@@ -10,7 +10,6 @@ import com.rollinup.server.model.request.attendance.CreateAttendanceBody
 import com.rollinup.server.model.request.attendance.EditAttendanceBody
 import com.rollinup.server.model.request.attendance.GetAttendanceByClassQueryParams
 import com.rollinup.server.model.request.attendance.GetAttendanceByStudentQueryParams
-import java.time.OffsetDateTime
 
 interface AttendanceRepository {
 //    fun getAttendanceList(queryParams: AttendanceQueryParams):List<AttendanceEntity>
@@ -33,7 +32,7 @@ interface AttendanceRepository {
         studentId: String,
     ): List<AttendanceByStudentEntity>
 
-    fun updateAttendanceData(id: String, body: EditAttendanceBody)
+    fun updateAttendanceData(listId: List<String>, body: EditAttendanceBody)
 
     fun deleteAttendanceData(listId: List<String>)
 
@@ -41,8 +40,10 @@ interface AttendanceRepository {
 
     fun createAttendanceFromPermit(
         permitId: String,
-        studentId:String,
-        duration:List<Long>,
+        studentId: String,
+        duration: List<Long>,
         status: AttendanceStatus,
     )
+
+    fun getAttendanceListByPermit(listId: List<String>): List<AttendanceEntity>
 }

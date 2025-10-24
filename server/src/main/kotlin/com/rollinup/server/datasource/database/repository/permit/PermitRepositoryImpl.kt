@@ -11,6 +11,7 @@ import com.rollinup.server.model.request.permit.EditPermitBody
 import com.rollinup.server.model.request.permit.GetPermitQueryParams
 import com.rollinup.server.util.Utils
 import com.rollinup.server.util.addFilter
+import com.rollinup.server.util.addOffset
 import com.rollinup.server.util.likePattern
 import org.jetbrains.exposed.v1.core.JoinType
 import org.jetbrains.exposed.v1.core.SqlExpressionBuilder.inList
@@ -47,7 +48,6 @@ class PermitRepositoryImpl() : PermitRepository {
             )
             .selectAll()
 
-
         query.addFilter(studentId) {
             if (it.isNotBlank()) {
                 andWhere {
@@ -63,6 +63,12 @@ class PermitRepositoryImpl() : PermitRepository {
         }
 
         with(queryParams) {
+            query.addFilter(listId) {
+                andWhere {
+                    PermitTable._id inList it.map { UUID.fromString(it) }
+                }
+            }
+
             query.addFilter(isActive) {
                 andWhere {
                     if (it)
@@ -109,6 +115,8 @@ class PermitRepositoryImpl() : PermitRepository {
                     PermitTable.approvalStatus inList status.map { ApprovalStatus.fromValue(it) }
                 }
             }
+
+            query.addOffset(limit, page)
         }
 
         return query
@@ -187,12 +195,12 @@ class PermitRepositoryImpl() : PermitRepository {
     }
 
     override fun editPermit(
-        id: String,
+        listId: List<String>,
         body: EditPermitBody,
     ) {
         PermitTable.update(
             where = {
-                PermitTable._id eq UUID.fromString(id)
+                PermitTable._id inList listId.map { UUID.fromString(it) }
             }
         ) { statement ->
             with(body) {

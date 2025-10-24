@@ -1,7 +1,13 @@
 package com.rollinup.server.util
 
 import com.rollinup.server.Constant
+import io.ktor.http.content.PartData
+import io.ktor.util.cio.writeChannel
+import io.ktor.utils.io.copyAndClose
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
+import java.io.File
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -100,6 +106,38 @@ object Utils {
     fun getOffset(): ZoneOffset {
 //        return ZoneOffset.UTC
         return ZoneId.of("Asia/Jakarta").rules.getOffset(Instant.now())
+    }
+
+    private fun String?.formatFileName(customName: String): String {
+        val format = this?.substringAfterLast(".") ?: ""
+        return "$customName-${UUID.randomUUID()}.$format".trimEnd('.')
+    }
+
+     fun fetchFormData(
+        partData: PartData.FormItem,
+        hashMap: HashMap<String, String>,
+    ) {
+        partData.name?.let {
+            hashMap[it] = partData.value
+        }
+    }
+
+     suspend fun fetchFileData(
+        partData: PartData.FileItem,
+        hashMap: HashMap<String, File>,
+        customName: String = "",
+    ) {
+        withContext(Dispatchers.IO) {
+            partData.name?.let {
+                val fileName = partData.originalFileName.formatFileName(customName)
+                val cacheDir =
+                    Utils.getCacheDir(path = Constant.UPDATE_FILE_PATH, fileName = fileName)
+                val cache = File(cacheDir).apply { parentFile?.mkdirs() }
+                partData.provider().copyAndClose(cache.writeChannel())
+
+                hashMap[it] = cache
+            }
+        }
     }
 
 }

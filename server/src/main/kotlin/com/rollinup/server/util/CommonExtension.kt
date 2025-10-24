@@ -48,12 +48,24 @@ fun String.successCreateResponse(): String {
     return "$this data successfully created"
 }
 
+fun String.successDeleteResponse(): String {
+    return "$this data successfully deleted"
+}
+
 fun String.successEditResponse(): String {
     return "$this data successfully updated"
 }
 
+fun String.illegalStatusExeptions(): CommonException{
+    return CommonException("Illegal $this status")
+}
+
 fun String.uploadFileException(): CommonException {
     return CommonException("failed to upload $this file ")
+}
+
+fun String.deleteFileException(): CommonException {
+    return CommonException("failed to delete $this file ")
 }
 
 fun String.toCensoredEmail(): String {
@@ -78,7 +90,7 @@ inline fun <T> Query.addFilter(value: T?, block: Query.(T) -> Unit) {
 }
 
 fun Query.addOffset(limit: Int?, page: Int?) {
-    if (listOf(limit, page).all { it != null && it != 0 })
+    if (listOf(limit, page).all { it != null && it > 0 })
         this.offset(
             (page!! * limit!!).toLong()
         )

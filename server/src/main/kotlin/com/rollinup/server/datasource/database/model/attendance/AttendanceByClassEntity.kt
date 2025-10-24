@@ -28,7 +28,7 @@ data class AttendanceByClassEntity(
 
     data class Permit(
         val id: String = "",
-        val reason: String = "",
+        val reason: String? = null,
         val type: PermitType = PermitType.DISPENSATION,
         val startTime: String = "",
         val endTime: String = "",

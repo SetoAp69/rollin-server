@@ -32,7 +32,7 @@ data class AttendanceEntity(
 
     data class Permit(
         val id: String = "",
-        val reason: String = "",
+        val reason: String? = null,
         val type: PermitType = PermitType.DISPENSATION,
         val startTime: String = "",
         val endTime: String = "",
@@ -56,31 +56,14 @@ data class AttendanceEntity(
     )
 
     companion object {
-        fun fromResultRow(row: ResultRow, student: Alias<UserTable>): AttendanceEntity {
+        fun fromResultRow(row: ResultRow): AttendanceEntity {
             return AttendanceEntity(
                 id = row[AttendanceTable._id].toString(),
-                student = User(
-                    id = row[student[UserTable.user_id]].toString(),
-                    username = row[student[UserTable.username]],
-                    name = row[student[UserTable.firstName]] + " " + row[student[UserTable.lastName]],
-                    classX = row[ClassTable.name]
-                ),
                 status = row[AttendanceTable.status],
                 checkedInAt = row.getOrNull(AttendanceTable.checkedInAt)?.toString(),
                 createdAt = row[AttendanceTable.createdAt].toString(),
                 updatedAt = row[AttendanceTable.updatedAt].toString(),
                 date = row[AttendanceTable.date].toString(),
-                permit = row.getOrNull(AttendanceTable.permit).let {
-                    if (it == null) null
-                    else
-                        Permit(
-                            id = it.toString(),
-                            reason = row[PermitTable.reason],
-                            type = row[PermitTable.type],
-                            startTime = row[PermitTable.startTime].toString(),
-                            endTime = row[PermitTable.endTime].toString()
-                        )
-                }
             )
         }
 

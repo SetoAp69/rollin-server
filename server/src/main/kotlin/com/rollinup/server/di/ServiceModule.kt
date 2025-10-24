@@ -11,6 +11,8 @@ import com.rollinup.server.service.email.EmailService
 import com.rollinup.server.service.email.EmailServiceImpl
 import com.rollinup.server.service.jwt.JWTService
 import com.rollinup.server.service.jwt.TokenService
+import com.rollinup.server.service.permit.PermitService
+import com.rollinup.server.service.permit.PermitServiceImpl
 import com.rollinup.server.service.security.HashingService
 import com.rollinup.server.service.security.HashingServiceImpl
 import com.rollinup.server.service.user.UserService
@@ -74,6 +76,20 @@ object ServiceModule {
                 attendanceRepository = get(),
                 transactionManager = get(),
                 mapper = get(),
+                permitRepository = get(),
+                fileService = get(),
+                generalSetting = get(),
+            )
+        }
+
+        single<PermitService>{
+            PermitServiceImpl(
+                permitRepository = get(),
+                attendanceRepository = get(),
+                permitMapper = get(),
+                transactionManager = get(),
+                fileService = get(),
+                generalSetting = get()
             )
         }
 

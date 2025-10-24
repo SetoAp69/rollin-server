@@ -32,14 +32,9 @@ import com.rollinup.server.util.uploadFileException
 import io.ktor.http.content.MultiPartData
 import io.ktor.http.content.PartData
 import io.ktor.http.content.forEachPart
-import io.ktor.util.cio.writeChannel
-import io.ktor.utils.io.copyAndClose
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.io.File
 import java.time.OffsetDateTime
 import java.time.OffsetTime
-import java.util.UUID
 
 class AttendanceServiceImpl(
     private val attendanceRepository: AttendanceRepository,
@@ -155,9 +150,9 @@ class AttendanceServiceImpl(
 
         multiPartData.forEachPart { partData ->
             when (partData) {
-                is PartData.FormItem -> fetchFormData(partData, formHash)
+                is PartData.FormItem -> Utils.fetchFormData(partData, formHash)
 
-                is PartData.FileItem -> fetchFileData(partData, fileHash)
+                is PartData.FileItem -> Utils.fetchFileData(partData, fileHash)
 
                 else -> {}
             }
@@ -184,7 +179,7 @@ class AttendanceServiceImpl(
                     throw "attendance attachment".uploadFileException()
                 }
 
-                is ApiResponse.Success -> {
+                is ApiResponse.Success -> transactionManager.suspendTransaction {
                     attendanceRepository.createAttendanceData(
                         body = body.copy(attachment = upload.data)
                     )
@@ -274,8 +269,8 @@ class AttendanceServiceImpl(
 
         multiPartData.forEachPart { partData ->
             when (partData) {
-                is PartData.FormItem -> fetchFormData(partData, formHash)
-                is PartData.FileItem -> fetchFileData(partData, fileHash)
+                is PartData.FormItem -> Utils.fetchFormData(partData, formHash)
+                is PartData.FileItem -> Utils.fetchFileData(partData, fileHash)
                 else -> {}
             }
         }
@@ -307,40 +302,13 @@ class AttendanceServiceImpl(
     }
 
 
-    private fun fetchFormData(
-        partData: PartData.FormItem,
-        hashMap: HashMap<String, String>,
-    ) {
-        partData.name?.let {
-            hashMap[it] = partData.value
-        }
-    }
-
-    private suspend fun fetchFileData(
-        partData: PartData.FileItem,
-        hashMap: HashMap<String, File>,
-        customName: String = "",
-    ) {
-        withContext(Dispatchers.IO) {
-            partData.name?.let {
-                val fileName = partData.originalFileName.formatFileName(customName)
-                val cacheDir =
-                    Utils.getCacheDir(path = Constant.UPDATE_FILE_PATH, fileName = fileName)
-                val cache = File(cacheDir).apply { parentFile?.mkdirs() }
-                partData.provider().copyAndClose(cache.writeChannel())
-
-                hashMap[it] = cache
-            }
-        }
-    }
-
     private suspend fun handleUpdateCheckIn(
         id: String,
         formHash: HashMap<String, String>,
     ) {
         val body = EditAttendanceBody.fromHashMap(formHash)
         transactionManager.suspendTransaction {
-            attendanceRepository.updateAttendanceData(id, body)
+            attendanceRepository.updateAttendanceData(listOf(id), body)
             attendanceRepository.updatePermit(id, null)
         }
     }
@@ -368,6 +336,7 @@ class AttendanceServiceImpl(
                 is ApiResponse.Success -> {
                     transactionManager.suspendTransaction {
                         val permitId = permitRepository.createPermit(permitBody)
+
                         attendanceRepository.createAttendanceFromPermit(
                             permitId = permitId,
                             duration = permitBody.duration,
@@ -394,28 +363,17 @@ class AttendanceServiceImpl(
         }
     }
 
-    private fun String?.formatFileName(customName: String): String {
-        val format = this?.substringAfterLast(".") ?: ""
-        return "$customName-${UUID.randomUUID()}.$format".trimEnd('.')
-    }
 
     private fun getAttendanceStatus(
         checkInTime: OffsetTime,
     ): AttendanceStatus {
 
-        val setting = GeneralSettingCache().get()
+        val setting = generalSetting.get()
 
-        val status = when {
-            checkInTime.isAfter(setting.checkInPeriodStart) && checkInTime.isBefore(setting.schoolPeriodStart) -> {
-                AttendanceStatus.CHECKED_IN
-            }
-
-            checkInTime.isBefore(setting.checkInPeriodEnd) -> {
-                AttendanceStatus.LATE
-            }
-
+        val status = when (checkInTime) {
+            in setting.checkInPeriodStart..setting.schoolPeriodStart -> AttendanceStatus.CHECKED_IN
+            in setting.schoolPeriodStart..setting.checkInPeriodEnd -> AttendanceStatus.LATE
             else -> throw CommonException(Message.OUTSIDE_TIME_PERIOD)
-
         }
 
         return status

@@ -3,7 +3,6 @@ package com.rollinup.server.route.attendance
 import com.rollinup.server.IllegalPathParameterException
 import com.rollinup.server.configurations.withRole
 import com.rollinup.server.model.Role
-import com.rollinup.server.model.request.attendance.AttendanceQueryParams
 import com.rollinup.server.model.request.attendance.GetAttendanceByClassQueryParams
 import com.rollinup.server.model.request.attendance.GetAttendanceByStudentQueryParams
 import com.rollinup.server.service.attendance.AttendanceService
@@ -20,33 +19,14 @@ import org.koin.ktor.ext.inject
 fun Route.attendanceRoute() {
     val attendanceService by inject<AttendanceService>()
 
-//    authenticate("auth-jwt") {
-//        withRole(Role.ADMIN, Role.TEACHER, Role.STUDENT) {
-//            get {
-//                withClaim {
-//                    val queryParams = AttendanceQueryParams(
-//                        limit = call.queryParameters["limit"]?.toIntOrNull(),
-//                        page = call.queryParameters["page"]?.toIntOrNull(),
-//                        sortBy = call.queryParameters["sortBy"],
-//                        order = call.queryParameters["order"],
-//                        search = call.queryParameters["search"],
-//                        status = decodeJsonList(call.queryParameters["status"]),
-//                        dateRange = decodeJsonList(call.queryParameters["dateRange"]),
-//                        studentId = call.queryParameters["studentId"]
-//                    )
-//                    val response = attendanceService.getAttendance(queryParams = queryParams)
-//                    call.respond(status = response.statusCode, message = response)
-//                }
-//            }
-//        }
-//    }
 
     authenticate("auth-jwt") {
         withRole(Role.ADMIN, Role.STUDENT, Role.TEACHER) {
             get("/by-student/{studentId}") {
                 withClaim { claim ->
-                    val studentId = call.pathParameters["studentId"]
-                        ?: throw IllegalPathParameterException("studentId")
+                    val studentId = call.pathParameters["studentId"]?.let {
+                        it.ifBlank { null }
+                    } ?: throw IllegalPathParameterException("studentId")
 
                     if (claim.role == Role.STUDENT && claim.id != studentId)
                         throw IllegalPathParameterException("studentId")
@@ -99,9 +79,9 @@ fun Route.attendanceRoute() {
     authenticate("auth-jwt") {
         withRole(Role.ADMIN, Role.TEACHER, Role.STUDENT) {
             get("/{id}") {
-                val attendanceId = call.pathParameters["id"]
-                    ?.ifBlank { throw IllegalPathParameterException("id") }
-                    ?: throw IllegalPathParameterException("id")
+                val attendanceId = call.pathParameters["id"]?.let {
+                    it.ifBlank { null }
+                } ?: throw IllegalPathParameterException("id")
 
 
                 val response = attendanceService.getAttendanceById(id = attendanceId)

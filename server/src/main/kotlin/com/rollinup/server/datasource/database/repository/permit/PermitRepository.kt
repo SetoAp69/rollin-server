@@ -17,7 +17,7 @@ interface PermitRepository {
 
     fun createPermit(body: CreatePermitBody): String
 
-    fun editPermit(id: String, body: EditPermitBody)
+    fun editPermit(listId: List<String>, body: EditPermitBody)
 
     fun deletePermit(listId: List<String>)
 }

@@ -6,5 +6,10 @@ import java.io.File
 interface FileService {
     suspend fun uploadFile(filePath: String, file: File): ApiResponse<String>
 
-    suspend fun deleteFile(filePath: String, file: File): ApiResponse<Unit>
+    suspend fun deleteFile(filePath: List<String>): ApiResponse<Unit>
+
+    suspend fun deleteFile(filePath: String): ApiResponse<Unit> =
+        deleteFile(listOf(filePath))
+
+
 }

@@ -14,7 +14,6 @@ data class CreateAttendanceBody(
 
 
     private object ValidationMessages {
-        // Updated to be more granular based on the user's new checks
         const val ID_BLANK_OR_NULL = "Id cannot be empty"
         const val LOCATION_INVALID = "Location is invalid"
         const val ATTACHMENT_INVALID = "Attachment is invalid"

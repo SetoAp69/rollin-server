@@ -11,9 +11,11 @@ import org.jetbrains.exposed.v1.core.ResultRow
 data class PermitListEntity(
     val id: String = "",
     val name: String = "",
-    val user: User = User(),
+    val date: String = "",
+    val student: User = User(),
     val approvalStatus: ApprovalStatus = ApprovalStatus.APPROVAL_PENDING,
     val type: PermitType = PermitType.DISPENSATION,
+    val attachment: String = "",
     val reason: String? = null,
     val permitStart: String = "",
     val permitEnd: String = "",
@@ -34,12 +36,14 @@ data class PermitListEntity(
             return PermitListEntity(
                 id = row[PermitTable._id].toString(),
                 name = row[PermitTable.name],
-                user = User(
+                date = row[PermitTable.createdAt].toLocalDate().toString(),
+                student = User(
                     id = row[UserTable.user_id].toString(),
                     name = row[UserTable.firstName] + " " + row[UserTable.firstName],
                     username = row[UserTable.username],
                     classX = row[ClassTable.name]
                 ),
+                attachment = row[PermitTable.attachment],
                 approvalStatus = row[PermitTable.approvalStatus],
                 type = row[PermitTable.type],
                 reason = row[PermitTable.reason],

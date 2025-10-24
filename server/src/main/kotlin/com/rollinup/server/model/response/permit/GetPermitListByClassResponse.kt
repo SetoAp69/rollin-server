@@ -5,10 +5,10 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class GetPermitListByClassResponse(
-    @SerialName("status")
-    val status: Int = 0,
-    @SerialName("message")
-    val message: String = "",
+    @SerialName("record")
+    val record: Int = 0,
+    @SerialName("page")
+    val page: Int = 0,
     @SerialName("data")
     val data: List<PermitListDTO> = emptyList(),
 ) {
@@ -23,7 +23,7 @@ data class GetPermitListByClassResponse(
         @SerialName("startTime")
         val startTime: String = "",
         @SerialName("reason")
-        val reason: String = "",
+        val reason: String? = null,
         @SerialName("approvalStatus")
         val approvalStatus: String = "",
         @SerialName("type")

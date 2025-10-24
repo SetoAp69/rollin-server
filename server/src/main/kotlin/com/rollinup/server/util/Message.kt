@@ -21,4 +21,5 @@ object Message {
     const val INVALID_PATH_PARAMETER = "Invalid path parameter"
     const val INVALID_REQUEST_BODY = "Invalid request body"
     const val OUTSIDE_TIME_PERIOD = "Outside time period"
+    const val INVALID_TIME_FORMAT = "Invalid time format"
 }

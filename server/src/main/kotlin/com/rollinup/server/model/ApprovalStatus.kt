@@ -3,7 +3,8 @@ package com.rollinup.server.model
 enum class ApprovalStatus(val value:String) {
     APPROVAL_PENDING("approval_pending"),
     APPROVED("approved"),
-    DECLINED("declined")
+    DECLINED("declined"),
+    CANCELED("canceled")
 
     ;
     companion object{

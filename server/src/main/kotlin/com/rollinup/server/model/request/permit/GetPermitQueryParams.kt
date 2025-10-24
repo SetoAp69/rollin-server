@@ -6,6 +6,7 @@ data class GetPermitQueryParams(
     val sortBy: String? = null,
     val order: String? = null,
     val search: String? = null,
+    val listId:List<String>? = null,
     val isActive:Boolean = true,
     val type:List<String>? = null,
     val dateRange:List<Long>? = null,

@@ -21,10 +21,15 @@ interface PermitService {
 
     suspend fun getPermitById(id: String): Response<GetPermitByIdResponse>
 
-    suspend fun doApproval(id: String, body: PermitApprovalBody): Response<Unit>
+    suspend fun doApproval(approverId: String, body: PermitApprovalBody): Response<Unit>
 
     suspend fun createPermit(multiPart: MultiPartData): Response<Unit>
 
-    suspend fun editPermit(multiPart: MultiPartData): Response<Unit>
+    suspend fun editPermit(id: String, multiPart: MultiPartData): Response<Unit>
+
+    suspend fun cancelPermit(id: List<String>): Response<Unit>
+
+    suspend fun deletePermit(id: List<String>): Response<Unit>
+
 
 }

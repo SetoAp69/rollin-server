@@ -35,6 +35,7 @@ import org.jetbrains.exposed.v1.core.sum
 import org.jetbrains.exposed.v1.jdbc.andWhere
 import org.jetbrains.exposed.v1.jdbc.batchUpsert
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
+import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.update
@@ -183,7 +184,7 @@ class AttendanceRepositoryImpl() : AttendanceRepository {
     }
 
     override fun createAttendanceData(body: CreateAttendanceBody): String {
-        return AttendanceTable.upsert(AttendanceTable.userId, AttendanceTable.date) { statement ->
+        return AttendanceTable.insert { statement ->
             statement[userId] = UUID.fromString(body.studentUserId)
             statement[latitude] = body.latitude
             statement[longitude] = body.longitude
@@ -244,12 +245,12 @@ class AttendanceRepositoryImpl() : AttendanceRepository {
             andWhere {
                 val from = LocalDate.ofInstant(
                     Instant.ofEpochMilli(range.first()),
-                    Utils.getOffset()
+                    getOffset()
                 )
 
                 val to = LocalDate.ofInstant(
                     Instant.ofEpochMilli(range.last()),
-                    Utils.getOffset()
+                    getOffset()
                 )
 
                 AttendanceTable.date.between(from, to)
@@ -325,9 +326,6 @@ class AttendanceRepositoryImpl() : AttendanceRepository {
         classKey: Int,
     ): List<AttendanceByClassEntity> {
 
-        val useOffset = listOf(queryParams.page, queryParams.limit).all { it != null && it != 0 }
-        val offset = if (useOffset) queryParams.page!! * queryParams.limit!!.toLong() else null
-
         val date = queryParams.date?.let {
             LocalDate.ofInstant(Instant.ofEpochMilli(it), getOffset())
         }
@@ -399,11 +397,8 @@ class AttendanceRepositoryImpl() : AttendanceRepository {
                     ClassTable.key eq classKey
                 }
 
-            if (useOffset) {
-                query
-                    .limit(queryParams.limit!!)
-                    .offset(offset!!)
-            }
+            query
+                .addOffset(limit, page)
 
             query
                 .orderBy(AttendanceTable.date)
@@ -431,17 +426,19 @@ class AttendanceRepositoryImpl() : AttendanceRepository {
             )
             .selectAll()
 
+
+
         with(queryParams) {
             query.addFilter(dateRange) {
                 val from = LocalDate
                     .ofInstant(
                         Instant.ofEpochMilli(it.first()),
-                        Utils.getOffset()
+                        getOffset()
                     )
                 val to = LocalDate
                     .ofInstant(
                         Instant.ofEpochMilli(it.last()),
-                        Utils.getOffset()
+                        getOffset()
                     )
 
                 andWhere {
@@ -472,14 +469,14 @@ class AttendanceRepositoryImpl() : AttendanceRepository {
     }
 
     override fun updateAttendanceData(
-        id: String,
+        listId: List<String>,
         body: EditAttendanceBody,
     ) {
 
         AttendanceTable
             .update(
                 where = {
-                    AttendanceTable._id eq UUID.fromString(id)
+                    AttendanceTable._id inList listId.map { UUID.fromString(it) }
                 }
             ) { statement ->
                 body.status?.let {
@@ -519,12 +516,12 @@ class AttendanceRepositoryImpl() : AttendanceRepository {
         val from = Utils.getOffsetDateTime(duration.first())
         val to = Utils.getOffsetDateTime(duration.last())
 
-        val dates = Utils.generateDateRange(from,to)
+        val dates = Utils.generateDateRange(from, to)
 
         AttendanceTable.batchUpsert(
             data = dates,
             keys = arrayOf(AttendanceTable.userId, AttendanceTable.date)
-        ){date->
+        ) { date ->
             this[AttendanceTable.userId] = UUID.fromString(studentId)
             this[AttendanceTable.date] = date
             this[AttendanceTable.status] = status
@@ -540,6 +537,17 @@ class AttendanceRepositoryImpl() : AttendanceRepository {
         AttendanceTable.deleteWhere {
             AttendanceTable._id inList uuidList
         }
+    }
+
+    override fun getAttendanceListByPermit(listId: List<String>): List<AttendanceEntity> {
+        val permitUUID = listId.map { UUID.fromString(it) }
+
+        return AttendanceTable
+            .select(AttendanceTable._id)
+            .where { AttendanceTable.permit inList permitUUID }
+            .map { row ->
+                AttendanceEntity.fromResultRow(row)
+            }
     }
 
 }

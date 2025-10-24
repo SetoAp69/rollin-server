@@ -1,5 +1,6 @@
 package com.rollinup.server.datasource.database.model.permit
 
+import com.rollinup.server.datasource.database.table.ClassTable
 import com.rollinup.server.datasource.database.table.PermitTable
 import com.rollinup.server.datasource.database.table.UserTable
 import com.rollinup.server.model.ApprovalStatus
@@ -10,7 +11,8 @@ import org.jetbrains.exposed.v1.core.ResultRow
 data class PermitByIdEntity(
     val id: String = "",
     val name: String = "",
-    val user: User = User(),
+    val student: User = User(),
+    val date: String = "",
     val approvalStatus: ApprovalStatus = ApprovalStatus.APPROVAL_PENDING,
     val type: PermitType = PermitType.DISPENSATION,
     val reason: String? = null,
@@ -27,7 +29,9 @@ data class PermitByIdEntity(
     data class User(
         val id: String = "",
         val name: String = "",
+        val studentId: String? = null,
         val username: String = "",
+        val classX: String? = null,
     )
 
     companion object {
@@ -39,11 +43,14 @@ data class PermitByIdEntity(
             return PermitByIdEntity(
                 id = row[PermitTable._id].toString(),
                 name = row[PermitTable.name],
-                user = User(
+                student = User(
                     id = row[student[UserTable.user_id]].toString(),
                     name = row[student[UserTable.firstName]] + " " + row[student[UserTable.lastName]],
-                    username = row[student[UserTable.username]]
+                    username = row[student[UserTable.username]],
+                    studentId = row.getOrNull(student[UserTable.studentId]),
+                    classX = row.getOrNull(ClassTable.name)
                 ),
+                date = row[PermitTable.createdAt].toLocalDate().toString(),
                 approvalStatus = row[PermitTable.approvalStatus],
                 type = row[PermitTable.type],
                 reason = row[PermitTable.reason],

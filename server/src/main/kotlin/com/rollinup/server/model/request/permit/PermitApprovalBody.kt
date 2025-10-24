@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class PermitApprovalBody(
     @SerialName("id")
-    val id: List<String> = emptyList(),
+    val listId: List<String> = emptyList(),
     @SerialName("approvalNote")
     val approvalNote: String = "",
     @SerialName("isApproved")
@@ -21,7 +21,7 @@ data class PermitApprovalBody(
 
     fun validation(): ValidationResult {
         return when {
-            id.isEmpty() -> ValidationResult.Invalid(ValidationMessages.ID_BLANK_OR_NULL)
+            listId.isEmpty() -> ValidationResult.Invalid(ValidationMessages.ID_BLANK_OR_NULL)
             approvalNote.length > 120 -> ValidationResult.Invalid(ValidationMessages.NOTE_MAX_LENGTH)
             isApproved == null -> ValidationResult.Invalid(ValidationMessages.APPROVAL_STATUS_INVALID)
             else -> ValidationResult.Valid
