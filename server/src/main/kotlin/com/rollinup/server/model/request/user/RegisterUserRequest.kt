@@ -41,17 +41,6 @@ data class RegisterUserRequest(
         const val ROLE_BLANK = "Role cannot be empty."
     }
 
-    val isInvalid
-        get() = listOf(
-            userName,
-            firstName,
-            lastName,
-            email,
-            password,
-            role,
-            assignedClass
-        ).any { it.isBlank() }
-
     fun validation(): ValidationResult {
         return when {
             userName.isBlank() -> {

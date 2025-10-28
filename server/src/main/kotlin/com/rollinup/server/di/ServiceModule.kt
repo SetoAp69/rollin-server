@@ -1,14 +1,16 @@
 package com.rollinup.server.di
 
-import com.rollinup.server.mapper.AttendanceMapper
-import com.rollinup.server.mapper.AuthMapper
-import com.rollinup.server.mapper.UserMapper
 import com.rollinup.server.service.attendance.AttendanceService
 import com.rollinup.server.service.attendance.AttendanceServiceImpl
 import com.rollinup.server.service.auth.AuthService
 import com.rollinup.server.service.auth.AuthServiceImpl
 import com.rollinup.server.service.email.EmailService
 import com.rollinup.server.service.email.EmailServiceImpl
+import com.rollinup.server.service.file.FileService
+import com.rollinup.server.service.file.FileServiceImpl
+import com.rollinup.server.service.file.GoogleStorage
+import com.rollinup.server.service.generalsetting.GeneralSettingService
+import com.rollinup.server.service.generalsetting.GeneralSettingServiceImpl
 import com.rollinup.server.service.jwt.JWTService
 import com.rollinup.server.service.jwt.TokenService
 import com.rollinup.server.service.permit.PermitService
@@ -24,13 +26,10 @@ import org.koin.dsl.module
 object ServiceModule {
     val module = module {
 
-        single<UserMapper> {
-            UserMapper()
+
+        single<GoogleStorage> {
+            GoogleStorage()
         }
-
-        single { AuthMapper() }
-
-        single{ AttendanceMapper() }
 
         single<TransactionManager> {
             TransactionManagerImpl()
@@ -82,7 +81,21 @@ object ServiceModule {
             )
         }
 
-        single<PermitService>{
+        single<FileService> {
+            FileServiceImpl(
+                googleStorage = get()
+            )
+        }
+
+        single<GeneralSettingService> {
+            GeneralSettingServiceImpl(
+                generalSettingRepository = get(),
+                transactionManager = get(),
+                mapper = get()
+            )
+        }
+
+        single<PermitService> {
             PermitServiceImpl(
                 permitRepository = get(),
                 attendanceRepository = get(),
@@ -92,7 +105,6 @@ object ServiceModule {
                 generalSetting = get()
             )
         }
-
 
     }
 }

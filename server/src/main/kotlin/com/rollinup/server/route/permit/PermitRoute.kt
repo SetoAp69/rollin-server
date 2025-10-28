@@ -76,6 +76,7 @@ fun Route.permitRoute() {
                     queryParams = queryParams,
                     classKey = classKey,
                 )
+
                 call.respond(status = response.statusCode, message = response)
             }
         }

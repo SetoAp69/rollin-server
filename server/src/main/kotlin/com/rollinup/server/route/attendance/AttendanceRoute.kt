@@ -14,6 +14,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
+import io.ktor.server.routing.put
 import org.koin.ktor.ext.inject
 
 fun Route.attendanceRoute() {
@@ -98,10 +99,35 @@ fun Route.attendanceRoute() {
                     val studentUserId = claim.id
                     val multiPart = call.receiveMultipart()
 
-                    attendanceService.createAttendanceData(
+                    val response = attendanceService.createAttendanceData(
                         multiPartData = multiPart,
-                        studentUserId = studentUserId
+                        studentUserId = studentUserId,
+                        role = claim.role
                     )
+                    call.respond(response.statusCode, response.message)
+                }
+
+            }
+        }
+    }
+
+    authenticate("auth-jwt") {
+        withRole(Role.ADMIN, Role.TEACHER) {
+            put("/{id}") {
+                withClaim { claim ->
+
+                    val id = call.pathParameters["id"]?.let {
+                        it.ifBlank { null }
+                    } ?: throw IllegalPathParameterException("id")
+
+                    val multiPart = call.receiveMultipart()
+
+                    val response = attendanceService.updateAttendance(
+                        id = id,
+                        editBy = claim.id,
+                        multiPartData = multiPart
+                    )
+                    call.respond(status = response.statusCode, message = response.message)
                 }
             }
         }

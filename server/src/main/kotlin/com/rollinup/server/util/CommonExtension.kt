@@ -56,7 +56,7 @@ fun String.successEditResponse(): String {
     return "$this data successfully updated"
 }
 
-fun String.illegalStatusExeptions(): CommonException{
+fun String.illegalStatusExeptions(): CommonException {
     return CommonException("Illegal $this status")
 }
 
@@ -93,5 +93,7 @@ fun Query.addOffset(limit: Int?, page: Int?) {
     if (listOf(limit, page).all { it != null && it > 0 })
         this.offset(
             (page!! * limit!!).toLong()
+        ).limit(
+            limit
         )
 }

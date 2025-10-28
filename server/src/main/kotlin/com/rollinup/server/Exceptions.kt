@@ -13,3 +13,7 @@ class InvalidSettingException() : Exception()
 class IllegalRoleException() : Exception()
 
 class IllegalPathParameterException(path: String) : Exception(path)
+
+class IllegalLocationException():Exception()
+
+class IllegalFileFormat():Exception()

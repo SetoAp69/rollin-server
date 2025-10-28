@@ -1,7 +1,7 @@
 package com.rollinup.server.datasource.database.table
 
 import com.rollinup.server.datasource.database.model.user.Gender
-import com.rollinup.server.datasource.database.model.user.PGEnum
+import com.rollinup.server.datasource.database.model.PGEnum
 import org.jetbrains.exposed.v1.core.Column
 import org.jetbrains.exposed.v1.core.ReferenceOption
 import org.jetbrains.exposed.v1.core.Table
@@ -58,14 +58,4 @@ object UserTable : Table("users") {
             "last_name" to lastName,
             "gender" to gender
         )
-
-    val filterField
-        get() = listOf(
-            gender,
-        )
 }
-/*
-* 21 x 30 = 630
-* 18 x 30 = 540
-*
-* */

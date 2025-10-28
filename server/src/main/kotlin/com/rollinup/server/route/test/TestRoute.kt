@@ -1,15 +1,21 @@
 package com.rollinup.server.route.test
 
+import com.google.cloud.storage.BlobId
+import com.google.cloud.storage.BlobInfo
+import com.google.cloud.storage.Storage
+import com.google.cloud.storage.StorageOptions
 import com.rollinup.server.CommonException
 import com.rollinup.server.IllegalPathParameterException
-import com.rollinup.server.model.request.attendance.AttendanceQueryParams
 import com.rollinup.server.service.attendance.AttendanceService
 import com.rollinup.server.service.email.EmailService
 import com.rollinup.server.util.Config
+import com.rollinup.server.util.Utils
 import com.rollinup.server.util.manager.TransactionManagerImpl
 import io.ktor.client.content.LocalFileContent
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.PartData
 import io.ktor.http.content.forEachPart
+import io.ktor.server.http.content.staticResources
 import io.ktor.server.request.receiveMultipart
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -29,6 +35,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
+import java.util.concurrent.TimeUnit
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
@@ -39,28 +46,77 @@ fun Route.testRoute() {
     val attendanceService by inject<AttendanceService>()
 
     post("/upload") {
-        var fileDescriptions = ""
-        var fileName = ""
-        val multiPartData = call.receiveMultipart(formFieldLimit = 1024 * 1024 * 100)
+        val projectId = "bubbly-granite-475802-v4"
+        val bucketName = "rollin_up_server"
 
-        multiPartData
-            .forEachPart { part ->
+        val storage = StorageOptions
+            .newBuilder()
+            .setProjectId(projectId)
+            .build()
+            .service
+
+        var cache: File = File("")
+        var name: String = ""
+
+        val multiPart = call.receiveMultipart()
+        multiPart.forEachPart { part ->
             when (part) {
-                is PartData.FormItem -> {
-//                    fileDescriptions = part
-                }
-
                 is PartData.FileItem -> {
-                    fileName = part.originalFileName ?: return@forEachPart
-                    val filePath = config.getUploadDir("/pic/$fileName")
-                    val file = File(filePath).apply { parentFile?.mkdirs() }
-                    println("\n\n ${file.absolutePath}")
-                    part.provider().copyAndClose(file.writeChannel())
+                    val fileName = part.originalFileName as String
+                    val cacheDir = Utils.getCacheDir("cache", fileName)
+                    name = part.originalFileName as String
+                    cache = File(cacheDir).apply { parentFile?.mkdirs() }
+                    part.provider().copyAndClose(cache.writeChannel())
                 }
 
-                else -> {}
+                else -> ""
             }
             part.dispose()
+        }
+
+        val blobId = BlobId.of(bucketName, name)
+        val blobInfo = BlobInfo.newBuilder(blobId).setContentType("image/jpeg").build()
+        try {
+            val blob = storage.create(blobInfo, cache.readBytes())
+            call.respond(HttpStatusCode.OK, "${blob.mediaLink}")
+        } catch (e: Exception) {
+            call.respond(status = HttpStatusCode.BadRequest, message = e.toString())
+        }
+
+        val x = storage.create(blobInfo, cache.readBytes()).mediaLink ?: ""
+    }
+
+    get("/file/{fileName}") {
+        val projectId = "bubbly-granite-475802-v4"
+
+        val storage = StorageOptions
+            .newBuilder()
+            .setProjectId(projectId)
+            .build()
+            .service
+
+        val fileName = call.pathParameters["fileName"]
+            ?: throw IllegalPathParameterException("fileName")
+        val blobInfo = BlobInfo.newBuilder("rollin_up_server", fileName).build()
+
+
+        try {
+            val url = storage.signUrl(
+                blobInfo,
+                600, TimeUnit.SECONDS,
+                Storage.SignUrlOption.withV4Signature()
+            )
+            call.respond(status = HttpStatusCode.OK, message = url.toString())
+        } catch (e: Exception) {
+            call.respond(status = HttpStatusCode.BadRequest, message = e.toString())
+
+        }
+
+    }
+
+    get {
+        staticResources("/end-point-test", "end-point-test") {
+            default("index.html")
         }
     }
 
@@ -111,26 +167,9 @@ fun Route.testRoute() {
         val localDateTimeA = LocalDateTime.now()
         val localDateTimeB = LocalDateTime.now()
 
-        val duration = Duration.between(instantJava,instantJava).toHours()
+        val duration = Duration.between(instantJava, instantJava).toHours()
     }
 
-    get("/attendance"){
-        val queryParams = AttendanceQueryParams(
-            limit = call.queryParameters["limit"]?.toIntOrNull(),
-            page = call.queryParameters["page"]?.toIntOrNull(),
-            sortBy = call.queryParameters["sortBy"] ,
-            order = call.queryParameters["order"],
-            search = call.queryParameters["search"],
-            status = call.queryParameters["status"]?.split(","),
-            dateRange = call.queryParameters["dateRange"]?.split(",")?.map { it->
-                it.toLong()
-            },
-            studentId = call.queryParameters["studentId"]
-        )
-
-        val response = attendanceService.getAttendance(queryParams)
-        call.respond(status = response.statusCode, message = response)
-    }
 
 }
 

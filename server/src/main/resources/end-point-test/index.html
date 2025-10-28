@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Tester - All Modules</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        pre::-webkit-scrollbar { width: 8px; height: 8px; }
+        pre::-webkit-scrollbar-track { background: #2d3748; }
+        pre::-webkit-scrollbar-thumb { background: #4a5568; border-radius: 4px; }
+        pre::-webkit-scrollbar-thumb:hover { background: #718096; }
+
+        .grid-cols-query {
+             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        }
+
+        /* Styles for active and inactive tabs */
+        .tab-btn {
+            @apply py-3 px-6 font-semibold text-gray-600 border-b-2 border-transparent hover:text-gray-800 hover:border-gray-300 transition-all;
+        }
+        .tab-btn.active[data-tab="attendance"] { @apply text-blue-600 border-blue-600; }
+        .tab-btn.active[data-tab="permit"] { @apply text-purple-600 border-purple-600; }
+        .tab-btn.active[data-tab="generalsetting"] { @apply text-green-600 border-green-600; }
+
+        /* Show/hide tab content */
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans leading-normal tracking-normal">
+
+<div class="container mx-auto p-4 md:p-8">
+
+    <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">API Module Tester</h1>
+
+    <!-- Global Config -->
+    <div class="bg-white p-6 rounded-lg shadow-lg mb-8">
+        <h2 class="text-xl font-semibold text-gray-700 mb-4">Global Configuration</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label for="baseUrl" class="block text-sm font-medium text-gray-700 mb-1">Base API URL</label>
+                <input type="text" id="baseUrl" value="http://localhost:8080" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="http://localhost:8080">
+            </div>
+            <div>
+                <label for="authToken" class="block text-sm font-medium text-gray-700 mb-1">Authorization Token (JWT)</label>
+                <input type="text" id="authToken" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Paste your Bearer token here...">
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="mb-8 border-b border-gray-200">
+        <nav class="-mb-px flex justify-center" aria-label="Tabs">
+            <button id="tab-btn-attendance" class="tab-btn active" data-tab="attendance">
+                Attendance
+            </button>
+            <button id="tab-btn-permit" class="tab-btn" data-tab="permit">
+                Permit
+            </button>
+            <button id="tab-btn-generalsetting" class="tab-btn" data-tab="generalsetting">
+                General Settings
+            </button>
+        </nav>
+    </div>
+
+    <!-- Tab Content: Attendance -->
+    <div id="tab-content-attendance" class="tab-content active">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+            <!-- POST /check-in -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h3 class="text-lg font-semibold text-blue-600 mb-4">
+                    <span class="text-xs font-mono bg-blue-100 text-blue-800 rounded-md px-2 py-1 mr-2">POST</span>
+                    /check-in
+                </h3>
+                <p class="text-sm text-gray-600 mb-4">Creates a new attendance record (Multipart Form).</p>
+                <div class="space-y-4">
+                    <div>
+                        <label for="checkInStudentId" class="block text-sm font-medium text-gray-700 mb-1">studentUserId <span class="text-gray-500 text-xs">(Note: Service logic might use claim ID)</span></label>
+                        <input type="text" id="checkInStudentId" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Student's User ID">
+                    </div>
+                    <div>
+                        <label for="checkInLatitude" class="block text-sm font-medium text-gray-700 mb-1">Latitude</label>
+                        <input type="text" id="checkInLatitude" class="w-full p-2 border border-gray-300 rounded-md" placeholder="e.g., -6.200000">
+                    </div>
+                    <div>
+                        <label for="checkInLongitude" class="block text-sm font-medium text-gray-700 mb-1">Longitude</label>
+                        <input type="text" id="checkInLongitude" class="w-full p-2 border border-gray-300 rounded-md" placeholder="e.g., 106.816666">
+                    </div>
+                    <div>
+                        <label for="checkInAttachment" class="block text-sm font-medium text-gray-700 mb-1">Attachment (File)</label>
+                        <input type="file" id="checkInAttachment" class="w-full text-sm text-gray-500
+                                file:mr-4 file:py-2 file:px-4
+                                file:rounded-md file:border-0
+                                file:text-sm file:font-semibold
+                                file:bg-blue-50 file:text-blue-700
+                                hover:file:bg-blue-100">
+                    </div>
+                    <button id="btnPostCheckIn" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+                        Send Request
+                    </button>
+                </div>
+            </div>
+
+            <!-- GET /by-student/{studentId} -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h3 class="text-lg font-semibold text-green-600 mb-4">
+                    <span class="text-xs font-mono bg-green-100 text-green-800 rounded-md px-2 py-1 mr-2">GET</span>
+                    /by-student/{studentId}
+                </h3>
+                <div class="space-y-4">
+                    <div>
+                        <label for="getByStudentId" class="block text-sm font-medium text-gray-700 mb-1">studentId (Path Param)</label>
+                        <input type="text" id="getByStudentId" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Student ID">
+                    </div>
+                    <div>
+                        <label for="getByStudentSearch" class="block text-sm font-medium text-gray-700 mb-1">search (Query Param)</label>
+                        <input type="text" id="getByStudentSearch" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Search term">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="getByStudentLimit" class="block text-sm font-medium text-gray-700 mb-1">limit</label>
+                            <input type="number" id="getByStudentLimit" class="w-full p-2 border border-gray-300 rounded-md" placeholder="10">
+                        </div>
+                        <div>
+                            <label for="getByStudentPage" class="block text-sm font-medium text-gray-700 mb-1">page</label>
+                            <input type="number" id="getByStudentPage" class="w-full p-2 border border-gray-300 rounded-md" placeholder="1">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="getByStudentDateRange" class="block text-sm font-medium text-gray-700 mb-1">dateRange (JSON Array of Longs)</label>
+                        <input type="text" id="getByStudentDateRange" class="w-full p-2 border border-gray-300 rounded-md" placeholder="[1678886400000, 1678972799000]">
+                    </div>
+                    <button id="btnGetByStudent" class="w-full bg-green-600 text-white py-2 px-4 rounded-md font-semibold hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">
+                        Send Request
+                    </button>
+                </div>
+            </div>
+
+            <!-- GET /by-class/{classKey} -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h3 class="text-lg font-semibold text-green-600 mb-4">
+                    <span class="text-xs font-mono bg-green-100 text-green-800 rounded-md px-2 py-1 mr-2">GET</span>
+                    /by-class/{classKey}
+                </h3>
+                <div class="space-y-4">
+                    <div>
+                        <label for="getByClassKey" class="block text-sm font-medium text-gray-700 mb-1">classKey (Path Param)</label>
+                        <input type="number" id="getByClassKey" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Class Key (e.g., 123)">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="getByClassSearch" class="block text-sm font-medium text-gray-700 mb-1">search</label>
+                            <input type="text" id="getByClassSearch" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Search term">
+                        </div>
+                        <div>
+                            <label for="getByClassDate" class="block text-sm font-medium text-gray-700 mb-1">date (Long)</label>
+                            <input type="number" id="getByClassDate" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Timestamp">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="getByClassLimit" class="block text-sm font-medium text-gray-700 mb-1">limit</label>
+                            <input type="number" id="getByClassLimit" class="w-full p-2 border border-gray-300 rounded-md" placeholder="10">
+                        </div>
+                        <div>
+                            <label for="getByClassPage" class="block text-sm font-medium text-gray-700 mb-1">page</label>
+                            <input type="number" id="getByClassPage" class="w-full p-2 border border-gray-300 rounded-md" placeholder="1">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="getByClassSortBy" class="block text-sm font-medium text-gray-700 mb-1">sortBy</label>
+                            <input type="text" id="getByClassSortBy" class="w-full p-2 border border-gray-300 rounded-md" placeholder="e.g., 'name'">
+                        </div>
+                        <div>
+                            <label for="getByClassOrder" class="block text-sm font-medium text-gray-700 mb-1">order</label>
+                            <input type="text" id="getByClassOrder" class="w-full p-2 border border-gray-300 rounded-md" placeholder="'asc' or 'desc'">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="getByClassStatus" class="block text-sm font-medium text-gray-700 mb-1">status (JSON Array of Strings)</label>
+                        <input type="text" id="getByClassStatus" class="w-full p-2 border border-gray-300 rounded-md" placeholder="[&quot;LATE&quot;, &quot;CHECKED_IN&quot;]">
+                    </div>
+                    <button id="btnGetByClass" class="w-full bg-green-600 text-white py-2 px-4 rounded-md font-semibold hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">
+                        Send Request
+                    </button>
+                </div>
+            </div>
+
+            <!-- GET /{id} -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h3 class="text-lg font-semibold text-green-600 mb-4">
+                    <span class="text-xs font-mono bg-green-100 text-green-800 rounded-md px-2 py-1 mr-2">GET</span>
+                    /{id}
+                </h3>
+                <p class="text-sm text-gray-600 mb-4">Get a single attendance record by its ID.</p>
+                <div class="space-y-4">
+                    <div>
+                        <label for="getById" class="block text-sm font-medium text-gray-700 mb-1">id (Path Param)</label>
+                        <input type="text" id="getById" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Attendance ID">
+                    </div>
+                    <button id="btnGetById" class="w-full bg-green-600 text-white py-2 px-4 rounded-md font-semibold hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">
+                        Send Request
+                    </button>
+                </div>
+            </div>
+
+            <!-- PUT /{id} (Check-in / Late / Alpha) -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h3 class="text-lg font-semibold text-yellow-600 mb-4">
+                    <span class="text-xs font-mono bg-yellow-100 text-yellow-800 rounded-md px-2 py-1 mr-2">PUT</span>
+                    /{id} (Check-in / Late / Alpha)
+                </h3>
+                <p class="text-sm text-gray-600 mb-4">
+                    Update attendance for `CHECKED_IN`, `LATE`, or `ALPHA` statuses.
+                    <br><strong class="text-yellow-700">Note:</strong> For `ABSENT` or `EXCUSED`, use the form below.
+                </p>
+                <div class="space-y-4">
+                    <div>
+                        <label for="putId" class="block text-sm font-medium text-gray-700 mb-1">id (Path Param)</label>
+                        <input type="text" id="putId" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Attendance ID to update">
+                    </div>
+                    <div>
+                        <label for="putStatus" class="block text-sm font-medium text-gray-700 mb-1">status (Form Field)</label>
+                        <input type="text" id="putStatus" class="w-full p-2 border border-gray-300 rounded-md" placeholder="CHECKED_IN, LATE, ALPHA">
+                    </div>
+                    <div>
+                        <label for="putLatitude" class="block text-sm font-medium text-gray-700 mb-1">Latitude (for CHECKED_IN/LATE)</label>
+                        <input type="text" id="putLatitude" class="w-full p-2 border border-gray-300 rounded-md" placeholder="e.g., -6.200000">
+                    </div>
+                    <div>
+                        <label for="putLongitude" class="block text-sm font-medium text-gray-700 mb-1">Longitude (for CHECKED_IN/LATE)</label>
+                        <input type="text" id="putLongitude" class="w-full p-2 border border-gray-300 rounded-md" placeholder="e.g., 106.816666">
+                    </div>
+                    <div>
+                        <label for="putCheckedInAt" class="block text-sm font-medium text-gray-700 mb-1">checkedInAt (for CHECKED_IN/LATE)</label>
+                        <input type="number" id="putCheckedInAt" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Timestamp (Long)">
+                    </div>
+                    <button id="btnPutId" class="w-full bg-yellow-500 text-white py-2 px-4 rounded-md font-semibold hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-50">
+                        Send Request
+                    </button>
+                </div>
+            </div>
+
+            <!-- PUT /{id} (Absent / Excused) -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h3 class="text-lg font-semibold text-purple-600 mb-4">
+                    <span class="text-xs font-mono bg-purple-100 text-purple-800 rounded-md px-2 py-1 mr-2">PUT</span>
+                    /{id} (Update with Permit)
+                </h3>
+                <p class="text-sm text-gray-600 mb-4">
+                    Update attendance by creating a permit for `ABSENT` or `EXCUSED` statuses.
+                </p>
+                <div class="space-y-4">
+                    <div>
+                        <label for="putPermitId" class="block text-sm font-medium text-gray-700 mb-1">id (Path Param)</label>
+                        <input type="text" id="putPermitId" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Attendance ID to update">
+                    </div>
+                    <div>
+                        <label for="putPermitStatus" class="block text-sm font-medium text-gray-700 mb-1">status (Form Field)</label>
+                        <input type="text" id="putPermitStatus" class="w-full p-2 border border-gray-300 rounded-md" placeholder="ABSENT or EXCUSED">
+                    </div>
+                    <div>
+                        <label for="putPermitStudentId" class="block text-sm font-medium text-gray-700 mb-1">studentId (Form Field)</label>
+                        <input type="text" id="putPermitStudentId" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Student's User ID">
+                    </div>
+                    <div>
+                        <label for="putPermitDuration" class="block text-sm font-medium text-gray-700 mb-1">duration (JSON Array of Longs)</label>
+                        <input type="text" id="putPermitDuration" class="w-full p-2 border border-gray-300 rounded-md" placeholder="[1678886400000, 1678972799000]">
+                    </div>
+                    <div>
+                        <label for="putPermitAttachment" class="block text-sm font-medium text-gray-700 mb-1">Attachment (Permit File)</label>
+                        <input type="file" id="putPermitAttachment" class="w-full text-sm text-gray-500
+                                file:mr-4 file:py-2 file:px-4
+                                file:rounded-md file:border-0
+                                file:text-sm file:font-semibold
+                                file:bg-purple-50 file:text-purple-700
+                                hover:file:bg-purple-100">
+                    </div>
+                    <button id="btnPutPermit" class="w-full bg-purple-600 text-white py-2 px-4 rounded-md font-semibold hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50">
+                        Send Request
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Tab Content: Permit -->
+    <div id="tab-content-permit" class="tab-content">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+            <!-- POST / (Create Permit) -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h3 class="text-lg font-semibold text-blue-600 mb-4">
+                    <span class="text-xs font-mono bg-blue-100 text-blue-800 rounded-md px-2 py-1 mr-2">POST</span>
+                    / (Create Permit)
+                </h3>
+                <p class="text-sm text-gray-600 mb-4">Creates a new permit (Multipart Form).</p>
+                <div class="space-y-4">
+                    <div>
+                        <label for="createStudentId" class="block text-sm font-medium text-gray-700 mb-1">studentId</label>
+                        <input type="text" id="createStudentId" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Student's User ID">
+                    </div>
+                    <div>
+                        <label for="createReason" class="block text-sm font-medium text-gray-700 mb-1">reason</label>
+                        <input type="text" id="createReason" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Reason for permit">
+                    </div>
+                    <div>
+                        <label for="createDuration" class="block text-sm font-medium text-gray-700 mb-1">duration (JSON Array of Longs)</label>
+                        <input type="text" id="createDuration" class="w-full p-2 border border-gray-300 rounded-md" placeholder="[1678886400000, 1678972799000]">
+                    </div>
+                    <div>
+                        <label for="createType" class="block text-sm font-medium text-gray-700 mb-1">type</label>
+                        <input type="text" id="createType" class="w-full p-2 border border-gray-300 rounded-md" placeholder="DISPENSATION or ABSENCE">
+                    </div>
+                    <div>
+                        <label for="createNote" class="block text-sm font-medium text-gray-700 mb-1">note (Optional)</label>
+                        <input type="text" id="createNote" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Optional note">
+                    </div>
+                    <div>
+                        <label for="createAttachment" class="block text-sm font-medium text-gray-700 mb-1">Attachment (File)</label>
+                        <input type="file" id="createAttachment" class="w-full text-sm text-gray-500
+                                file:mr-4 file:py-2 file:px-4
+                                file:rounded-md file:border-0
+                                file:text-sm file:font-semibold
+                                file:bg-blue-50 file:text-blue-700
+                                hover:file:bg-blue-100">
+                    </div>
+                    <button id="btnPostCreate" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+                        Send Request
+                    </button>
+                </div>
+            </div>
+
+            <!-- PUT /{id} (Edit Permit) -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h3 class="text-lg font-semibold text-yellow-600 mb-4">
+                    <span class="text-xs font-mono bg-yellow-100 text-yellow-800 rounded-md px-2 py-1 mr-2">PUT</span>
+                    /{id} (Edit Permit)
+                </h3>
+                <p class="text-sm text-gray-600 mb-4">Edits an existing permit (Multipart Form).</p>
+                <div class="space-y-4">
+                    <div>
+                        <label for="editId" class="block text-sm font-medium text-gray-700 mb-1">id (Path Param)</label>
+                        <input type="text" id="editId" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Permit ID to edit">
+                    </div>
+                    <div>
+                        <label for="editDuration" class="block text-sm font-medium text-gray-700 mb-1">duration (JSON Array of Longs)</label>
+                        <input type="text" id="editDuration" class="w-full p-2 border border-gray-300 rounded-md" placeholder="[1678886400000, 1678972799000]">
+                    </div>
+                    <div>
+                        <label for="editReason" class="block text-sm font-medium text-gray-700 mb-1">reason</label>
+                        <input type="text" id="editReason" class="w-full p-2 border border-gray-300 rounded-md" placeholder="New reason">
+                    </div>
+                    <div>
+                        <label for="editType" class="block text-sm font-medium text-gray-700 mb-1">type</label>
+                        <input type="text" id="editType" class="w-full p-2 border border-gray-300 rounded-md" placeholder="DISPENSATION or ABSENCE">
+                    </div>
+                    <div>
+                        <label for="editNote" class="block text-sm font-medium text-gray-700 mb-1">note</label>
+                        <input type="text" id="editNote" class="w-full p-2 border border-gray-300 rounded-md" placeholder="New note">
+                    </div>
+                    <div>
+                        <label for="editAttachment" class="block text-sm font-medium text-gray-700 mb-1">Attachment (Optional new file)</label>
+                        <input type="file" id="editAttachment" class="w-full text-sm text-gray-500
+                                file:mr-4 file:py-2 file:px-4
+                                file:rounded-md file:border-0
+                                file:text-sm file:font-semibold
+                                file:bg-yellow-50 file:text-yellow-700
+                                hover:file:bg-yellow-100">
+                    </div>
+                    <button id="btnPutEdit" class="w-full bg-yellow-500 text-white py-2 px-4 rounded-md font-semibold hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-50">
+                        Send Request
+                    </button>
+                </div>
+            </div>
+
+            <!-- GET /by-student/{studentId} -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h3 class="text-lg font-semibold text-green-600 mb-4">
+                    <span class="text-xs font-mono bg-green-100 text-green-800 rounded-md px-2 py-1 mr-2">GET</span>
+                    /by-student/{studentId}
+                </h3>
+                <div class="space-y-4">
+                    <div>
+                        <label for="getByStudentId-permit" class="block text-sm font-medium text-gray-700 mb-1">studentId (Path Param)</label>
+                        <input type="text" id="getByStudentId-permit" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Student ID">
+                    </div>
+                    <p class="text-sm font-medium text-gray-700">Query Params:</p>
+                    <div class="grid grid-cols-query gap-4 border p-3 rounded-md">
+                        <input type="number" id="getByStudentLimit-permit" class="w-full p-2 border border-gray-300 rounded-md" placeholder="limit">
+                        <input type="number" id="getByStudentPage-permit" class="w-full p-2 border border-gray-300 rounded-md" placeholder="page">
+                        <input type="text" id="getByStudentSortBy-permit" class="w-full p-2 border border-gray-300 rounded-md" placeholder="sortBy">
+                        <input type="text" id="getByStudentOrder-permit" class="w-full p-2 border border-gray-300 rounded-md" placeholder="order">
+                        <input type="text" id="getByStudentSearch-permit" class="w-full p-2 border border-gray-300 rounded-md" placeholder="search">
+                        <input type="text" id="getByStudentListId-permit" class="w-full p-2 border border-gray-300 rounded-md" placeholder="listId (JSON)">
+                        <input type="text" id="getByStudentType-permit" class="w-full p-2 border border-gray-300 rounded-md" placeholder="type (JSON)">
+                        <input type="text" id="getByStudentDateRange-permit" class="w-full p-2 border border-gray-300 rounded-md" placeholder="dateRange (JSON)">
+                        <input type="number" id="getByStudentDate-permit" class="w-full p-2 border border-gray-300 rounded-md" placeholder="date (Long)">
+                        <input type="text" id="getByStudentStatus-permit" class="w-full p-2 border border-gray-300 rounded-md" placeholder="status (JSON)">
+                        <div class="flex items-center">
+                            <input type="checkbox" id="getByStudentIsActive-permit" class="h-4 w-4 text-purple-600 border-gray-300 rounded" checked>
+                            <label for="getByStudentIsActive-permit" class="ml-2 block text-sm text-gray-900">isActive</label>
+                        </div>
+                    </div>
+                    <button id="btnGetByStudent-permit" class="w-full bg-green-600 text-white py-2 px-4 rounded-md font-semibold hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">
+                        Send Request
+                    </button>
+                </div>
+            </div>
+
+            <!-- GET /by-class/{classKey} -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h3 class="text-lg font-semibold text-green-600 mb-4">
+                    <span class="text-xs font-mono bg-green-100 text-green-800 rounded-md px-2 py-1 mr-2">GET</span>
+                    /by-class/{classKey}
+                </h3>
+                <div class="space-y-4">
+                    <div>
+                        <label for="getByClassKey-permit" class="block text-sm font-medium text-gray-700 mb-1">classKey (Path Param)</label>
+                        <input type="number" id="getByClassKey-permit" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Class Key (e.g., 123)">
+                    </div>
+                    <p class="text-sm font-medium text-gray-700">Query Params:</p>
+                    <div class="grid grid-cols-query gap-4 border p-3 rounded-md">
+                        <input type="number" id="getByClassLimit-permit" class="w-full p-2 border border-gray-300 rounded-md" placeholder="limit">
+                        <input type="number" id="getByClassPage-permit" class="w-full p-2 border border-gray-300 rounded-md" placeholder="page">
+                        <input type="text" id="getByClassSortBy-permit" class="w-full p-2 border border-gray-300 rounded-md" placeholder="sortBy">
+                        <input type="text" id="getByClassOrder-permit" class="w-full p-2 border border-gray-300 rounded-md" placeholder="order">
+                        <input type="text" id="getByClassSearch-permit" class="w-full p-2 border border-gray-300 rounded-md" placeholder="search">
+                        <input type="text" id="getByClassListId-permit" class="w-full p-2 border border-gray-300 rounded-md" placeholder="listId (JSON)">
+                        <input type="text" id="getByClassType-permit" class="w-full p-2 border border-gray-300 rounded-md" placeholder="type (JSON)">
+                        <input type="text" id="getByClassDateRange-permit" class="w-full p-2 border border-gray-300 rounded-md" placeholder="dateRange (JSON)">
+                        <input type="number" id="getByClassDate-permit" class="w-full p-2 border border-gray-300 rounded-md" placeholder="date (Long)">
+                        <input type="text" id="getByClassStatus-permit" class="w-full p-2 border border-gray-300 rounded-md" placeholder="status (JSON)">
+                        <div class="flex items-center">
+                            <input type="checkbox" id="getByClassIsActive-permit" class="h-4 w-4 text-purple-600 border-gray-300 rounded" checked>
+                            <label for="getByClassIsActive-permit" class="ml-2 block text-sm text-gray-900">isActive</label>
+                        </div>
+                    </div>
+                    <button id="btnGetByClass-permit" class="w-full bg-green-600 text-white py-2 px-4 rounded-md font-semibold hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">
+                        Send Request
+                    </button>
+                </div>
+            </div>
+
+            <!-- GET /{id} -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h3 class="text-lg font-semibold text-green-600 mb-4">
+                    <span class="text-xs font-mono bg-green-100 text-green-800 rounded-md px-2 py-1 mr-2">GET</span>
+                    /{id}
+                </h3>
+                <div class="space-y-4">
+                    <div>
+                        <label for="getById-permit" class="block text-sm font-medium text-gray-700 mb-1">id (Path Param)</label>
+                        <input type="text" id="getById-permit" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Permit ID">
+                    </div>
+                    <button id="btnGetById-permit" class="w-full bg-green-600 text-white py-2 px-4 rounded-md font-semibold hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">
+                        Send Request
+                    </button>
+                </div>
+            </div>
+
+            <!-- POST /approval -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h3 class="text-lg font-semibold text-indigo-600 mb-4">
+                    <span class="text-xs font-mono bg-indigo-100 text-indigo-800 rounded-md px-2 py-1 mr-2">POST</span>
+                    /approval (JSON)
+                </h3>
+                <div class="space-y-4">
+                    <div>
+                        <label for="approvalListId" class="block text-sm font-medium text-gray-700 mb-1">listId (JSON Array of Strings)</label>
+                        <input type="text" id="approvalListId" class="w-full p-2 border border-gray-300 rounded-md" placeholder="[&quot;id1&quot;, &quot;id2&quot;]">
+                    </div>
+                    <div>
+                        <label for="approvalNote" class="block text-sm font-medium text-gray-700 mb-1">approvalNote</label>
+                        <input type="text" id="approvalNote" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Note for approval">
+                    </div>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="approvalIsApproved" class="h-4 w-4 text-indigo-600 border-gray-300 rounded">
+                        <label for="approvalIsApproved" class="ml-2 block text-sm text-gray-900">isApproved</label>
+                    </div>
+                    <button id="btnPostApproval" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50">
+                        Send Request
+                    </button>
+                </div>
+            </div>
+
+            <!-- PUT /cancel -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h3 class="text-lg font-semibold text-red-600 mb-4">
+                    <span class="text-xs font-mono bg-red-100 text-red-800 rounded-md px-2 py-1 mr-2">PUT</span>
+                    /cancel (JSON)
+                </h3>
+                <div class="space-y-4">
+                    <div>
+                        <label for="cancelListId" class="block text-sm font-medium text-gray-700 mb-1">listId (JSON Array of Strings)</label>
+                        <input type="text" id="cancelListId" class="w-full p-2 border border-gray-300 rounded-md" placeholder="[&quot;id1&quot;, &quot;id2&quot;]">
+                    </div>
+                    <button id="btnPutCancel" class="w-full bg-red-600 text-white py-2 px-4 rounded-md font-semibold hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50">
+                        Send Request
+                    </button>
+                </div>
+            </div>
+
+            <!-- PUT /delete -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h3 class="text-lg font-semibold text-red-800 mb-4">
+                    <span class="text-xs font-mono bg-red-200 text-red-900 rounded-md px-2 py-1 mr-2">PUT</span>
+                    /delete (JSON)
+                </h3>
+                <div class="space-y-4">
+                    <div>
+                        <label for="deleteListId" class="block text-sm font-medium text-gray-700 mb-1">listId (JSON Array of Strings)</label>
+                        <input type="text" id="deleteListId" class="w-full p-2 border border-gray-300 rounded-md" placeholder="[&quot;id1&quot;, &quot;id2&quot;]">
+                    </div>
+                    <button id="btnPutDelete" class="w-full bg-red-800 text-white py-2 px-4 rounded-md font-semibold hover:bg-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50">
+                        Send Request
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Tab Content: General Settings -->
+    <div id="tab-content-generalsetting" class="tab-content">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+            <!-- GET / -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h3 class="text-lg font-semibold text-green-600 mb-4">
+                    <span class="text-xs font-mono bg-green-100 text-green-800 rounded-md px-2 py-1 mr-2">GET</span>
+                    /
+                </h3>
+                <p class="text-sm text-gray-600 mb-4">Get the current general settings for the application.</p>
+                <button id="btnGetGeneralSetting" class="w-full bg-green-600 text-white py-2 px-4 rounded-md font-semibold hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">
+                    Fetch Settings
+                </button>
+            </div>
+
+            <!-- PUT /edit -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h3 class="text-lg font-semibold text-yellow-600 mb-4">
+                    <span class="text-xs font-mono bg-yellow-100 text-yellow-800 rounded-md px-2 py-1 mr-2">PUT</span>
+                    /edit (JSON)
+                </h3>
+                <p class="text-sm text-gray-600 mb-4">Update general settings. Fields are optional (JSON body).</p>
+                <div class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="gsSemesterStart" class="block text-sm font-medium text-gray-700 mb-1">semesterStart (Long)</label>
+                            <input type="number" id="gsSemesterStart" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Timestamp">
+                        </div>
+                        <div>
+                            <label for="gsSemesterEnd" class="block text-sm font-medium text-gray-700 mb-1">semesterEnd (Long)</label>
+                            <input type="number" id="gsSemesterEnd" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Timestamp">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="gsSchoolStart" class="block text-sm font-medium text-gray-700 mb-1">schoolPeriodStart (Long)</label>
+                            <input type="number" id="gsSchoolStart" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Timestamp (time of day)">
+                        </div>
+                        <div>
+                            <label for="gsSchoolEnd" class="block text-sm font-medium text-gray-700 mb-1">schoolPeriodEnd (Long)</label>
+                            <input type="number" id="gsSchoolEnd" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Timestamp (time of day)">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="gsCheckInStart" class="block text-sm font-medium text-gray-700 mb-1">checkInPeriodStart (Long)</label>
+                            <input type="number" id="gsCheckInStart" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Timestamp (time of day)">
+                        </div>
+                        <div>
+                            <label for="gsCheckInEnd" class="block text-sm font-medium text-gray-700 mb-1">checkInPeriodEnd (Long)</label>
+                            <input type="number" id="gsCheckInEnd" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Timestamp (time of day)">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label for="gsLatitude" class="block text-sm font-medium text-gray-700 mb-1">latitude (Double)</label>
+                            <input type="text" id="gsLatitude" class="w-full p-2 border border-gray-300 rounded-md" placeholder="-6.200">
+                        </div>
+                        <div>
+                            <label for="gsLongitude" class="block text-sm font-medium text-gray-700 mb-1">longitude (Double)</label>
+                            <input type="text" id="gsLongitude" class="w-full p-2 border border-gray-300 rounded-md" placeholder="106.816">
+                        </div>
+                        <div>
+                            <label for="gsRadius" class="block text-sm font-medium text-gray-700 mb-1">radius (Double)</label>
+                            <input type="text" id="gsRadius" class="w-full p-2 border border-gray-300 rounded-md" placeholder="100.0">
+                        </div>
+                    </div>
+                    <button id="btnPutGeneralSetting" class="w-full bg-yellow-500 text-white py-2 px-4 rounded-md font-semibold hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-50">
+                        Send Update Request
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- Response Area -->
+    <div class="mt-8">
+        <h2 class="text-xl font-semibold text-gray-700 mb-4">API Response</h2>
+        <pre id="responseOutput" class="bg-gray-900 text-white text-sm p-6 rounded-lg shadow-inner overflow-auto h-96">Waiting for a request...</pre>
+    </div>
+
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Get global elements
+        const baseUrlInput = document.getElementById('baseUrl');
+        const authTokenInput = document.getElementById('authToken');
+        const responseOutput = document.getElementById('responseOutput');
+
+        // Tab elements
+        const tabs = {
+            attendance: {
+                btn: document.getElementById('tab-btn-attendance'),
+                content: document.getElementById('tab-content-attendance')
+            },
+            permit: {
+                btn: document.getElementById('tab-btn-permit'),
+                content: document.getElementById('tab-content-permit')
+            },
+            generalsetting: { // New tab
+                btn: document.getElementById('tab-btn-generalsetting'),
+                content: document.getElementById('tab-content-generalsetting')
+            }
+        };
+        let activeTab = 'attendance'; // Start with attendance
+
+        // --- Tab Switching Logic ---
+        function switchTab(tabName) {
+            if (activeTab === tabName) return;
+
+            // Deactivate old tab
+            tabs[activeTab].btn.classList.remove('active');
+            tabs[activeTab].content.classList.remove('active');
+
+            // Activate new tab
+            activeTab = tabName;
+            tabs[activeTab].btn.classList.add('active');
+            tabs[activeTab].content.classList.add('active');
+
+            // Adjust active tab button style
+            Object.values(tabs).forEach(tab => {
+                tab.btn.classList.remove('text-blue-600', 'border-blue-600', 'text-purple-600', 'border-purple-600', 'text-green-600', 'border-green-600');
+                if (tab.btn.dataset.tab === activeTab) {
+                    const color = activeTab === 'attendance' ? 'blue' : (activeTab === 'permit' ? 'purple' : 'green');
+                    tab.btn.classList.add(`text-${color}-600`, `border-${color}-600`);
+                } else {
+                     tab.btn.classList.add('text-gray-600', 'border-transparent');
+                }
+            });
+        }
+
+        tabs.attendance.btn.addEventListener('click', () => switchTab('attendance'));
+        tabs.permit.btn.addEventListener('click', () => switchTab('permit'));
+        tabs.generalsetting.btn.addEventListener('click', () => switchTab('generalsetting'));
+
+        // Initialize first tab
+        switchTab('attendance');
+        tabs.permit.btn.classList.remove('active');
+        tabs.generalsetting.btn.classList.remove('active');
+
+
+        // --- Helper Functions ---
+
+        function showResponse(data, status, ok, duration) {
+            const color = ok ? 'text-green-400' : 'text-red-400';
+            let formattedData;
+
+            if (typeof data === 'object') {
+                formattedData = JSON.stringify(data, null, 2);
+            } else {
+                formattedData = data.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            }
+
+            responseOutput.innerHTML = `<span class="${color} font-bold">Status: ${status}</span> <span class="text-gray-400">(${duration} ms)</span>\n\n${formattedData}`;
+        }
+
+        function showError(error, duration) {
+            console.error('API Error:', error);
+            let durationString = duration ? ` <span class="text-gray-400">(${duration} ms)</span>` : '';
+            responseOutput.innerHTML = `<span class="text-red-400 font-bold">Fetch Error:</span>${durationString}\n\n${error.message}\n\nCheck the browser console for more details. Is the server running? Is CORS configured?`;
+        }
+
+        function getHeaders() {
+            const headers = new Headers();
+            const token = authTokenInput.value;
+            if (token) {
+                headers.append('Authorization', `Bearer ${token}`);
+            }
+            return headers;
+        }
+
+        function buildQueryString(params) {
+            const searchParams = new URLSearchParams();
+            for (const key in params) {
+                const value = params[key];
+                if (value || value === false) {
+                    searchParams.append(key, value);
+                }
+            }
+            const queryString = searchParams.toString();
+            return queryString ? `?${queryString}` : '';
+        }
+
+        async function sendRequest(path, method = 'GET', queryParams = {}, body = null) {
+            const baseUrl = baseUrlInput.value;
+            const headers = getHeaders();
+
+            // Set module path based on active tab
+            const modulePaths = {
+                attendance: '/attendance',
+                permit: '/permit',
+                generalsetting: '/general-setting'
+            };
+            const modulePath = modulePaths[activeTab];
+
+            const fullPath = modulePath + path;
+            const queryString = buildQueryString(queryParams);
+            const url = `${baseUrl}${fullPath}${queryString}`;
+
+            const requestOptions = {
+                method: method,
+                headers: headers,
+                body: body
+            };
+
+            if (body && !(body instanceof FormData)) {
+                headers.append('Content-Type', 'application/json');
+                requestOptions.body = JSON.stringify(body);
+            }
+
+            responseOutput.textContent = `Sending ${method} request to ${url}...`;
+
+            const startTime = performance.now();
+
+            try {
+                const response = await fetch(url, requestOptions);
+                const endTime = performance.now();
+                const duration = Math.round(endTime - startTime);
+
+                const contentType = response.headers.get("content-type");
+                let responseData;
+
+                if (response.status === 204 || response.status === 205) {
+                    responseData = "Request successful (Status " + response.status + "), no content returned.";
+                } else if (contentType && contentType.includes("application/json")) {
+                    responseData = await response.json();
+                } else {
+                    responseData = await response.text();
+                }
+
+                showResponse(responseData, response.status, response.ok, duration);
+
+            } catch (err) {
+                const endTime = performance.now();
+                const duration = Math.round(endTime - startTime);
+                showError(err, duration);
+            }
+        }
+
+        // --- Event Listeners: Attendance ---
+
+        document.getElementById('btnPostCheckIn').addEventListener('click', () => {
+            const formData = new FormData();
+            formData.append('studentUserId', document.getElementById('checkInStudentId').value);
+            formData.append('latitude', document.getElementById('checkInLatitude').value);
+            formData.append('longitude', document.getElementById('checkInLongitude').value);
+            const attachment = document.getElementById('checkInAttachment').files[0];
+            if (attachment) formData.append('attachment', attachment);
+            sendRequest('/check-in', 'POST', {}, formData);
+        });
+
+        document.getElementById('btnGetByStudent').addEventListener('click', () => {
+            const studentId = document.getElementById('getByStudentId').value;
+            if (!studentId) return showError({ message: 'studentId (Path Param) is required.' });
+            const queryParams = {
+                search: document.getElementById('getByStudentSearch').value,
+                limit: document.getElementById('getByStudentLimit').value,
+                page: document.getElementById('getByStudentPage').value,
+                dateRange: document.getElementById('getByStudentDateRange').value
+            };
+            sendRequest(`/by-student/${studentId}`, 'GET', queryParams);
+        });
+
+        document.getElementById('btnGetByClass').addEventListener('click', () => {
+            const classKey = document.getElementById('getByClassKey').value;
+            if (!classKey) return showError({ message: 'classKey (Path Param) is required.' });
+            const queryParams = {
+                search: document.getElementById('getByClassSearch').value,
+                limit: document.getElementById('getByClassLimit').value,
+                page: document.getElementById('getByClassPage').value,
+                date: document.getElementById('getByClassDate').value,
+                sortBy: document.getElementById('getByClassSortBy').value,
+                order: document.getElementById('getByClassOrder').value,
+                status: document.getElementById('getByClassStatus').value
+            };
+            sendRequest(`/by-class/${classKey}`, 'GET', queryParams);
+        });
+
+        document.getElementById('btnGetById').addEventListener('click', () => {
+            const id = document.getElementById('getById').value;
+            if (!id) return showError({ message: 'id (Path Param) is required.' });
+            sendRequest(`/${id}`, 'GET');
+        });
+
+        document.getElementById('btnPutId').addEventListener('click', () => {
+            const id = document.getElementById('putId').value;
+            if (!id) return showError({ message: 'id (Path Param) is required.' });
+            const formData = new FormData();
+            formData.append('status', document.getElementById('putStatus').value);
+            formData.append('latitude', document.getElementById('putLatitude').value);
+            formData.append('longitude', document.getElementById('putLongitude').value);
+            formData.append('checkedInAt', document.getElementById('putCheckedInAt').value);
+            sendRequest(`/${id}`, 'PUT', {}, formData);
+        });
+
+        document.getElementById('btnPutPermit').addEventListener('click', () => {
+            const id = document.getElementById('putPermitId').value;
+            if (!id) return showError({ message: 'id (Path Param) is required.' });
+            const formData = new FormData();
+            formData.append('status', document.getElementById('putPermitStatus').value);
+            formData.append('studentId', document.getElementById('putPermitStudentId').value);
+            formData.append('duration', document.getElementById('putPermitDuration').value);
+            const attachment = document.getElementById('putPermitAttachment').files[0];
+            if (attachment) formData.append('attachment', attachment);
+            sendRequest(`/${id}`, 'PUT', {}, formData);
+        });
+
+        // --- Event Listeners: Permit ---
+
+        document.getElementById('btnPostCreate').addEventListener('click', () => {
+            const formData = new FormData();
+            formData.append('studentId', document.getElementById('createStudentId').value);
+            formData.append('reason', document.getElementById('createReason').value);
+            formData.append('duration', document.getElementById('createDuration').value);
+            formData.append('type', document.getElementById('createType').value);
+            formData.append('note', document.getElementById('createNote').value);
+            const attachment = document.getElementById('createAttachment').files[0];
+            if (attachment) formData.append('attachment', attachment);
+            sendRequest('', 'POST', {}, formData);
+        });
+
+        document.getElementById('btnPutEdit').addEventListener('click', () => {
+            const id = document.getElementById('editId').value;
+            if (!id) return showError({ message: 'id (Path Param) is required.' });
+            const formData = new FormData();
+            formData.append('duration', document.getElementById('editDuration').value);
+            formData.append('reason', document.getElementById('editReason').value);
+            formData.append('type', document.getElementById('editType').value);
+            formData.append('note', document.getElementById('editNote').value);
+            const attachment = document.getElementById('editAttachment').files[0];
+            if (attachment) formData.append('attachment', attachment);
+            sendRequest(`/${id}`, 'PUT', {}, formData);
+        });
+
+        document.getElementById('btnGetByStudent-permit').addEventListener('click', () => {
+            const studentId = document.getElementById('getByStudentId-permit').value;
+            if (!studentId) return showError({ message: 'studentId (Path Param) is required.' });
+            const queryParams = {
+                limit: document.getElementById('getByStudentLimit-permit').value,
+                page: document.getElementById('getByStudentPage-permit').value,
+                sortBy: document.getElementById('getByStudentSortBy-permit').value,
+                order: document.getElementById('getByStudentOrder-permit').value,
+                search: document.getElementById('getByStudentSearch-permit').value,
+                listId: document.getElementById('getByStudentListId-permit').value,
+                isActive: document.getElementById('getByStudentIsActive-permit').checked,
+                type: document.getElementById('getByStudentType-permit').value,
+                dateRange: document.getElementById('getByStudentDateRange-permit').value,
+                date: document.getElementById('getByStudentDate-permit').value,
+                status: document.getElementById('getByStudentStatus-permit').value
+            };
+            sendRequest(`/by-student/${studentId}`, 'GET', queryParams);
+        });
+
+        document.getElementById('btnGetByClass-permit').addEventListener('click', () => {
+            const classKey = document.getElementById('getByClassKey-permit').value;
+            if (!classKey) return showError({ message: 'classKey (Path Param) is required.' });
+            const queryParams = {
+                limit: document.getElementById('getByClassLimit-permit').value,
+                page: document.getElementById('getByClassPage-permit').value,
+                sortBy: document.getElementById('getByClassSortBy-permit').value,
+                order: document.getElementById('getByClassOrder-permit').value,
+                search: document.getElementById('getByClassSearch-permit').value,
+                listId: document.getElementById('getByClassListId-permit').value,
+                isActive: document.getElementById('getByClassIsActive-permit').checked,
+                type: document.getElementById('getByClassType-permit').value,
+                dateRange: document.getElementById('getByClassDateRange-permit').value,
+                date: document.getElementById('getByClassDate-permit').value,
+                status: document.getElementById('getByClassStatus-permit').value
+            };
+            sendRequest(`/by-class/${classKey}`, 'GET', queryParams);
+        });
+
+        document.getElementById('btnGetById-permit').addEventListener('click', () => {
+            const id = document.getElementById('getById-permit').value;
+            if (!id) return showError({ message: 'id (Path Param) is required.' });
+            sendRequest(`/${id}`, 'GET');
+        });
+
+        document.getElementById('btnPostApproval').addEventListener('click', () => {
+            try {
+                const listId = JSON.parse(document.getElementById('approvalListId').value);
+                const body = {
+                    listId: listId,
+                    approvalNote: document.getElementById('approvalNote').value,
+                    isApproved: document.getElementById('approvalIsApproved').checked
+                };
+                sendRequest('/approval', 'POST', {}, body);
+            } catch (e) {
+                showError({ message: 'Invalid JSON for listId. Please use array format, e.g., ["id1"]' });
+            }
+        });
+
+        function sendJsonListRequest(path, inputId) {
+            try {
+                const listId = JSON.parse(document.getElementById(inputId).value);
+                if (!Array.isArray(listId)) throw new Error("Invalid JSON Array");
+                const body = { listId: listId };
+                sendRequest(path, 'PUT', {}, body);
+            } catch (e) {
+                showError({ message: `Invalid JSON for listId. Please use array format, e.g., ["id1"]` });
+            }
+        }
+
+        document.getElementById('btnPutCancel').addEventListener('click', () => {
+            sendJsonListRequest('/cancel', 'cancelListId');
+        });
+
+        document.getElementById('btnPutDelete').addEventListener('click', () => {
+            sendJsonListRequest('/delete', 'deleteListId');
+        });
+
+        // --- Event Listeners: General Settings ---
+
+        document.getElementById('btnGetGeneralSetting').addEventListener('click', () => {
+            sendRequest('', 'GET');
+        });
+
+        document.getElementById('btnPutGeneralSetting').addEventListener('click', () => {
+            const body = {};
+
+            // Helper to add number fields if they have a value
+            const addNumericField = (key, id, isFloat = false) => {
+                const value = document.getElementById(id).value;
+                if (value) {
+                    const numberValue = isFloat ? parseFloat(value) : parseInt(value, 10);
+                    if (!isNaN(numberValue)) {
+                        body[key] = numberValue;
+                    }
+                }
+            };
+
+            addNumericField('semesterStart', 'gsSemesterStart');
+            addNumericField('semesterEnd', 'gsSemesterEnd');
+            addNumericField('schoolPeriodStart', 'gsSchoolStart');
+            addNumericField('schoolPeriodEnd', 'gsSchoolEnd');
+            addNumericField('checkInPeriodStart', 'gsCheckInStart');
+            addNumericField('checkInPeriodEnd', 'gsCheckInEnd');
+            addNumericField('latitude', 'gsLatitude', true);
+            addNumericField('longitude', 'gsLongitude', true);
+            addNumericField('radius', 'gsRadius', true);
+
+            if (Object.keys(body).length === 0) {
+                showError({ message: 'Please fill out at least one field to update.' });
+                return;
+            }
+
+            sendRequest('/edit', 'PUT', {}, body);
+        });
+
+    });
+</script>
+</body>
+</html>
+

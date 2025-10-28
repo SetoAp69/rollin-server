@@ -5,7 +5,7 @@ import com.rollinup.server.datasource.database.model.permit.PermitListEntity
 import com.rollinup.server.datasource.database.table.ClassTable
 import com.rollinup.server.datasource.database.table.PermitTable
 import com.rollinup.server.datasource.database.table.UserTable
-import com.rollinup.server.model.ApprovalStatus
+import com.rollinup.server.datasource.database.model.ApprovalStatus
 import com.rollinup.server.model.request.permit.CreatePermitBody
 import com.rollinup.server.model.request.permit.EditPermitBody
 import com.rollinup.server.model.request.permit.GetPermitQueryParams
@@ -63,9 +63,9 @@ class PermitRepositoryImpl() : PermitRepository {
         }
 
         with(queryParams) {
-            query.addFilter(listId) {
+            query.addFilter(listId) { listId ->
                 andWhere {
-                    PermitTable._id inList it.map { UUID.fromString(it) }
+                    PermitTable._id inList listId.map { UUID.fromString(it) }
                 }
             }
 

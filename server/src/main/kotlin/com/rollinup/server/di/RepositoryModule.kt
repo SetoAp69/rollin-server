@@ -1,7 +1,9 @@
 package com.rollinup.server.di
 
+import com.rollinup.server.datasource.database.repository.generalsetting.GeneralSettingRepository
 import com.rollinup.server.datasource.database.repository.attendance.AttendanceRepository
 import com.rollinup.server.datasource.database.repository.attendance.AttendanceRepositoryImpl
+import com.rollinup.server.datasource.database.repository.generalsetting.GeneralSettingRepositoryImpl
 import com.rollinup.server.datasource.database.repository.permit.PermitRepository
 import com.rollinup.server.datasource.database.repository.permit.PermitRepositoryImpl
 import com.rollinup.server.datasource.database.repository.refreshtoken.RefreshTokenRepository
@@ -33,6 +35,10 @@ object RepositoryModule {
 
         single<PermitRepository> {
             PermitRepositoryImpl()
+        }
+
+        single<GeneralSettingRepository> {
+            GeneralSettingRepositoryImpl()
         }
     }
 }

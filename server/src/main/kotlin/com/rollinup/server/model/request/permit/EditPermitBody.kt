@@ -1,7 +1,7 @@
 package com.rollinup.server.model.request.permit
 
-import com.rollinup.server.model.ApprovalStatus
-import com.rollinup.server.model.PermitType
+import com.rollinup.server.datasource.database.model.ApprovalStatus
+import com.rollinup.server.datasource.database.model.PermitType
 import com.rollinup.server.util.Utils
 
 data class EditPermitBody(

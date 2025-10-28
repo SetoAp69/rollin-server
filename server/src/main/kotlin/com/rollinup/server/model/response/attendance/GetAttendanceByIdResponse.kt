@@ -36,7 +36,7 @@ data class GetAttendanceByIdResponse(
         @SerialName("id")
         val id: String = "",
         @SerialName("reason")
-        val reason: String = "",
+        val reason: String? = null,
         @SerialName("type")
         val type: String = "",
         @SerialName("start_time")

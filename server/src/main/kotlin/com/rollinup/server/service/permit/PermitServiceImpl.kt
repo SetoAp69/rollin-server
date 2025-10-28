@@ -2,15 +2,15 @@ package com.rollinup.server.service.permit
 
 import com.rollinup.server.CommonException
 import com.rollinup.server.Constant
-import com.rollinup.server.datasource.api.model.ApiResponse
 import com.rollinup.server.datasource.database.model.AttendanceStatus
 import com.rollinup.server.datasource.database.model.attendance.AttendanceEntity
 import com.rollinup.server.datasource.database.model.permit.PermitListEntity
 import com.rollinup.server.datasource.database.repository.attendance.AttendanceRepository
 import com.rollinup.server.datasource.database.repository.permit.PermitRepository
+import com.rollinup.server.generalsetting.GeneralSettingCache
 import com.rollinup.server.mapper.PermitMapper
-import com.rollinup.server.model.ApprovalStatus
-import com.rollinup.server.model.PermitType
+import com.rollinup.server.datasource.database.model.ApprovalStatus
+import com.rollinup.server.datasource.database.model.PermitType
 import com.rollinup.server.model.request.attendance.EditAttendanceBody
 import com.rollinup.server.model.request.attendance.GetAttendanceByStudentQueryParams
 import com.rollinup.server.model.request.permit.CreatePermitBody
@@ -24,9 +24,7 @@ import com.rollinup.server.model.response.permit.GetPermitListByStudentResponse
 import com.rollinup.server.service.file.FileService
 import com.rollinup.server.util.Message
 import com.rollinup.server.util.Utils
-import com.rollinup.server.util.Utils.toLocalDateTime
-import com.rollinup.server.util.deleteFileException
-import com.rollinup.server.util.generalsetting.GeneralSettingCache
+import com.rollinup.server.util.Utils.toLocalTime
 import com.rollinup.server.util.illegalStatusExeptions
 import com.rollinup.server.util.manager.TransactionManager
 import com.rollinup.server.util.notFoundException
@@ -115,9 +113,10 @@ class PermitServiceImpl(
 
         val permitList = permitRepository.getPermitList(
             queryParams = GetPermitQueryParams(
-                listId = body.listId
+                listId = body.listId,
+                isActive = true
             ),
-        )
+        ).ifEmpty { throw "permit".notFoundException() }
 
         val permitBody = EditPermitBody(
             approvedBy = approverId,
@@ -156,28 +155,21 @@ class PermitServiceImpl(
             throw IllegalArgumentException()
 
         val body = CreatePermitBody.fromHashMap(formHash)
-        val path = Utils.getUploadDir(path = Constant.PERMIT_FILE_PATH)
         val file = fileHash.get("attachment")
             ?: throw "permit attachment".uploadFileException()
+        val path = Utils.getUploadDir(path = Constant.PERMIT_FILE_PATH, file.name)
 
         val upload = fileService.uploadFile(path, file)
 
-        if (upload !is ApiResponse.Success)
-            throw "permit attachment".uploadFileException()
+        transactionManager.suspendTransaction {
+            val permitId = permitRepository.createPermit(body.copy(attachment = upload))
 
-        try {
-            transactionManager.suspendTransaction {
-                if (body.type == PermitType.DISPENSATION && !validateAttendanceStatus(body.studentId))
-                    throw "attendance".illegalStatusExeptions()
-
-                permitRepository.createPermit(body.copy(attachment = upload.data))
-            }
-
-        } catch (e: Exception) {
-            fileService.deleteFile(upload.data)
-            throw e
-        } finally {
-            fileHash.forEach { _, file -> file.delete() }
+            attendanceRepository.createAttendanceFromPermit(
+                permitId = permitId,
+                studentId = body.studentId,
+                duration = body.duration,
+                status = AttendanceStatus.APPROVAL_PENDING
+            )
         }
 
         return Response(
@@ -217,7 +209,7 @@ class PermitServiceImpl(
 
         return Response(
             status = 201,
-            message = "permit".successEditResponse() ,
+            message = "permit".successEditResponse(),
         )
     }
 
@@ -267,26 +259,11 @@ class PermitServiceImpl(
                 }
         }
 
-        val delete = fileService.deleteFile(permit.map { it.attachment })
-
-        when (delete) {
-            is ApiResponse.Error -> throw "permit".deleteFileException()
-
-            is ApiResponse.Success -> transactionManager.suspendTransaction {
-                val attendanceList = attendanceRepository.getAttendanceListByPermit(id)
-                val attendanceListByPermit = attendanceList.groupBy { it.permit }
-
-                permitRepository.deletePermit(id)
-                attendanceListByPermit.forEach { permit, att ->
-                    permit ?: return@forEach
-
-                    rollBackAttendance(
-                        attendanceList = att,
-                        permitType = permit.type,
-                    )
-                }
-            }
+        transactionManager.suspendTransaction {
+            permitRepository.deletePermit(id)
         }
+
+        fileService.deleteFile(permit.map { it.attachment })
 
         return Response(
             status = 200,
@@ -301,10 +278,15 @@ class PermitServiceImpl(
         val attendanceList =
             attendanceRepository.getAttendanceListByPermit(permitList.map { it.id })
 
+        println("PermitList: ${permitList.map { it.id }}")
+
         val attendanceByPermit = attendanceList.groupBy { it.permit }
+        println("Att By Permit: $attendanceByPermit")
 
         attendanceByPermit.forEach { permit, att ->
             permit ?: return@forEach
+            println("att id: ${att.map { it.id }}")
+
             val id = att.map { it.id }
 
             if (isApproved) {
@@ -328,15 +310,21 @@ class PermitServiceImpl(
         val attendanceId = attendanceList.map { it.id }
         when (permitType) {
             PermitType.DISPENSATION -> {
-                val status = getDispensationStatus(
-                    time = attendanceList.firstOrNull()?.checkedInAt?.toLocalDateTime()
-                        ?.toLocalTime()
-                )
+                attendanceList.forEach { att->
+                    if(att.checkedInAt!=null){
+                        val status = getDispensationStatus(
+                            time = att.checkedInAt.toLocalTime()
+                        )
 
-                attendanceRepository.updateAttendanceData(
-                    listId = attendanceId,
-                    body = EditAttendanceBody(status = status)
-                )
+                        attendanceRepository.updateAttendanceData(
+                            listId = attendanceId,
+                            body = EditAttendanceBody(status = status)
+                        )
+                    }else{
+                        attendanceRepository.deleteAttendanceData(listOf(att.id))
+                    }
+                }
+
             }
 
             PermitType.ABSENCE -> attendanceRepository.deleteAttendanceData(attendanceId)
@@ -346,13 +334,14 @@ class PermitServiceImpl(
     private fun getDispensationStatus(time: LocalTime?): AttendanceStatus {
         time ?: throw CommonException(Message.INVALID_TIME_FORMAT)
         val offsetTime = OffsetTime.of(time, Utils.getOffset())
-        return getAttendanceStatus(offsetTime)
+        return getAttendanceStatus(offsetTime.toLocalTime())
     }
 
 
     private fun getAttendanceStatus(
-        checkInTime: OffsetTime,
+        checkInTime: LocalTime,
     ): AttendanceStatus {
+        println(checkInTime)
 
         val setting = generalSetting.get()
 
@@ -384,38 +373,22 @@ class PermitServiceImpl(
         body: EditPermitBody,
         attachment: File,
     ) {
-        val path = Utils.getUploadDir(Constant.PERMIT_FILE_PATH)
-        val upload = fileService.uploadFile(path, attachment)
 
-        if (upload !is ApiResponse.Success)
-            throw "permit attachment".uploadFileException()
+        val path = Utils.getUploadDir(Constant.PERMIT_FILE_PATH, attachment.name)
+        val upload = fileService.uploadFile(
+            filePath = path,
+            file = attachment
+        )
+        transactionManager.suspendTransaction {
+            val permit = permitRepository.getPermitById(id)
+                ?: throw "permit".notFoundException()
 
-        try {
-            var oldAttachment = ""
+            if (permit.approvalStatus != ApprovalStatus.APPROVAL_PENDING)
+                throw "permit".illegalStatusExeptions()
 
-            transactionManager.suspendTransaction {
-                val permit = permitRepository.getPermitById(id)
-                    ?: throw "permit".notFoundException()
-
-                if (permit.approvalStatus != ApprovalStatus.APPROVAL_PENDING)
-                    throw "permit".illegalStatusExeptions()
-
-                oldAttachment = permit.attachment
-
-                permitRepository.editPermit(listOf(id), body.copy(attachment = upload.data))
-            }
-
-            val delete = fileService.deleteFile(oldAttachment)
-
-            if (delete !is ApiResponse.Success)
-                throw "permit attachment".uploadFileException()
-
-        } catch (e: Exception) {
-            fileService.deleteFile(upload.data)
-            throw e
-        } finally {
-            attachment.delete()
+            permitRepository.editPermit(listOf(id), body.copy(attachment = upload))
         }
+
 
     }
 

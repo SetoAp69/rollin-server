@@ -16,7 +16,6 @@ data class CreateAttendanceBody(
     private object ValidationMessages {
         const val ID_BLANK_OR_NULL = "Id cannot be empty"
         const val LOCATION_INVALID = "Location is invalid"
-        const val ATTACHMENT_INVALID = "Attachment is invalid"
         const val CHECKED_IN_AT_INVALID = "Check in time is invalid"
     }
 
@@ -27,15 +26,15 @@ data class CreateAttendanceBody(
                     if (it.isNullOrBlank()) throw CommonException(ValidationMessages.ID_BLANK_OR_NULL)
                     else it
                 },
-                latitude = hashMap.get("latitude")?.toDoubleOrNull()
+                latitude = hashMap["latitude"]?.toDoubleOrNull()
                     ?: throw CommonException(ValidationMessages.LOCATION_INVALID),
-                attachment = hashMap.get("attachment")
-                    ?: throw CommonException(ValidationMessages.ATTACHMENT_INVALID),
-                status = hashMap.get("status").let {
+                longitude = hashMap["longitude"]?.toDoubleOrNull()
+                    ?: throw CommonException(ValidationMessages.LOCATION_INVALID),
+                status = hashMap["status"].let {
                     if (it.isNullOrBlank()) AttendanceStatus.CHECKED_IN
                     else AttendanceStatus.fromValue(it)
                 },
-                checkedInAt = hashMap.get("checkedInAt")?.toLongOrNull()
+                checkedInAt = hashMap["checkedInAt"]?.toLongOrNull()
                     ?: throw CommonException(ValidationMessages.CHECKED_IN_AT_INVALID)
             )
         }

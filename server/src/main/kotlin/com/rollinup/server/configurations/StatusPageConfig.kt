@@ -1,5 +1,6 @@
 package com.rollinup.server.configurations
 
+import com.rollinup.server.IllegalLocationException
 import com.rollinup.server.IllegalPathParameterException
 import com.rollinup.server.IllegalRoleException
 import com.rollinup.server.UnauthorizedTokenException
@@ -41,6 +42,13 @@ fun Application.configureStatusPage() {
                     call.respond(
                         status = HttpStatusCode.Forbidden,
                         message = Message.ILLEGAL_ROLE
+                    )
+                }
+
+                is IllegalLocationException -> {
+                    call.respond(
+                        status = HttpStatusCode.BadRequest,
+                        message = Message.INVALID_LOCATION
                     )
                 }
 

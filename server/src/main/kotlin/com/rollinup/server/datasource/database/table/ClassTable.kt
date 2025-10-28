@@ -8,9 +8,4 @@ object ClassTable: Table("class") {
     val grade = integer("grade")
     val key = integer("key")
 
-    val sortField
-        get() = mapOf(
-            "grade" to grade,
-            "name" to name
-        )
 }

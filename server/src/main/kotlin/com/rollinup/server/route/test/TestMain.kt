@@ -1,29 +1,20 @@
 package com.rollinup.server.route.test
 
-import com.rollinup.server.util.Utils
 import com.rollinup.server.util.Utils.getOffset
-import java.time.Duration
+import com.rollinup.server.util.Utils.toLocalDateTime
 import java.time.Instant
-import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.LocalTime
-import java.time.OffsetDateTime
-import java.time.ZoneId
 
 fun main() {
-//    val offset = OffsetDateTime.now().offset
-//    val currentDate =
-//        LocalDateTime
-//            .of(LocalDate.now(), LocalTime.of(0, 0))
-//            .toInstant(offset)
-//            .toEpochMilli()
-//
-//    val instantB = Instant.now().plusSeconds(7200)
-//    val instantA = Instant.now()
-//    val duration = Duration.between(instantA,instantB).toHours()
-//    println(duration)
+    val timeS = "2025-10-28T05:00:13.610Z"
+    val localTime = timeS.toLocalDateTime().atZone(getOffset()).toLocalTime()
+    val localTime2 = timeS.toLocalDateTime().atOffset(getOffset()).toLocalTime()
+    val localTime3 = Instant.parse(timeS).let {
+        LocalTime.ofInstant(it, getOffset())
+    }
 
 
-    val start = Instant.ofEpochMilli(1760854256108)
-    val end =  Instant.ofEpochMilli(1760854270432 )
+    println(localTime)
+    println(localTime2)
+    println(localTime3)
 }

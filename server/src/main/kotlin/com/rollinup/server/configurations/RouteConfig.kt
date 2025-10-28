@@ -24,8 +24,26 @@ fun Application.configureRouting() {
         }
         route(
             path = Route.Attendance.path
-        ){
+        ) {
             Route.Attendance.route(this)
+        }
+
+        route(
+            path = Route.File.path
+        ) {
+            Route.File.route(this)
+        }
+
+        route(
+            path = Route.Permit.path
+        ) {
+            Route.Permit.route(this)
+        }
+
+        route(
+            path = Route.GeneralSetting.path
+        ) {
+            Route.GeneralSetting.route(this)
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.rollinup.server.datasource.database.model.user
+package com.rollinup.server.datasource.database.model
 
 import org.postgresql.util.PGobject
 

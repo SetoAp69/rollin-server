@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PermitApprovalBody(
-    @SerialName("id")
+    @SerialName("listId")
     val listId: List<String> = emptyList(),
     @SerialName("approvalNote")
     val approvalNote: String = "",

@@ -1,4 +1,4 @@
-package com.rollinup.server.model
+package com.rollinup.server.datasource.database.model
 
 enum class ApprovalStatus(val value:String) {
     APPROVAL_PENDING("approval_pending"),

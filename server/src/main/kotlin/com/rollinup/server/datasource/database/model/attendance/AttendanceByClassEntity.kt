@@ -4,7 +4,7 @@ import com.rollinup.server.datasource.database.model.AttendanceStatus
 import com.rollinup.server.datasource.database.table.AttendanceTable
 import com.rollinup.server.datasource.database.table.PermitTable
 import com.rollinup.server.datasource.database.table.UserTable
-import com.rollinup.server.model.PermitType
+import com.rollinup.server.datasource.database.model.PermitType
 import org.jetbrains.exposed.v1.core.ResultRow
 
 data class AttendanceByClassEntity(

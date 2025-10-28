@@ -1,5 +1,6 @@
 package com.rollinup.server.service.attendance
 
+import com.rollinup.server.model.Role
 import com.rollinup.server.model.request.attendance.GetAttendanceByClassQueryParams
 import com.rollinup.server.model.request.attendance.GetAttendanceByStudentQueryParams
 import com.rollinup.server.model.response.Response
@@ -13,7 +14,7 @@ interface AttendanceService {
 
     suspend fun getAttendanceById(id: String): Response<GetAttendanceByIdResponse>
 
-    suspend fun createAttendanceData(multiPartData: MultiPartData, studentUserId: String): Response<Unit>
+    suspend fun createAttendanceData(multiPartData: MultiPartData, studentUserId: String,role: Role): Response<Unit>
 
     suspend fun getAttendanceListByStudent(queryParams: GetAttendanceByStudentQueryParams, studentId:String):Response<GetAttendanceByStudentListResponse>
 

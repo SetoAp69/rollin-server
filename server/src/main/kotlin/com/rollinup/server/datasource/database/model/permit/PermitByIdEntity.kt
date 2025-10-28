@@ -3,8 +3,8 @@ package com.rollinup.server.datasource.database.model.permit
 import com.rollinup.server.datasource.database.table.ClassTable
 import com.rollinup.server.datasource.database.table.PermitTable
 import com.rollinup.server.datasource.database.table.UserTable
-import com.rollinup.server.model.ApprovalStatus
-import com.rollinup.server.model.PermitType
+import com.rollinup.server.datasource.database.model.ApprovalStatus
+import com.rollinup.server.datasource.database.model.PermitType
 import org.jetbrains.exposed.v1.core.Alias
 import org.jetbrains.exposed.v1.core.ResultRow
 

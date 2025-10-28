@@ -9,7 +9,7 @@ import com.rollinup.server.datasource.database.table.AttendanceTable
 import com.rollinup.server.datasource.database.table.ClassTable
 import com.rollinup.server.datasource.database.table.PermitTable
 import com.rollinup.server.datasource.database.table.UserTable
-import com.rollinup.server.model.ApprovalStatus
+import com.rollinup.server.datasource.database.model.ApprovalStatus
 import com.rollinup.server.model.request.attendance.AttendanceSummaryQueryParams
 import com.rollinup.server.model.request.attendance.CreateAttendanceBody
 import com.rollinup.server.model.request.attendance.EditAttendanceBody
@@ -39,112 +39,12 @@ import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.update
-import org.jetbrains.exposed.v1.jdbc.upsert
 import java.time.Instant
 import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.UUID
 
 class AttendanceRepositoryImpl() : AttendanceRepository {
-//    override fun getAttendanceList(queryParams: AttendanceQueryParams): List<AttendanceEntity> {
-//        val student = UserTable.alias("student")
-//        val query = AttendanceTable
-//            .join(
-//                joinType = JoinType.INNER,
-//                otherTable = student,
-//                onColumn = AttendanceTable.userId,
-//                otherColumn = student[UserTable.user_id],
-//            )
-//            .join(
-//                joinType = JoinType.LEFT,
-//                otherTable = ClassTable,
-//                onColumn = student[UserTable.classX],
-//                otherColumn = ClassTable._id,
-//            )
-//            .join(
-//                joinType = JoinType.LEFT,
-//                otherTable = PermitTable,
-//                onColumn = AttendanceTable.permit,
-//                otherColumn = PermitTable._id,
-//            )
-//            .select(
-//                AttendanceTable.columns
-//                        + student[UserTable.user_id]
-//                        + student[UserTable.username]
-//                        + student[UserTable.firstName]
-//                        + student[UserTable.lastName]
-//                        + ClassTable.name
-//                        + PermitTable.startTime
-//                        + PermitTable.endTime
-//                        + PermitTable.reason
-//                        + PermitTable.type
-//            )
-//
-//        val sortField = AttendanceTable.sortField + PermitTable.sortField + ClassTable.sortField
-//
-//        with(queryParams) {
-//            query.addFilter(studentId) {
-//                if (it.isNotBlank()) {
-//                    andWhere {
-//                        student[UserTable.user_id] eq UUID.fromString(it)
-//                    }
-//                }
-//            }
-//            query.addFilter(status) { status ->
-//                andWhere {
-//                    AttendanceTable.status inList status.map { AttendanceStatus.fromValue(it) }
-//                }
-//            }
-////            query.addFilter(xClass) { classList ->
-////                andWhere {
-////                    ClassTable.key inList classList
-////                }
-////            }
-//            query.addFilter(dateRange) { range ->
-//                andWhere {
-//                    val from = LocalDate.ofInstant(
-//                        Instant.ofEpochMilli(range.first()),
-//                        Utils.getOffset()
-//                    )
-//
-//
-//                    val to = LocalDate.ofInstant(
-//                        Instant.ofEpochMilli(range.last()),
-//                        Utils.getOffset()
-//                    )
-//
-//                    AttendanceTable.date.between(from, to)
-//                }
-//            }
-//            query.addFilter(search) { searchQuery ->
-//                if (searchQuery.isNotBlank()) {
-//                    andWhere {
-//                        listOf(
-//                            student[UserTable.firstName] like searchQuery.likePattern(),
-//                            student[UserTable.lastName] like searchQuery.likePattern(),
-//                            ClassTable.name like searchQuery.likePattern(),
-//                            PermitTable.reason like searchQuery.likePattern(),
-//                            AttendanceTable.status inList AttendanceStatus.like(searchQuery)
-//                        ).compoundOr()
-//                    }
-//                }
-//            }
-//            query.addFilter(sortBy) { sortBy ->
-//                if (sortBy.isNotBlank() && order?.isNotBlank() ?: false) {
-//                    sortField[sortBy]?.let {
-//                        orderBy(it to SortOrder.valueOf(order))
-//                    }
-//                }
-//            }
-//        }
-//
-//        return query.map { row ->
-//            AttendanceEntity.fromResultRow(
-//                row = row,
-//                student = student
-//            )
-//        }
-//    }
 
     override fun getAttendanceById(id: String): AttendanceEntity? {
         val student = UserTable.alias("student")
@@ -154,24 +54,28 @@ class AttendanceRepositoryImpl() : AttendanceRepository {
                 otherTable = student,
                 joinType = JoinType.INNER,
                 onColumn = AttendanceTable.userId,
+                otherColumn = student[UserTable.user_id]
             )
             .join(
                 otherTable = ClassTable,
                 joinType = JoinType.INNER,
-                onColumn = student[UserTable.classX]
+                onColumn = student[UserTable.classX],
+                otherColumn = ClassTable._id
             )
             .join(
                 otherTable = PermitTable,
                 joinType = JoinType.LEFT,
                 onColumn = AttendanceTable.permit,
+                otherColumn = PermitTable._id
             )
             .join(
                 otherTable = approver,
                 joinType = JoinType.LEFT,
                 onColumn = PermitTable.approvedBy,
+                otherColumn = approver[UserTable.user_id]
             )
             .selectAll()
-            .where { AttendanceTable.userId eq UUID.fromString(id) }
+            .where { AttendanceTable._id eq UUID.fromString(id) }
             .firstOrNull()
 
         return query?.let {
@@ -184,14 +88,17 @@ class AttendanceRepositoryImpl() : AttendanceRepository {
     }
 
     override fun createAttendanceData(body: CreateAttendanceBody): String {
-        return AttendanceTable.insert { statement ->
+        val id = AttendanceTable.insert { statement ->
             statement[userId] = UUID.fromString(body.studentUserId)
             statement[latitude] = body.latitude
             statement[longitude] = body.longitude
             statement[attachment] = body.attachment
+            statement[status] = body.status
             statement[checkedInAt] =
                 OffsetDateTime.ofInstant(Instant.ofEpochMilli(body.checkedInAt), getOffset())
-        }[AttendanceTable._id].toString()
+        } get AttendanceTable._id
+
+        return id.toString()
     }
 
 
@@ -441,6 +348,8 @@ class AttendanceRepositoryImpl() : AttendanceRepository {
                         getOffset()
                     )
 
+                println("${from}, ${to}")
+
                 andWhere {
                     AttendanceTable.date.between(from, to)
                 }
@@ -450,11 +359,13 @@ class AttendanceRepositoryImpl() : AttendanceRepository {
                     andWhere {
                         listOf(
                             PermitTable.approvalStatus inList ApprovalStatus.like(it),
+                            AttendanceTable.status inList AttendanceStatus.like(it),
                             PermitTable.reason like it.likePattern()
                         ).compoundOr()
                     }
                 }
             }
+
             query.andWhere {
                 AttendanceTable.userId eq UUID.fromString(studentId)
             }
@@ -543,7 +454,13 @@ class AttendanceRepositoryImpl() : AttendanceRepository {
         val permitUUID = listId.map { UUID.fromString(it) }
 
         return AttendanceTable
-            .select(AttendanceTable._id)
+            .join(
+                otherTable = PermitTable,
+                onColumn = AttendanceTable.permit,
+                otherColumn = PermitTable._id,
+                joinType = JoinType.LEFT,
+            )
+            .selectAll()
             .where { AttendanceTable.permit inList permitUUID }
             .map { row ->
                 AttendanceEntity.fromResultRow(row)

@@ -1,4 +1,4 @@
-package com.rollinup.server.model
+package com.rollinup.server.datasource.database.model
 
 enum class PermitType(val value: String) {
     DISPENSATION("dispensation"),
@@ -7,7 +7,7 @@ enum class PermitType(val value: String) {
 
     companion object {
         fun fromValue(value: String): PermitType {
-            return entries.find { it.value == value } ?: ABSENCE
+            return entries.find { it.value.equals(value,true) } ?: ABSENCE
         }
         fun like(search:String):List<PermitType>{
             if (search.isBlank()) return emptyList()

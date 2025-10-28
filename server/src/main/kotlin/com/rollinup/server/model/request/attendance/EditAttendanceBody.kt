@@ -23,7 +23,6 @@ data class EditAttendanceBody(
                 status = hash.get("status")?.let { AttendanceStatus.fromValue(it) },
                 checkedInAt = hash.get("checkedInAt")?.toLongOrNull()
             )
-
         }
     }
 }

@@ -2,6 +2,8 @@ package com.rollinup.server.route
 
 import com.rollinup.server.route.attendance.attendanceRoute
 import com.rollinup.server.route.auth.authRoute
+import com.rollinup.server.route.file.fileRoute
+import com.rollinup.server.route.generalsetting.generalSettingRoute
 import com.rollinup.server.route.permit.permitRoute
 import com.rollinup.server.route.test.testRoute
 import com.rollinup.server.route.user.userRouteNew
@@ -42,6 +44,20 @@ sealed class Route(
         path = "/permit",
         route = {
             permitRoute()
+        }
+    )
+
+    object File : Route(
+        path = "/file",
+        route = {
+            fileRoute()
+        }
+    )
+
+    object GeneralSetting : Route(
+        path = "/general-setting",
+        route = {
+            generalSettingRoute()
         }
     )
 

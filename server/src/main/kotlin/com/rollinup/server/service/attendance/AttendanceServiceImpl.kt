@@ -2,13 +2,15 @@ package com.rollinup.server.service.attendance
 
 import com.rollinup.server.CommonException
 import com.rollinup.server.Constant
+import com.rollinup.server.IllegalLocationException
 import com.rollinup.server.UnauthorizedTokenException
-import com.rollinup.server.datasource.api.model.ApiResponse
 import com.rollinup.server.datasource.database.model.AttendanceStatus
 import com.rollinup.server.datasource.database.repository.attendance.AttendanceRepository
 import com.rollinup.server.datasource.database.repository.permit.PermitRepository
+import com.rollinup.server.generalsetting.GeneralSettingCache
 import com.rollinup.server.mapper.AttendanceMapper
-import com.rollinup.server.model.PermitType
+import com.rollinup.server.datasource.database.model.PermitType
+import com.rollinup.server.model.Role
 import com.rollinup.server.model.request.attendance.AttendanceSummaryQueryParams
 import com.rollinup.server.model.request.attendance.CreateAttendanceBody
 import com.rollinup.server.model.request.attendance.EditAttendanceBody
@@ -22,7 +24,7 @@ import com.rollinup.server.model.response.attendance.GetAttendanceByStudentListR
 import com.rollinup.server.service.file.FileService
 import com.rollinup.server.util.Message
 import com.rollinup.server.util.Utils
-import com.rollinup.server.util.generalsetting.GeneralSettingCache
+import com.rollinup.server.util.isExistException
 import com.rollinup.server.util.manager.TransactionManager
 import com.rollinup.server.util.notFoundException
 import com.rollinup.server.util.successCreateResponse
@@ -33,8 +35,8 @@ import io.ktor.http.content.MultiPartData
 import io.ktor.http.content.PartData
 import io.ktor.http.content.forEachPart
 import java.io.File
+import java.time.LocalTime
 import java.time.OffsetDateTime
-import java.time.OffsetTime
 
 class AttendanceServiceImpl(
     private val attendanceRepository: AttendanceRepository,
@@ -44,6 +46,9 @@ class AttendanceServiceImpl(
     private val transactionManager: TransactionManager,
     private val generalSetting: GeneralSettingCache,
 ) : AttendanceService {
+
+    val setting = generalSetting.get()
+
     override suspend fun getAttendanceById(id: String): Response<GetAttendanceByIdResponse> =
         transactionManager.suspendTransaction {
             val result = attendanceRepository.getAttendanceById(id)
@@ -56,97 +61,17 @@ class AttendanceServiceImpl(
             )
         }
 
-//    override suspend fun createAttendanceData(
-//        multiPartData: MultiPartData,
-//        studentUserId: String,
-//    ): Response<Unit> {
-//
-//        val hashMap: HashMap<String, String> = hashMapOf()
-//        var cacheDir = ""
-//        var uploadPath = ""
-//        var file: File? = null
-//
-//
-//        studentUserId.ifBlank { throw UnauthorizedTokenException() }
-//        hashMap["studentUserId"] = studentUserId
-//
-//
-//        multiPartData.forEachPart { partData ->
-//            when (partData) {
-//                is PartData.FormItem -> {
-//                    partData.name?.let { hashMap[it] = partData.value }
-//                }
-//
-//                is PartData.FileItem -> {
-//                    val fileName =
-//                        "$studentUserId-${UUID.randomUUID()}." + partData.originalFileName?.substringAfterLast(
-//                            "."
-//                        )
-//                    cacheDir =
-//                        Utils.getCacheDir(path = Constant.ATTENDANCE_FILE_PATH, fileName = fileName)
-//
-//                    uploadPath = Utils.getUploadDir(
-//                        path = Constant.ATTENDANCE_FILE_PATH
-//                    )
-//
-//                    file = File(cacheDir).apply { parentFile?.mkdirs() }
-//
-//                    withContext(Dispatchers.IO) {
-//                        partData.provider().copyAndClose(file.writeChannel())
-//                    }
-//                    partData.dispose()
-//                    return@forEachPart
-//                }
-//
-//                else -> {}
-//            }
-//            partData.dispose()
-//        }
-//
-//        if (file == null) {
-//            throw "attendance attachment".uploadFileException()
-//        } else {
-//            try {
-//                val upload = fileService.uploadFile(filePath = uploadPath, file = file)
-//                when (upload) {
-//                    is ApiResponse.Error -> {
-//                        throw "Attendance attachment".uploadFileException()
-//                    }
-//
-//                    is ApiResponse.Success -> {
-//                        hashMap["attachment"] = upload.data
-//                        val body = CreateAttendanceBody.fromHashMap(hashMap)
-//
-//                        transactionManager.suspendTransaction {
-//                            attendanceRepository.createAttendanceData(
-//                                body = body
-//                            )
-//                        }
-//                    }
-//                }
-//
-//            } finally {
-//                file.delete()
-//            }
-//        }
-//
-//        return Response(
-//            status = 201,
-//            message = "Attendance".successCreateResponse(),
-//            data = null
-//        )
-//
-//    }
-
     override suspend fun createAttendanceData(
         multiPartData: MultiPartData,
         studentUserId: String,
+        role: Role,
     ): Response<Unit> {
 
         val formHash: HashMap<String, String> = hashMapOf()
         val fileHash: HashMap<String, File> = hashMapOf()
 
         studentUserId.ifBlank { throw UnauthorizedTokenException() }
+
 
         multiPartData.forEachPart { partData ->
             when (partData) {
@@ -163,32 +88,53 @@ class AttendanceServiceImpl(
         val checkInAt = OffsetDateTime.now(Utils.getOffset())
 
         formHash["checkedInAt"] = checkInAt.toInstant().toEpochMilli().toString()
-        formHash["status"] = getAttendanceStatus(checkInAt.toOffsetTime()).value
+        formHash["status"] = getAttendanceStatus(checkInAt.toOffsetTime().toLocalTime()).value
 
         val body = CreateAttendanceBody.fromHashMap(formHash)
 
-        try {
-            val path = Utils.getUploadDir(Constant.ATTENDANCE_FILE_PATH)
-            val file = fileHash["attachment"]
-                ?: throw "attendance attachment".uploadFileException()
+        if (role == Role.STUDENT && studentUserId != body.studentUserId) {
+            throw IllegalArgumentException("studentId")
+        }
 
-            val upload = fileService.uploadFile(filePath = path, file = file)
+        val isLocationValid = Utils.validateLocations(
+            locationA = setting.lat to setting.long,
+            locationB = body.latitude to body.longitude,
+            rad = setting.rad
+        )
 
-            when (upload) {
-                is ApiResponse.Error -> {
-                    throw "attendance attachment".uploadFileException()
-                }
+        if (!isLocationValid) throw IllegalLocationException()
+        val currentDate = OffsetDateTime.now().toInstant().toEpochMilli()
+        val queryParams = GetAttendanceByStudentQueryParams(
+            dateRange = listOf(
+                currentDate, currentDate
+            )
+        )
+        transactionManager.suspendTransaction {
+            val attendance = attendanceRepository.getAttendanceListByStudent(
+                queryParams = queryParams,
+                studentId = body.studentUserId
+            )
 
-                is ApiResponse.Success -> transactionManager.suspendTransaction {
-                    attendanceRepository.createAttendanceData(
-                        body = body.copy(attachment = upload.data)
-                    )
-                }
-            }
-        } finally {
-            fileHash.forEach { _, file ->
-                file.delete()
-            }
+            if (attendance.isNotEmpty())
+                throw "attendance data".isExistException()
+
+        }
+
+        val file = fileHash["attachment"]
+            ?: throw "attendance attachment".uploadFileException()
+        val filePath = Utils.getUploadDir(Constant.ATTENDANCE_FILE_PATH, file.name)
+
+        val upload = fileService.uploadFile(filePath, file)
+
+        transactionManager.suspendTransaction {
+            attendanceRepository.createAttendanceData(
+                body = body.copy(attachment = upload)
+            )
+            return@suspendTransaction Response(
+                status = 201,
+                message = "Attendance".successCreateResponse(),
+                data = null
+            )
         }
 
         return Response(
@@ -196,6 +142,7 @@ class AttendanceServiceImpl(
             message = "Attendance".successCreateResponse(),
             data = null
         )
+
     }
 
     override suspend fun getAttendanceListByStudent(
@@ -282,6 +229,7 @@ class AttendanceServiceImpl(
         when (type) {
             AttendanceStatus.ALPHA -> handleUpdateAlpha(id)
             AttendanceStatus.ABSENT, AttendanceStatus.EXCUSED -> handleUpdateWithPermit(
+                id=id,
                 type = if (type == AttendanceStatus.ABSENT) PermitType.ABSENCE else PermitType.DISPENSATION,
                 formHash = formHash,
                 fileHash = fileHash
@@ -314,45 +262,40 @@ class AttendanceServiceImpl(
     }
 
     private suspend fun handleUpdateWithPermit(
+        id: String,
         type: PermitType,
         formHash: HashMap<String, String>,
         fileHash: HashMap<String, File>,
     ) {
-        val permitBody = CreatePermitBody.fromHashMap(formHash)
         val file = fileHash["attachment"] ?: throw "permit attachment".uploadFileException()
 
-        try {
-            val filePath = Utils.getUploadDir(Constant.PERMIT_FILE_PATH)
-            val upload = fileService.uploadFile(
-                filePath = filePath,
-                file = file
+        val path = Utils.getUploadDir(Constant.PERMIT_FILE_PATH, file.name)
+        val upload = fileService.uploadFile(
+            filePath = path,
+            file = file
+        )
+
+        transactionManager.suspendTransaction {
+            val studentId = attendanceRepository
+                .getAttendanceById(id)?.let {
+                    it.student.id.ifBlank { null }
+                } ?: throw "student id".notFoundException()
+
+            formHash["studentId"] = studentId
+            formHash["type"] = type.value
+
+            val permitBody = CreatePermitBody.fromHashMap(formHash)
+
+            val permitId = permitRepository.createPermit(permitBody.copy(studentId = studentId, attachment = upload))
+            attendanceRepository.createAttendanceFromPermit(
+                permitId = permitId,
+                studentId = permitBody.studentId,
+                duration = permitBody.duration,
+                status = when (type) {
+                    PermitType.DISPENSATION -> AttendanceStatus.EXCUSED
+                    PermitType.ABSENCE -> AttendanceStatus.ABSENT
+                }
             )
-
-            when (upload) {
-                is ApiResponse.Error -> {
-                    throw "permit attachment".uploadFileException()
-                }
-
-                is ApiResponse.Success -> {
-                    transactionManager.suspendTransaction {
-                        val permitId = permitRepository.createPermit(permitBody)
-
-                        attendanceRepository.createAttendanceFromPermit(
-                            permitId = permitId,
-                            duration = permitBody.duration,
-                            studentId = permitBody.studentId,
-                            status = when (type) {
-                                PermitType.DISPENSATION -> AttendanceStatus.EXCUSED
-                                PermitType.ABSENCE -> AttendanceStatus.ABSENT
-                            }
-                        )
-                    }
-                }
-            }
-        } finally {
-            fileHash.forEach { _, file ->
-                file.delete()
-            }
         }
 
     }
@@ -365,7 +308,7 @@ class AttendanceServiceImpl(
 
 
     private fun getAttendanceStatus(
-        checkInTime: OffsetTime,
+        checkInTime: LocalTime,
     ): AttendanceStatus {
 
         val setting = generalSetting.get()

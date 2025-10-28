@@ -1,8 +1,8 @@
 package com.rollinup.server.model.request.permit
 
 import com.rollinup.server.CommonException
-import com.rollinup.server.model.ApprovalStatus
-import com.rollinup.server.model.PermitType
+import com.rollinup.server.datasource.database.model.ApprovalStatus
+import com.rollinup.server.datasource.database.model.PermitType
 import com.rollinup.server.util.Utils
 
 data class CreatePermitBody(
@@ -20,7 +20,6 @@ data class CreatePermitBody(
     private object ValidationMessages {
         // Updated to be more granular based on the user's new checks
         const val ID_BLANK_OR_NULL = "Id cannot be empty"
-        const val ATTACHMENT_INVALID = "Attachment is invalid"
         const val DURATION_INVALID = "Duration is invalid"
         const val TYPE_INVALID = "Permit type is Invalid"
     }
@@ -39,8 +38,6 @@ data class CreatePermitBody(
                 type = hashMap.get("type")?.let { PermitType.fromValue(it) }
                     ?: throw CommonException(ValidationMessages.TYPE_INVALID),
                 note = hashMap.get("note"),
-                attachment = hashMap.get("attachment")
-                    ?: throw CommonException(ValidationMessages.ATTACHMENT_INVALID),
                 approvalStatus = hashMap.get("approvalStatus")?.let { ApprovalStatus.fromValue(it) },
                 approvedBy = hashMap.get("approvedBy"),
                 approvedAt = hashMap.get("approvedAt")?.toLong(),

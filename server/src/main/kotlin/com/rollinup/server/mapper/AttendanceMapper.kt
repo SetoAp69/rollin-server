@@ -4,57 +4,13 @@ import com.rollinup.server.datasource.database.model.attendance.AttendanceByClas
 import com.rollinup.server.datasource.database.model.attendance.AttendanceByStudentEntity
 import com.rollinup.server.datasource.database.model.attendance.AttendanceEntity
 import com.rollinup.server.datasource.database.model.attendance.AttendanceSummaryEntity
-import com.rollinup.server.model.request.attendance.AttendanceQueryParams
 import com.rollinup.server.model.request.attendance.GetAttendanceByClassQueryParams
 import com.rollinup.server.model.request.attendance.GetAttendanceByStudentQueryParams
 import com.rollinup.server.model.response.attendance.GetAttendanceByClassListResponse
 import com.rollinup.server.model.response.attendance.GetAttendanceByIdResponse
 import com.rollinup.server.model.response.attendance.GetAttendanceByStudentListResponse
-import com.rollinup.server.model.response.attendance.GetAttendanceListResponse
 
 class AttendanceMapper {
-    fun mapAttendanceList(
-        query: AttendanceQueryParams,
-        data: List<AttendanceEntity>,
-        summary: AttendanceSummaryEntity,
-    ) = GetAttendanceListResponse(
-        record = data.size,
-        page = query.page ?: 1,
-        data = data.map { attendance ->
-            GetAttendanceListResponse.GetAttendanceListDTO(
-                id = attendance.id,
-                student = attendance.student.let {
-                    GetAttendanceListResponse.User(
-                        id = it.id,
-                        name = it.name,
-                        classX = it.classX ?: "",
-                    )
-                },
-                status = attendance.status,
-                checkedInAt = attendance.checkedInAt,
-                createdAt = attendance.createdAt,
-                updatedAt = attendance.updatedAt,
-                permit = attendance.permit?.let {
-                    GetAttendanceListResponse.Permit(
-                        id = it.id,
-                        reason = it.reason,
-                        type = it.type.value,
-                        startTime = it.startTime,
-                        endTime = it.endTime
-                    )
-                }
-            )
-        },
-        summary = GetAttendanceListResponse.Summary(
-            checkedIn = summary.checkedIn,
-            late = summary.late,
-            excused = summary.excused,
-            approvalPending = summary.approvalPending,
-            absent = summary.absent,
-            sick = summary.sick,
-            other = summary.other
-        )
-    )
 
     fun mapAttendanceById(
         data: AttendanceEntity,

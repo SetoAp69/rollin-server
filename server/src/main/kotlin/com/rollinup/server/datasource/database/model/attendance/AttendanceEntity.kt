@@ -5,9 +5,8 @@ import com.rollinup.server.datasource.database.table.AttendanceTable
 import com.rollinup.server.datasource.database.table.ClassTable
 import com.rollinup.server.datasource.database.table.PermitTable
 import com.rollinup.server.datasource.database.table.UserTable
-import com.rollinup.server.model.PermitType
+import com.rollinup.server.datasource.database.model.PermitType
 import org.jetbrains.exposed.v1.core.Alias
-import org.jetbrains.exposed.v1.core.Case
 import org.jetbrains.exposed.v1.core.ResultRow
 
 data class AttendanceEntity(
@@ -48,13 +47,6 @@ data class AttendanceEntity(
         val longitude: Double = 0.0,
     )
 
-    data class Summary(
-        val checkedIn: Int = 0,
-        val excused: Int = 0,
-        val absent: Int = 0,
-        val late: Int = 0,
-    )
-
     companion object {
         fun fromResultRow(row: ResultRow): AttendanceEntity {
             return AttendanceEntity(
@@ -64,6 +56,13 @@ data class AttendanceEntity(
                 createdAt = row[AttendanceTable.createdAt].toString(),
                 updatedAt = row[AttendanceTable.updatedAt].toString(),
                 date = row[AttendanceTable.date].toString(),
+                permit = row.getOrNull(AttendanceTable.permit)?.let{
+                    Permit(
+                        id = row[PermitTable._id].toString(),
+                        type = row[PermitTable.type]
+                    )
+                }
+
             )
         }
 

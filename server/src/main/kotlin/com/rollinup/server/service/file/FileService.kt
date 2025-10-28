@@ -1,15 +1,16 @@
 package com.rollinup.server.service.file
 
-import com.rollinup.server.datasource.api.model.ApiResponse
 import java.io.File
 
 interface FileService {
-    suspend fun uploadFile(filePath: String, file: File): ApiResponse<String>
+    suspend fun uploadFile(filePath: String, file: File): String
 
-    suspend fun deleteFile(filePath: List<String>): ApiResponse<Unit>
+    suspend fun deleteFile(filePath: List<String>)
 
-    suspend fun deleteFile(filePath: String): ApiResponse<Unit> =
+    suspend fun deleteFile(filePath: String): Unit =
         deleteFile(listOf(filePath))
+
+    suspend fun getFileUrl(file:String): ByteArray
 
 
 }

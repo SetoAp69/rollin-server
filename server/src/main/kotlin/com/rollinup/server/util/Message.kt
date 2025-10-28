@@ -22,4 +22,8 @@ object Message {
     const val INVALID_REQUEST_BODY = "Invalid request body"
     const val OUTSIDE_TIME_PERIOD = "Outside time period"
     const val INVALID_TIME_FORMAT = "Invalid time format"
+    const val INVALID_LOCATION = "The given location is outside the range"
+    const val STORAGE_CONNECTION_FAILED = "failed to connect with storage provider"
+    const val INVALID_CONTENT_TYPE = "Invalid content type"
+    const val INVALID_FILE_FORMAT = "Invalid file format"
 }

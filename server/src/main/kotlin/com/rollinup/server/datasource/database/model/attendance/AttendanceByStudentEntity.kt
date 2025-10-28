@@ -4,7 +4,7 @@ package com.rollinup.server.datasource.database.model.attendance
 import com.rollinup.server.datasource.database.model.AttendanceStatus
 import com.rollinup.server.datasource.database.table.AttendanceTable
 import com.rollinup.server.datasource.database.table.PermitTable
-import com.rollinup.server.model.PermitType
+import com.rollinup.server.datasource.database.model.PermitType
 import org.jetbrains.exposed.v1.core.ResultRow
 
 data class AttendanceByStudentEntity(
@@ -19,7 +19,7 @@ data class AttendanceByStudentEntity(
 
     data class Permit(
         val id: String = "",
-        val reason: String = "",
+        val reason: String? = null,
         val type: PermitType = PermitType.DISPENSATION,
         val startTime: String = "",
         val endTime: String = "",
