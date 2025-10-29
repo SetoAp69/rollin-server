@@ -24,6 +24,7 @@ class AttendanceMapper {
                 xClass = student.classX
             )
         },
+        checkedInAt = data.checkedInAt,
         status = data.status.value,
         updatedAt = data.updatedAt,
         createdAt = data.createdAt,

@@ -11,6 +11,8 @@ data class GetAttendanceByIdResponse(
     val student: User = User(),
     @SerialName("status")
     val status: String = "",
+    @SerialName("checkedInAt")
+    val checkedInAt:String? = null,
     @SerialName("updatedAt")
     val updatedAt: String = "",
     @SerialName("createdAt")
