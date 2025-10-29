@@ -5,7 +5,6 @@ import com.rollinup.server.datasource.database.model.attendance.AttendanceByClas
 import com.rollinup.server.datasource.database.model.attendance.AttendanceByStudentEntity
 import com.rollinup.server.datasource.database.model.attendance.AttendanceEntity
 import com.rollinup.server.datasource.database.model.attendance.AttendanceSummaryEntity
-import com.rollinup.server.model.request.attendance.AttendanceSummaryQueryParams
 import com.rollinup.server.model.request.attendance.CreateAttendanceBody
 import com.rollinup.server.model.request.attendance.EditAttendanceBody
 import com.rollinup.server.model.request.attendance.GetAttendanceByClassQueryParams
@@ -18,7 +17,11 @@ interface AttendanceRepository {
 
     fun createAttendanceData(body: CreateAttendanceBody): String
 
-    fun getSummary(queryParams: AttendanceSummaryQueryParams): AttendanceSummaryEntity
+    fun getSummary(
+        studentId: String? = null,
+        classKey: Int? = null,
+        dateRange: List<Long>? = null,
+    ): AttendanceSummaryEntity
 
     fun isCheckedIn(userId: String): Boolean
 

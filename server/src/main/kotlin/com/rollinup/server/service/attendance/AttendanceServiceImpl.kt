@@ -12,7 +12,6 @@ import com.rollinup.server.datasource.database.repository.attendance.AttendanceR
 import com.rollinup.server.datasource.database.repository.permit.PermitRepository
 import com.rollinup.server.mapper.AttendanceMapper
 import com.rollinup.server.model.Role
-import com.rollinup.server.model.request.attendance.AttendanceSummaryQueryParams
 import com.rollinup.server.model.request.attendance.CreateAttendanceBody
 import com.rollinup.server.model.request.attendance.EditAttendanceBody
 import com.rollinup.server.model.request.attendance.GetAttendanceByClassQueryParams
@@ -152,12 +151,10 @@ class AttendanceServiceImpl(
         queryParams: GetAttendanceByStudentQueryParams,
         studentId: String,
     ): Response<GetAttendanceByStudentListResponse> = transactionManager.suspendTransaction {
-        val summaryQueryParams = AttendanceSummaryQueryParams(
-            studentUserId = studentId,
-            dateRange = queryParams.dateRange
-        )
+
         val summary = attendanceRepository.getSummary(
-            queryParams = summaryQueryParams,
+            studentId = studentId,
+            dateRange = queryParams.dateRange
         )
 
         val attendanceList = attendanceRepository.getAttendanceListByStudent(
@@ -183,12 +180,8 @@ class AttendanceServiceImpl(
         queryParams: GetAttendanceByClassQueryParams,
         classKey: Int,
     ): Response<GetAttendanceByClassListResponse> = transactionManager.suspendTransaction {
-        val summaryQueryParams = AttendanceSummaryQueryParams(
-            classX = classKey
-        )
-        val summary = attendanceRepository.getSummary(
-            queryParams = summaryQueryParams,
-        )
+
+        val summary = attendanceRepository.getSummary()
 
         val attendanceList = attendanceRepository.getAttendanceListByClass(
             queryParams = queryParams,

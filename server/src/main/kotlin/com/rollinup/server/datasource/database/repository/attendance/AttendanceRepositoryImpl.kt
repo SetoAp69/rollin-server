@@ -10,12 +10,10 @@ import com.rollinup.server.datasource.database.table.AttendanceTable
 import com.rollinup.server.datasource.database.table.ClassTable
 import com.rollinup.server.datasource.database.table.PermitTable
 import com.rollinup.server.datasource.database.table.UserTable
-import com.rollinup.server.model.request.attendance.AttendanceSummaryQueryParams
 import com.rollinup.server.model.request.attendance.CreateAttendanceBody
 import com.rollinup.server.model.request.attendance.EditAttendanceBody
 import com.rollinup.server.model.request.attendance.GetAttendanceByClassQueryParams
 import com.rollinup.server.model.request.attendance.GetAttendanceByStudentQueryParams
-import com.rollinup.server.util.Utils
 import com.rollinup.server.util.Utils.getOffset
 import com.rollinup.server.util.addFilter
 import com.rollinup.server.util.addOffset
@@ -102,7 +100,11 @@ class AttendanceRepositoryImpl() : AttendanceRepository {
     }
 
 
-    override fun getSummary(queryParams: AttendanceSummaryQueryParams): AttendanceSummaryEntity {
+    override fun getSummary(
+        studentId: String?,
+        classKey: Int?,
+        dateRange: List<Long>?,
+    ): AttendanceSummaryEntity {
         val sickExpression = Case()
             .When(PermitTable.reason eq "sick", intLiteral(1))
             .Else(intLiteral(0))
@@ -136,19 +138,19 @@ class AttendanceRepositoryImpl() : AttendanceRepository {
             )
 
 
-        byStatusQuery.addFilter(queryParams.classX) {
+        byStatusQuery.addFilter(classKey) {
             andWhere {
                 ClassTable.key eq it
             }
         }
 
-        byStatusQuery.addFilter(queryParams.studentUserId) {
+        byStatusQuery.addFilter(studentId) {
             andWhere {
                 AttendanceTable.userId eq UUID.fromString(it)
             }
         }
 
-        byStatusQuery.addFilter(queryParams.dateRange) { range ->
+        byStatusQuery.addFilter(dateRange) { range ->
             andWhere {
                 val from = LocalDate.ofInstant(
                     Instant.ofEpochMilli(range.first()),
@@ -180,19 +182,19 @@ class AttendanceRepositoryImpl() : AttendanceRepository {
             .select(sickExpression, otherExpression)
 
 
-        byReasonQuery.addFilter(queryParams.classX) {
+        byReasonQuery.addFilter(classKey) {
             andWhere {
                 ClassTable.key eq it
             }
         }
 
-        byReasonQuery.addFilter(queryParams.studentUserId) {
+        byReasonQuery.addFilter(studentId) {
             andWhere {
                 AttendanceTable.userId eq UUID.fromString(it)
             }
         }
 
-        byReasonQuery.addFilter(queryParams.dateRange) { range ->
+        byReasonQuery.addFilter(dateRange) { range ->
             andWhere {
                 val from = LocalDate.ofInstant(
                     Instant.ofEpochMilli(range.first()),
