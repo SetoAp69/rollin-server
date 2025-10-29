@@ -1,5 +1,6 @@
 package com.rollinup.server.datasource.database.repository.attendance
 
+import com.rollinup.server.datasource.database.model.ApprovalStatus
 import com.rollinup.server.datasource.database.model.AttendanceStatus
 import com.rollinup.server.datasource.database.model.attendance.AttendanceByClassEntity
 import com.rollinup.server.datasource.database.model.attendance.AttendanceByStudentEntity
@@ -9,7 +10,6 @@ import com.rollinup.server.datasource.database.table.AttendanceTable
 import com.rollinup.server.datasource.database.table.ClassTable
 import com.rollinup.server.datasource.database.table.PermitTable
 import com.rollinup.server.datasource.database.table.UserTable
-import com.rollinup.server.datasource.database.model.ApprovalStatus
 import com.rollinup.server.model.request.attendance.AttendanceSummaryQueryParams
 import com.rollinup.server.model.request.attendance.CreateAttendanceBody
 import com.rollinup.server.model.request.attendance.EditAttendanceBody
@@ -421,13 +421,9 @@ class AttendanceRepositoryImpl() : AttendanceRepository {
     override fun createAttendanceFromPermit(
         permitId: String,
         studentId: String,
-        duration: List<Long>,
+        dates: List<LocalDate>,
         status: AttendanceStatus,
     ) {
-        val from = Utils.getOffsetDateTime(duration.first())
-        val to = Utils.getOffsetDateTime(duration.last())
-
-        val dates = Utils.generateDateRange(from, to)
 
         AttendanceTable.batchUpsert(
             data = dates,
@@ -438,7 +434,6 @@ class AttendanceRepositoryImpl() : AttendanceRepository {
             this[AttendanceTable.status] = status
             this[AttendanceTable.permit] = UUID.fromString(permitId)
         }
-
     }
 
 

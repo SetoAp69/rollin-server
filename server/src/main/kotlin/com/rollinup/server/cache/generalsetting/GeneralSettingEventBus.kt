@@ -1,4 +1,4 @@
-package com.rollinup.server.generalsetting
+package com.rollinup.server.cache.generalsetting
 
 import com.rollinup.server.datasource.database.model.generalsetting.GeneralSetting
 import kotlinx.coroutines.flow.MutableSharedFlow

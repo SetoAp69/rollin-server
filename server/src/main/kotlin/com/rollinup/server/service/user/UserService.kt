@@ -1,6 +1,7 @@
 package com.rollinup.server.service.user
 
 import com.rollinup.server.model.request.user.EditUserRequest
+import com.rollinup.server.model.request.user.RegisterDeviceBody
 import com.rollinup.server.model.request.user.RegisterUserRequest
 import com.rollinup.server.model.request.user.UserQueryParams
 import com.rollinup.server.model.response.Response
@@ -23,7 +24,18 @@ interface UserService {
         otp: String
     ): Response<ValidateResetOtpResponse>
 
+
     suspend fun resetPasswordRequest(usernameOrEmail: String): Response<ResetPasswordRequestResponse>
 
     suspend fun resetPassword(token: String, newPassword: String): Response<Unit>
+
+    suspend fun registerDevice(id:String, body: RegisterDeviceBody): Response<Unit>
+
 }
+
+
+/*
+* New Acc -> Login -> 201 (Device = null) -> Register Device Page -> register(deviceId) ->
+* Verified Acc -> Login -> 200 -> Local check -> devId is Invalid -> logout
+*
+* */

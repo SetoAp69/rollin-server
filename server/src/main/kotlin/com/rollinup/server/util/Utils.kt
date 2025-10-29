@@ -11,6 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import java.io.File
+import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -87,12 +88,11 @@ object Utils {
 
     }
 
-    fun generateDateRange(start: OffsetDateTime, end: OffsetDateTime): List<LocalDate> {
+    fun generateDateRange(start: LocalDate, end: LocalDate): List<LocalDate> {
         val dates = mutableListOf<LocalDate>()
-        var currentDate = start.toLocalDate()
-        val endDate = end.toLocalDate()
+        var currentDate = start
 
-        while (currentDate <= endDate) {
+        while (currentDate <= end) {
             dates.add(currentDate)
             currentDate = currentDate.plusDays(1)
         }
@@ -162,6 +162,14 @@ object Utils {
         }
     }
 
+    fun OffsetDateTime.isWeekend(): Boolean {
+        return this.dayOfWeek in listOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)
+    }
+
+    fun LocalDate.isWeekend(): Boolean {
+        return this.dayOfWeek in listOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)
+    }
+
     fun getHaversine(
         locationA: Pair<Double, Double>,
         locationB: Pair<Double, Double>,
@@ -206,6 +214,13 @@ object Utils {
             "pdf" -> ContentType.Application.Pdf
             else -> throw IllegalFileFormat()
         }
+    }
+
+    fun Long.toLocalDate(offset: ZoneOffset = getOffset()): LocalDate {
+        return LocalDate.ofInstant(
+            Instant.ofEpochMilli(this),
+            offset
+        )
     }
 
 }

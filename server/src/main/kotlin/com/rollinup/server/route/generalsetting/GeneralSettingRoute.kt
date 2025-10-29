@@ -1,7 +1,7 @@
 package com.rollinup.server.route.generalsetting
 
 import com.rollinup.server.configurations.withRole
-import com.rollinup.server.generalsetting.GeneralSettingEventBus
+import com.rollinup.server.cache.generalsetting.GeneralSettingEventBus
 import com.rollinup.server.mapper.GeneralSettingMapper
 import com.rollinup.server.model.Role
 import com.rollinup.server.model.request.generalsetting.EditGeneralSettingBody

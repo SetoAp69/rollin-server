@@ -1,6 +1,7 @@
 package com.rollinup.server.configurations
 
 import com.rollinup.server.di.GeneralSettingModule
+import com.rollinup.server.di.HolidayModule
 import com.rollinup.server.di.MapperModule
 import com.rollinup.server.di.RepositoryModule
 import com.rollinup.server.di.ServiceModule
@@ -18,7 +19,8 @@ fun Application.module() {
                 MapperModule.module,
                 RepositoryModule.module,
                 ServiceModule.module,
-                GeneralSettingModule.module
+                GeneralSettingModule.module,
+                HolidayModule.module,
             )
         )
     }
@@ -31,6 +33,6 @@ fun Application.module() {
     configureAuthentication()
     configureSSE()
     configureDatabase()
-    configureRouting()
     configureListener()
+    configureRouting()
 }

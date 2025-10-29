@@ -1,8 +1,8 @@
 package com.rollinup.server.di
 
-import com.rollinup.server.generalsetting.GeneralSettingCache
-import com.rollinup.server.generalsetting.GeneralSettingEventBus
-import com.rollinup.server.generalsetting.GeneralSettingListener
+import com.rollinup.server.cache.generalsetting.GeneralSettingCache
+import com.rollinup.server.cache.generalsetting.GeneralSettingEventBus
+import com.rollinup.server.cache.generalsetting.GeneralSettingListener
 import org.koin.dsl.module
 
 object GeneralSettingModule {
@@ -11,7 +11,7 @@ object GeneralSettingModule {
             GeneralSettingCache()
         }
 
-        single {
+        single<GeneralSettingListener> {
             GeneralSettingListener(
                 generalSettingCache = get(),
                 transactionManager = get(),
@@ -19,7 +19,7 @@ object GeneralSettingModule {
                 generalSettingEventBus = get()
             )
         }
-        single { GeneralSettingEventBus() }
+        single <GeneralSettingEventBus> { GeneralSettingEventBus() }
 
     }
 }

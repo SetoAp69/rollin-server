@@ -12,4 +12,5 @@ data class UserEntity(
     val gender: String = "",
     val password: String = "",
     val salt: String = "",
+    val device: String? = null,
 )

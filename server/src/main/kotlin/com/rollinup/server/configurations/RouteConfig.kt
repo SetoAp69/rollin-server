@@ -45,6 +45,13 @@ fun Application.configureRouting() {
         ) {
             Route.GeneralSetting.route(this)
         }
+
+        route(
+            path = Route.Holiday.path
+        ) {
+            Route.Holiday.route(this)
+        }
+
     }
 }
 

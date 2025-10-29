@@ -20,7 +20,6 @@ import org.koin.ktor.ext.inject
 fun Route.attendanceRoute() {
     val attendanceService by inject<AttendanceService>()
 
-
     authenticate("auth-jwt") {
         withRole(Role.ADMIN, Role.STUDENT, Role.TEACHER) {
             get("/by-student/{studentId}") {

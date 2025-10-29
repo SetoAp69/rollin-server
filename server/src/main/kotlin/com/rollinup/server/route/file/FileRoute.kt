@@ -13,7 +13,7 @@ import org.koin.ktor.ext.inject
 fun Route.fileRoute() {
     val fileService by inject<FileService>()
     authenticate("auth-jwt") {
-        get() {
+        get {
             val filePath = call.receive<HashMap<String, String>>()["path"]
                 ?.let {
                     it.ifBlank { null }

@@ -1,9 +1,8 @@
-package com.rollinup.server.generalsetting
+package com.rollinup.server.cache.holiday
 
-import com.rollinup.server.datasource.database.repository.generalsetting.GeneralSettingRepository
+import com.rollinup.server.datasource.database.repository.holiday.HolidayRepository
 import com.rollinup.server.util.Config
 import com.rollinup.server.util.manager.TransactionManager
-import com.rollinup.server.util.notFoundException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -12,11 +11,11 @@ import kotlinx.coroutines.launch
 import org.postgresql.PGConnection
 import java.sql.DriverManager
 
-class GeneralSettingListener(
-    private val generalSettingCache: GeneralSettingCache,
+class HolidayListener(
+    private val holidayCache: HolidayCache,
     private val transactionManager: TransactionManager,
-    private val generalSettingRepository: GeneralSettingRepository,
-    private val generalSettingEventBus: GeneralSettingEventBus,
+    private val holidayRepository: HolidayRepository,
+    private val holidayEventBus: HolidayEventBus,
 ) {
     val config = Config.getDbConfig()
 
@@ -28,41 +27,36 @@ class GeneralSettingListener(
         )
 
         conn.autoCommit = true
+
         val pgConn = conn.unwrap(PGConnection::class.java)
 
         val statement = conn.createStatement()
-        statement.execute("LISTEN general_setting_update;")
+        statement.execute("LISTEN holiday_update;")
 
-        initSettings()
+        initCache()
 
         while (isActive) {
             pgConn.notifications?.let { notifications ->
                 for (notif in notifications) {
                     if (notif == null) return@let
                     println(" Received notification: ${notif.name} - payload: ${notif.parameter}")
-
                 }
 
-                val newSetting = transactionManager.suspendTransaction {
-                    generalSettingRepository.getGeneralSetting()
-                        ?: throw "general setting".notFoundException()
+                val data = transactionManager.suspendTransaction {
+                    holidayRepository.getHolidayList()
                 }
-                generalSettingCache.update(newSetting)
-                generalSettingEventBus.emit(newSetting)
+                holidayCache.update(data)
 
+                holidayEventBus.emit(data)
             }
             delay(1000)
-
         }
     }
 
-    suspend fun initSettings() {
+    suspend fun initCache() {
         transactionManager.suspendTransaction {
-            val newSetting =
-                generalSettingRepository.getGeneralSetting()
-                    ?: throw "general setting".notFoundException()
-
-            generalSettingCache.update(newSetting)
+            val data = holidayRepository.getHolidayList()
+            holidayCache.update(data)
         }
     }
 }

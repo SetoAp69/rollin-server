@@ -4,12 +4,13 @@ import com.rollinup.server.CommonException
 import com.rollinup.server.Constant
 import com.rollinup.server.IllegalLocationException
 import com.rollinup.server.UnauthorizedTokenException
+import com.rollinup.server.cache.generalsetting.GeneralSettingCache
+import com.rollinup.server.cache.holiday.HolidayCache
 import com.rollinup.server.datasource.database.model.AttendanceStatus
+import com.rollinup.server.datasource.database.model.PermitType
 import com.rollinup.server.datasource.database.repository.attendance.AttendanceRepository
 import com.rollinup.server.datasource.database.repository.permit.PermitRepository
-import com.rollinup.server.generalsetting.GeneralSettingCache
 import com.rollinup.server.mapper.AttendanceMapper
-import com.rollinup.server.datasource.database.model.PermitType
 import com.rollinup.server.model.Role
 import com.rollinup.server.model.request.attendance.AttendanceSummaryQueryParams
 import com.rollinup.server.model.request.attendance.CreateAttendanceBody
@@ -24,6 +25,8 @@ import com.rollinup.server.model.response.attendance.GetAttendanceByStudentListR
 import com.rollinup.server.service.file.FileService
 import com.rollinup.server.util.Message
 import com.rollinup.server.util.Utils
+import com.rollinup.server.util.Utils.isWeekend
+import com.rollinup.server.util.Utils.toLocalDate
 import com.rollinup.server.util.isExistException
 import com.rollinup.server.util.manager.TransactionManager
 import com.rollinup.server.util.notFoundException
@@ -45,10 +48,8 @@ class AttendanceServiceImpl(
     private val mapper: AttendanceMapper,
     private val transactionManager: TransactionManager,
     private val generalSetting: GeneralSettingCache,
+    private val holidayCache: HolidayCache,
 ) : AttendanceService {
-
-    val setting = generalSetting.get()
-
     override suspend fun getAttendanceById(id: String): Response<GetAttendanceByIdResponse> =
         transactionManager.suspendTransaction {
             val result = attendanceRepository.getAttendanceById(id)
@@ -72,7 +73,6 @@ class AttendanceServiceImpl(
 
         studentUserId.ifBlank { throw UnauthorizedTokenException() }
 
-
         multiPartData.forEachPart { partData ->
             when (partData) {
                 is PartData.FormItem -> Utils.fetchFormData(partData, formHash)
@@ -87,6 +87,9 @@ class AttendanceServiceImpl(
 
         val checkInAt = OffsetDateTime.now(Utils.getOffset())
 
+        if (checkInAt.isWeekend() || checkInAt.toLocalDate() in holidayCache.get())
+            throw CommonException(Message.OUTSIDE_TIME_PERIOD)
+
         formHash["checkedInAt"] = checkInAt.toInstant().toEpochMilli().toString()
         formHash["status"] = getAttendanceStatus(checkInAt.toOffsetTime().toLocalTime()).value
 
@@ -97,9 +100,9 @@ class AttendanceServiceImpl(
         }
 
         val isLocationValid = Utils.validateLocations(
-            locationA = setting.lat to setting.long,
+            locationA = generalSetting.get().lat to generalSetting.get().long,
             locationB = body.latitude to body.longitude,
-            rad = setting.rad
+            rad = generalSetting.get().rad
         )
 
         if (!isLocationValid) throw IllegalLocationException()
@@ -229,7 +232,7 @@ class AttendanceServiceImpl(
         when (type) {
             AttendanceStatus.ALPHA -> handleUpdateAlpha(id)
             AttendanceStatus.ABSENT, AttendanceStatus.EXCUSED -> handleUpdateWithPermit(
-                id=id,
+                id = id,
                 type = if (type == AttendanceStatus.ABSENT) PermitType.ABSENCE else PermitType.DISPENSATION,
                 formHash = formHash,
                 fileHash = fileHash
@@ -286,11 +289,27 @@ class AttendanceServiceImpl(
 
             val permitBody = CreatePermitBody.fromHashMap(formHash)
 
-            val permitId = permitRepository.createPermit(permitBody.copy(studentId = studentId, attachment = upload))
+            val permitId = permitRepository.createPermit(
+                permitBody.copy(
+                    studentId = studentId,
+                    attachment = upload
+                )
+            )
+
+            val duration = permitBody.duration.map { it.toLocalDate() }
+
+            val dates = Utils.generateDateRange(
+                start = duration.first(),
+                end = duration.last()
+            ).filter {
+                !it.isWeekend() && it !in holidayCache.get()
+            }
+
+
             attendanceRepository.createAttendanceFromPermit(
                 permitId = permitId,
                 studentId = permitBody.studentId,
-                duration = permitBody.duration,
+                dates = dates,
                 status = when (type) {
                     PermitType.DISPENSATION -> AttendanceStatus.EXCUSED
                     PermitType.ABSENCE -> AttendanceStatus.ABSENT
@@ -311,11 +330,9 @@ class AttendanceServiceImpl(
         checkInTime: LocalTime,
     ): AttendanceStatus {
 
-        val setting = generalSetting.get()
-
         val status = when (checkInTime) {
-            in setting.checkInPeriodStart..setting.schoolPeriodStart -> AttendanceStatus.CHECKED_IN
-            in setting.schoolPeriodStart..setting.checkInPeriodEnd -> AttendanceStatus.LATE
+            in generalSetting.get().checkInPeriodStart..generalSetting.get().schoolPeriodStart -> AttendanceStatus.CHECKED_IN
+            in generalSetting.get().schoolPeriodStart..generalSetting.get().checkInPeriodEnd -> AttendanceStatus.LATE
             else -> throw CommonException(Message.OUTSIDE_TIME_PERIOD)
         }
 

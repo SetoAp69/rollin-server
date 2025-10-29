@@ -8,7 +8,7 @@ class CommonException(message: String) : Exception(message)
 
 class UnauthorizedTokenException() : Exception()
 
-class InvalidSettingException() : Exception()
+class InvalidCacheException() : Exception()
 
 class IllegalRoleException() : Exception()
 

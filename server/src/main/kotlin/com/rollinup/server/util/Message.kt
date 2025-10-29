@@ -26,4 +26,6 @@ object Message {
     const val STORAGE_CONNECTION_FAILED = "failed to connect with storage provider"
     const val INVALID_CONTENT_TYPE = "Invalid content type"
     const val INVALID_FILE_FORMAT = "Invalid file format"
+    const val DEVICE_ALREADY_REGISTERED = "This account already have a registered device id"
+    const val INVALID_CACHE = "There's a problem on getting cache data"
 }

@@ -8,6 +8,7 @@ import com.rollinup.server.datasource.database.repository.resetpassword.ResetPas
 import com.rollinup.server.datasource.database.repository.user.UserRepository
 import com.rollinup.server.mapper.UserMapper
 import com.rollinup.server.model.request.user.EditUserRequest
+import com.rollinup.server.model.request.user.RegisterDeviceBody
 import com.rollinup.server.model.request.user.RegisterUserRequest
 import com.rollinup.server.model.request.user.UserQueryParams
 import com.rollinup.server.model.response.Response
@@ -24,6 +25,8 @@ import com.rollinup.server.util.Message
 import com.rollinup.server.util.Utils
 import com.rollinup.server.util.Utils.toLocalDateTime
 import com.rollinup.server.util.manager.TransactionManager
+import com.rollinup.server.util.notFoundException
+import com.rollinup.server.util.successEditResponse
 import com.rollinup.server.util.successGettingResponse
 import com.rollinup.server.util.toCensoredEmail
 import java.time.ZoneOffset
@@ -35,7 +38,7 @@ class UserServiceImpl(
     private val tokenService: TokenService,
     private val emailService: EmailService,
     private val mapper: UserMapper,
-    private val transactionManager: TransactionManager
+    private val transactionManager: TransactionManager,
 ) : UserService {
     override suspend fun registerUser(requestBody: RegisterUserRequest): Response<Unit> =
         transactionManager.suspendTransaction {
@@ -65,7 +68,7 @@ class UserServiceImpl(
 
     override suspend fun editUser(
         requestBody: EditUserRequest,
-        id: String
+        id: String,
     ): Response<Unit> = transactionManager.suspendTransaction {
         val userData = userRepository.getUserById(id)
 
@@ -105,7 +108,7 @@ class UserServiceImpl(
 
     override suspend fun validateResetOtp(
         userNameOrEmail: String,
-        otp: String
+        otp: String,
     ): Response<ValidateResetOtpResponse> = transactionManager.suspendTransaction {
         val user = userRepository.getUserByEmailOrUsername(userNameOrEmail)
             ?: throw CommonException(Message.USER_NOT_FOUND)
@@ -202,7 +205,7 @@ class UserServiceImpl(
 
     override suspend fun resetPassword(
         token: String,
-        newPassword: String
+        newPassword: String,
     ): Response<Unit> =
         transactionManager.suspendTransaction {
             val tokenClaim = tokenService.validateToken(
@@ -231,4 +234,26 @@ class UserServiceImpl(
                 data = Unit
             )
         }
+
+    override suspend fun registerDevice(
+        id: String,
+        body: RegisterDeviceBody,
+    ): Response<Unit> = transactionManager.suspendTransaction {
+        val user = userRepository.getUserById(id)
+            ?: throw "user".notFoundException()
+
+        if (user.device != null)
+            throw CommonException(Message.DEVICE_ALREADY_REGISTERED)
+
+        userRepository.editUser(
+            request = EditUserRequest(deviceId = body.deviceId),
+            id = id
+        )
+
+        return@suspendTransaction Response(
+            status = 201,
+            message = "user device".successEditResponse(),
+            data = Unit
+        )
+    }
 }

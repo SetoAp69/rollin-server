@@ -2,15 +2,16 @@ package com.rollinup.server.service.permit
 
 import com.rollinup.server.CommonException
 import com.rollinup.server.Constant
+import com.rollinup.server.cache.generalsetting.GeneralSettingCache
+import com.rollinup.server.cache.holiday.HolidayCache
+import com.rollinup.server.datasource.database.model.ApprovalStatus
 import com.rollinup.server.datasource.database.model.AttendanceStatus
+import com.rollinup.server.datasource.database.model.PermitType
 import com.rollinup.server.datasource.database.model.attendance.AttendanceEntity
 import com.rollinup.server.datasource.database.model.permit.PermitListEntity
 import com.rollinup.server.datasource.database.repository.attendance.AttendanceRepository
 import com.rollinup.server.datasource.database.repository.permit.PermitRepository
-import com.rollinup.server.generalsetting.GeneralSettingCache
 import com.rollinup.server.mapper.PermitMapper
-import com.rollinup.server.datasource.database.model.ApprovalStatus
-import com.rollinup.server.datasource.database.model.PermitType
 import com.rollinup.server.model.request.attendance.EditAttendanceBody
 import com.rollinup.server.model.request.attendance.GetAttendanceByStudentQueryParams
 import com.rollinup.server.model.request.permit.CreatePermitBody
@@ -24,6 +25,8 @@ import com.rollinup.server.model.response.permit.GetPermitListByStudentResponse
 import com.rollinup.server.service.file.FileService
 import com.rollinup.server.util.Message
 import com.rollinup.server.util.Utils
+import com.rollinup.server.util.Utils.isWeekend
+import com.rollinup.server.util.Utils.toLocalDate
 import com.rollinup.server.util.Utils.toLocalTime
 import com.rollinup.server.util.illegalStatusExeptions
 import com.rollinup.server.util.manager.TransactionManager
@@ -49,7 +52,9 @@ class PermitServiceImpl(
     private val transactionManager: TransactionManager,
     private val fileService: FileService,
     private val generalSetting: GeneralSettingCache,
+    private val holidayCache: HolidayCache,
 ) : PermitService {
+
     override suspend fun getPermitByStudent(
         studentId: String,
         queryParams: GetPermitQueryParams,
@@ -155,7 +160,7 @@ class PermitServiceImpl(
             throw IllegalArgumentException()
 
         val body = CreatePermitBody.fromHashMap(formHash)
-        val file = fileHash.get("attachment")
+        val file = fileHash["attachment"]
             ?: throw "permit attachment".uploadFileException()
         val path = Utils.getUploadDir(path = Constant.PERMIT_FILE_PATH, file.name)
 
@@ -164,10 +169,19 @@ class PermitServiceImpl(
         transactionManager.suspendTransaction {
             val permitId = permitRepository.createPermit(body.copy(attachment = upload))
 
+            val duration = body.duration.map { it.toLocalDate() }
+
+            val dates = Utils.generateDateRange(
+                start = duration.first(),
+                end = duration.last()
+            ).filter {
+                !it.isWeekend() && it !in holidayCache.get()
+            }
+
             attendanceRepository.createAttendanceFromPermit(
                 permitId = permitId,
                 studentId = body.studentId,
-                duration = body.duration,
+                dates = dates,
                 status = AttendanceStatus.APPROVAL_PENDING
             )
         }
@@ -310,8 +324,8 @@ class PermitServiceImpl(
         val attendanceId = attendanceList.map { it.id }
         when (permitType) {
             PermitType.DISPENSATION -> {
-                attendanceList.forEach { att->
-                    if(att.checkedInAt!=null){
+                attendanceList.forEach { att ->
+                    if (att.checkedInAt != null) {
                         val status = getDispensationStatus(
                             time = att.checkedInAt.toLocalTime()
                         )
@@ -320,7 +334,7 @@ class PermitServiceImpl(
                             listId = attendanceId,
                             body = EditAttendanceBody(status = status)
                         )
-                    }else{
+                    } else {
                         attendanceRepository.deleteAttendanceData(listOf(att.id))
                     }
                 }

@@ -11,6 +11,8 @@ import com.rollinup.server.service.file.FileServiceImpl
 import com.rollinup.server.service.file.GoogleStorage
 import com.rollinup.server.service.generalsetting.GeneralSettingService
 import com.rollinup.server.service.generalsetting.GeneralSettingServiceImpl
+import com.rollinup.server.service.holiday.HolidayService
+import com.rollinup.server.service.holiday.HolidayServiceImpl
 import com.rollinup.server.service.jwt.JWTService
 import com.rollinup.server.service.jwt.TokenService
 import com.rollinup.server.service.permit.PermitService
@@ -25,7 +27,6 @@ import org.koin.dsl.module
 
 object ServiceModule {
     val module = module {
-
 
         single<GoogleStorage> {
             GoogleStorage()
@@ -58,6 +59,11 @@ object ServiceModule {
                 transactionManager = get(),
             )
         }
+        single<FileService> {
+            FileServiceImpl(
+                googleStorage = get()
+            )
+        }
 
         single<AuthService> {
             AuthServiceImpl(
@@ -78,12 +84,7 @@ object ServiceModule {
                 permitRepository = get(),
                 fileService = get(),
                 generalSetting = get(),
-            )
-        }
-
-        single<FileService> {
-            FileServiceImpl(
-                googleStorage = get()
+                holidayCache = get(),
             )
         }
 
@@ -102,7 +103,16 @@ object ServiceModule {
                 permitMapper = get(),
                 transactionManager = get(),
                 fileService = get(),
-                generalSetting = get()
+                generalSetting = get(),
+                holidayCache = get()
+            )
+        }
+
+        single<HolidayService> {
+            HolidayServiceImpl(
+                transactionManager = get(),
+                holidayRepository = get(),
+                mapper = get()
             )
         }
 

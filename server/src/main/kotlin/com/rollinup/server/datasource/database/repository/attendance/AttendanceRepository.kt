@@ -10,9 +10,9 @@ import com.rollinup.server.model.request.attendance.CreateAttendanceBody
 import com.rollinup.server.model.request.attendance.EditAttendanceBody
 import com.rollinup.server.model.request.attendance.GetAttendanceByClassQueryParams
 import com.rollinup.server.model.request.attendance.GetAttendanceByStudentQueryParams
+import java.time.LocalDate
 
 interface AttendanceRepository {
-//    fun getAttendanceList(queryParams: AttendanceQueryParams):List<AttendanceEntity>
 
     fun getAttendanceById(id: String): AttendanceEntity?
 
@@ -41,7 +41,7 @@ interface AttendanceRepository {
     fun createAttendanceFromPermit(
         permitId: String,
         studentId: String,
-        duration: List<Long>,
+        dates: List<LocalDate>,
         status: AttendanceStatus,
     )
 
