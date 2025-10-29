@@ -2,7 +2,7 @@
 
 Backend server for the Rollin Attendance Apps project — part of my thesis work on an Attendance Management System.
 
-This repository contains the server-side implementation that provides APIs and services used by the Rollin mobile and web clients. It is implemented in Kotlin and includes static front-end assets and a Dockerfile for containerized deployments.
+This repository contains the server-side implementation that provides APIs and services used by the Rollin mobile and web clients. It is implemented in Kotlin and includes  Dockerfile for containerized deployments.
 
 Key goals (thesis context)
 - Serve as the central backend for recording and managing attendance data.
@@ -40,18 +40,5 @@ Prerequisites: JDK 11+ or 17+, Docker (optional), and a database (Postgres or ot
 Testing
 - Run tests with: ./gradlew test
 
-Configuration
-- Place configuration in environment variables or in a config file as your environment requires. Common variables: DATABASE_URL, JWT_SECRET, PORT.
-
-Development notes
-- This repository is maintained as part of an academic thesis. If you are reading this and want to reproduce results from the thesis, check the thesis document or contact the author for dataset and experiment details.
-
-Contributing
-- Contributions are welcome. Please open issues to discuss proposed changes before submitting pull requests.
-
-License
-- Add your chosen license here (e.g., MIT). If this is part of thesis work with restrictions, note them here.
-
 Contact
 - Author: SetoAp69 (https://github.com/SetoAp69)
-- Thesis supervisor or contact details can be added here if desired.
