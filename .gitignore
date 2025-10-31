@@ -19,3 +19,4 @@ captures
 server/src/main/resources/env.properties
 docker/dev.Dockerfile
 etc/secrets
+env.properties
