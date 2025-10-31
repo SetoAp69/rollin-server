@@ -18,11 +18,6 @@ fun Application.configureRouting() {
             Route.User.route(this)
         }
         route(
-            path = Route.Test.path
-        ) {
-            Route.Test.route(this)
-        }
-        route(
             path = Route.Attendance.path
         ) {
             Route.Attendance.route(this)
