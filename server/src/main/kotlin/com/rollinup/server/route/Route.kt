@@ -6,7 +6,6 @@ import com.rollinup.server.route.file.fileRoute
 import com.rollinup.server.route.generalsetting.generalSettingRoute
 import com.rollinup.server.route.holiday.holidayRoute
 import com.rollinup.server.route.permit.permitRoute
-import com.rollinup.server.route.test.testRoute
 import com.rollinup.server.route.user.userRouteNew
 
 sealed class Route(
@@ -24,13 +23,6 @@ sealed class Route(
         path = "/user",
         route = {
             userRouteNew()
-        }
-    )
-
-    object Test : Route(
-        path = "/test",
-        route = {
-            testRoute()
         }
     )
 
@@ -62,7 +54,7 @@ sealed class Route(
         }
     )
 
-    object Holiday:Route(
+    object Holiday : Route(
         path = "/holiday",
         route = {
             holidayRoute()
