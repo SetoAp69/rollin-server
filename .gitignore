@@ -19,6 +19,7 @@ captures
 server/src/main/resources/env.properties
 docker/dev.Dockerfile
 etc/secrets
+env.properties
 /server/src/main/resources/end-point-test/
 /server/src/main/kotlin/com/rollinup/server/route/test/
 /server/src/main/kotlin/com/rollinup/server/route/test
