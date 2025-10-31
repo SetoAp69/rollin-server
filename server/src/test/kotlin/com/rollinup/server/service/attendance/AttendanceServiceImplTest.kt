@@ -563,7 +563,12 @@ class AttendanceServiceImplTest {
             val uploadedFilePath = "UPLOAD_DIR/attachment/attendance/$currentDate/some-file.jpg"
             val attachment = file
 
-            val localTime = LocalTime.now()
+            val localTime = OffsetDateTime
+                .ofInstant(
+                    Instant.now(),
+                    Utils.getOffset()
+                )
+                .toLocalTime()
 
             val checkInTime = OffsetDateTime
                 .ofInstant(
@@ -669,8 +674,12 @@ class AttendanceServiceImplTest {
             val latitude = "12.2222"
             val longitude = "123.123"
             val attachment = file
-            val localTime = LocalTime.now()
-
+            val localTime = OffsetDateTime
+                .ofInstant(
+                    Instant.now(),
+                    Utils.getOffset()
+                )
+                .toLocalTime()
 
             val checkInTime = OffsetDateTime
                 .ofInstant(
@@ -850,7 +859,12 @@ class AttendanceServiceImplTest {
             val currentDate = LocalDate.now().toString().replace("-", "")
             val attachment = file
 
-            val localTime = LocalTime.now()
+            val localTime = OffsetDateTime
+                .ofInstant(
+                    Instant.now(),
+                    Utils.getOffset()
+                )
+                .toLocalTime()
 
             val checkInTime = OffsetDateTime
                 .ofInstant(

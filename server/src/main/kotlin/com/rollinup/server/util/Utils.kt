@@ -119,8 +119,7 @@ object Utils {
     }
 
     fun getOffset(): ZoneOffset {
-//        return ZoneOffset.UTC
-        return ZoneId.of("Asia/Jakarta").rules.getOffset(Instant.now())
+        return ZoneOffset.UTC
     }
 
     private fun String?.formatFileName(customName: String): String {
