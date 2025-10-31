@@ -350,8 +350,6 @@ class AttendanceRepositoryImpl() : AttendanceRepository {
                         getOffset()
                     )
 
-                println("${from}, ${to}")
-
                 andWhere {
                     AttendanceTable.date.between(from, to)
                 }

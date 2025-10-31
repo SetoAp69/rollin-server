@@ -20,8 +20,6 @@ fun Route.fileRoute() {
                 }
                 ?: throw IllegalPathParameterException("path")
 
-            println("projectId = ${Config.getGCSConfig().projectId}, bucketName = ${Config.getGCSConfig().bucketName}")
-            println("path = $filePath")
             val contentType = Utils.getContentType(filePath.substringAfterLast("."))
             val file = fileService.getFileUrl(filePath)
             call.respondBytes(bytes = file, contentType = contentType)
