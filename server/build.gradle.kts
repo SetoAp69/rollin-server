@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.org.apache.commons.lang3.Functions.test
-
 plugins {
     alias(libs.plugins.kotlinJvm)
     alias(libs.plugins.ktor)
@@ -85,6 +83,9 @@ dependencies {
     //web socket
     implementation(libs.ktor.websockets)
 
+    //SSE
+    implementation(libs.ktor.server.sse)
+
     //Serialization
     implementation(libs.ktor.serialization.json)
 
@@ -115,11 +116,17 @@ dependencies {
     //Email
     implementation(libs.common.email)
 
+    //Google cloud storage
+    implementation(libs.gc.storage)
+    implementation(libs.gc.storage.control)
+
     //Testing
     testImplementation(libs.kotlin.testJunit)
     testImplementation(libs.ktor.serverTestHost)
     testImplementation(libs.json.path)
+    testImplementation(libs.ktor.content.negotiation)
     testImplementation(libs.mockk)
+    testImplementation(libs.koin.test)
     testImplementation(libs.system.lambda)
     testImplementation(libs.system.stubs.testng)
 

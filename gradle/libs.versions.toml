@@ -15,6 +15,7 @@ kover = "0.9.2"
 mockk = "1.14.5"
 systemLambda = "1.2.1"
 testNG = "2.1.8"
+googleCloud = "2.59.0"
 
 
 [libraries]
@@ -38,6 +39,7 @@ ktor-auth-jwt = { group = "io.ktor", name = "ktor-server-auth-jwt", version.ref 
 ktor-server-call-logging = { group = "io.ktor", name = "ktor-server-call-logging", version.ref = "ktor" }
 ktor-client-logging = { group = "io.ktor", name = "ktor-client-logging", version.ref = "ktor" }
 
+#Serialization
 ktor-serialization-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
 
 #Gson
@@ -50,17 +52,20 @@ ktor-content-negotiation-client = { group = "io.ktor", name = "ktor-client-conte
 #web socket
 ktor-websockets = { group = "io.ktor", name = "ktor-server-websockets", version.ref = "ktor" }
 
-#Email
-common-email = { group = "org.apache.commons", name = "commons-email2-javax", version.ref = "apache-mail" }
-
-#MOcKK
-mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
-
 #Status Pages
 ktor-server-status-pages = { group = "io.ktor", name = "ktor-server-status-pages", version.ref = "ktor" }
 
 #Request validator
 ktor-server-request-validation = { group = "io.ktor", name = "ktor-server-request-validation", version.ref = "ktor" }
+
+#SSE
+ktor-server-sse = {group = "io.ktor", name = "ktor-server-sse",version.ref="ktor"}
+
+#Email
+common-email = { group = "org.apache.commons", name = "commons-email2-javax", version.ref = "apache-mail" }
+
+#MOcKK
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 
 #Exposed
 exposed-core = { group = "org.jetbrains.exposed", name = "exposed-core", version.ref = "exposed" }
@@ -83,9 +88,14 @@ system-lambda = {group = "com.github.stefanbirkner", name="system-lambda", versi
 koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koin" }
 koin-ktor = { group = "io.insert-koin", name = "koin-ktor", version.ref = "koin" }
 koin-logger = { group = "io.insert-koin", name = "koin-logger-slf4j", version.ref = "koin" }
+koin-test = {group = "io.insert-koin", name = "koin-test", version.ref="koin"}
 
 #System stubs
 system-stubs-testng = {group = "uk.org.webcompere", name = "system-stubs-testng", version.ref ="testNG"}
+
+#Google Cloud Storage
+gc-storage = {group = "com.google.cloud", name = "google-cloud-storage", version.ref = "googleCloud"}
+gc-storage-control = {group = "com.google.cloud", name = "google-cloud-storage-control", version.ref = "googleCloud"}
 
 [plugins]
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

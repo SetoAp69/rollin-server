@@ -6,6 +6,7 @@ import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.principal
 import io.ktor.server.routing.RoutingCall
 import io.ktor.server.routing.RoutingContext
+import org.jetbrains.exposed.v1.jdbc.Query
 
 fun RoutingCall.getAuthClaim(): JwtAuthClaim {
     fun claim(name: String): String =
@@ -24,7 +25,7 @@ fun RoutingCall.getAuthClaim(): JwtAuthClaim {
 }
 
 suspend fun RoutingContext.withClaim(
-    body: suspend RoutingContext.(JwtAuthClaim) -> Unit
+    body: suspend RoutingContext.(JwtAuthClaim) -> Unit,
 ) {
     val claim = call.getAuthClaim()
     body(claim)
@@ -47,11 +48,56 @@ fun String.successCreateResponse(): String {
     return "$this data successfully created"
 }
 
+fun String.successDeleteResponse(): String {
+    return "$this data successfully deleted"
+}
+
 fun String.successEditResponse(): String {
     return "$this data successfully updated"
+}
+
+fun String.illegalStatusExeptions(): CommonException {
+    return CommonException("Illegal $this status")
+}
+
+fun String.uploadFileException(): CommonException {
+    return CommonException("failed to upload $this file")
+}
+
+fun String.deleteFileException(): CommonException {
+    return CommonException("failed to delete $this file")
+}
+
+fun String.getFileException() : CommonException{
+    return CommonException("failed to get $this file")
 }
 
 fun String.toCensoredEmail(): String {
     val email = this.substringBefore("@")
     return "${email.firstOrNull() ?: "*"}*****${email.lastOrNull() ?: "*"}@***.***"
+}
+
+fun String.likePattern(): String {
+    return "%$this%"
+}
+
+inline fun <T> Query.addFilter(value: List<T>?, block: Query.(List<T>) -> Unit) {
+    if (!value.isNullOrEmpty()) {
+        this.block(value)
+    }
+}
+
+inline fun <T> Query.addFilter(value: T?, block: Query.(T) -> Unit) {
+    if (value != null) {
+        this.block(value)
+    }
+}
+
+fun Query.addOffset(limit: Int?, page: Int?) {
+    if (listOf(limit, page).all { it != null && it > 0 })
+        this.offset(
+            (page!! * limit!!).toLong()
+        ).limit(
+            limit
+        )
 }

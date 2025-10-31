@@ -25,7 +25,9 @@ data class EditUserRequest(
     val phoneNumber: String? = null,
     @SerialName("gender")
     val gender: String? = null,
-    val salt: String? = null
+    val salt: String? = null,
+    @SerialName("deviceId")
+    val deviceId: String? = null,
 ) {
     private object ValidationMessages {
         // Updated to be more granular based on the user's new checks
@@ -34,6 +36,7 @@ data class EditUserRequest(
         const val LAST_NAME_BLANK = "Last name cannot be empty."
         const val INVALID_EMAIL_FORMAT = "Email address is invalid."
         const val ROLE_BLANK = "Role cannot be empty."
+        const val DEVICE_ID_BLANK = "Device Id cannot be empty."
     }
 
     fun validation(): ValidationResult {
@@ -51,6 +54,9 @@ data class EditUserRequest(
                 ?: false -> ValidationResult.Invalid(ValidationMessages.INVALID_EMAIL_FORMAT)
 
             role?.isBlank() ?: false -> ValidationResult.Invalid(ValidationMessages.ROLE_BLANK)
+            deviceId?.isBlank()
+                ?: false -> ValidationResult.Invalid(ValidationMessages.DEVICE_ID_BLANK)
+
             else -> ValidationResult.Valid
         }
     }

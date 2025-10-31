@@ -26,10 +26,11 @@ fun Application.configureDatabase() {
                     ) {
                         println("transaction : $transaction")
                     }
-
                 }
             }
+
         ),
+
 
         )
 }

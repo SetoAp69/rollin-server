@@ -1,7 +1,9 @@
 package com.rollinup.server.configurations
 
+import com.rollinup.server.IllegalLocationException
 import com.rollinup.server.IllegalPathParameterException
 import com.rollinup.server.IllegalRoleException
+import com.rollinup.server.InvalidCacheException
 import com.rollinup.server.UnauthorizedTokenException
 import com.rollinup.server.model.response.Response
 import com.rollinup.server.util.Message
@@ -44,12 +46,26 @@ fun Application.configureStatusPage() {
                     )
                 }
 
+                is IllegalLocationException -> {
+                    call.respond(
+                        status = HttpStatusCode.BadRequest,
+                        message = Message.INVALID_LOCATION
+                    )
+                }
+
+                is InvalidCacheException->{
+                    call.respond(
+                        status = HttpStatusCode.InternalServerError,
+                        message = Message.INVALID_CACHE
+                    )
+                }
+
                 else -> {
                     call.respond(
                         status = HttpStatusCode.InternalServerError,
                         message = Response(
                             status = 500,
-                            message = "Something went wrong",
+                            message = Message.INTERNAL_SERVER_ERROR,
                             data = Unit
                         )
                     )

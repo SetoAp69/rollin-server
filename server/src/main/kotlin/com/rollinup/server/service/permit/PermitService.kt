@@ -1,0 +1,41 @@
+package com.rollinup.server.service.permit
+
+import com.rollinup.server.model.request.permit.GetPermitQueryParams
+import com.rollinup.server.model.request.permit.PermitApprovalBody
+import com.rollinup.server.model.response.Response
+import com.rollinup.server.model.response.permit.GetPermitByIdResponse
+import com.rollinup.server.model.response.permit.GetPermitListByClassResponse
+import com.rollinup.server.model.response.permit.GetPermitListByStudentResponse
+import java.io.File
+
+interface PermitService {
+    suspend fun getPermitByStudent(
+        studentId: String,
+        queryParams: GetPermitQueryParams,
+    ): Response<GetPermitListByStudentResponse>
+
+    suspend fun getPermitByClass(
+        classKey: Int,
+        queryParams: GetPermitQueryParams,
+    ): Response<GetPermitListByClassResponse>
+
+    suspend fun getPermitById(id: String): Response<GetPermitByIdResponse>
+
+    suspend fun doApproval(approverId: String, body: PermitApprovalBody): Response<Unit>
+
+    suspend fun createPermit(
+        formHashMap: HashMap<String, String>,
+        fileHashMap: HashMap<String, File>,
+    ): Response<Unit>
+
+    suspend fun editPermit(
+        id: String, formHashMap: HashMap<String, String>,
+        fileHashMap: HashMap<String, File>,
+    ): Response<Unit>
+
+    suspend fun cancelPermit(id: List<String>): Response<Unit>
+
+    suspend fun deletePermit(id: List<String>): Response<Unit>
+
+
+}

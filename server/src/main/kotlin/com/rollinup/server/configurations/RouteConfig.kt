@@ -18,10 +18,35 @@ fun Application.configureRouting() {
             Route.User.route(this)
         }
         route(
-            path = Route.Test.path
+            path = Route.Attendance.path
         ) {
-            Route.Test.route(this)
+            Route.Attendance.route(this)
         }
+
+        route(
+            path = Route.File.path
+        ) {
+            Route.File.route(this)
+        }
+
+        route(
+            path = Route.Permit.path
+        ) {
+            Route.Permit.route(this)
+        }
+
+        route(
+            path = Route.GeneralSetting.path
+        ) {
+            Route.GeneralSetting.route(this)
+        }
+
+        route(
+            path = Route.Holiday.path
+        ) {
+            Route.Holiday.route(this)
+        }
+
     }
 }
 

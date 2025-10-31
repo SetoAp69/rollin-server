@@ -3,6 +3,7 @@ package com.rollinup.server.route.user
 import com.rollinup.server.configurations.withRole
 import com.rollinup.server.model.Role
 import com.rollinup.server.model.request.user.EditUserRequest
+import com.rollinup.server.model.request.user.RegisterDeviceBody
 import com.rollinup.server.model.request.user.RegisterUserRequest
 import com.rollinup.server.model.request.user.ResetPasswordRequest
 import com.rollinup.server.model.request.user.ResetPasswordRequestRequest
@@ -61,7 +62,7 @@ fun Route.userRouteNew() {
     }
 
     authenticate("auth-jwt") {
-        withRole(Role.ADMIN) {
+        withRole(Role.ADMIN, Role.STUDENT, Role.TEACHER) {
             put("/{id}/edit") {
                 val id = call.pathParameters["id"]
                     ?: throw IllegalArgumentException("id")
@@ -120,5 +121,15 @@ fun Route.userRouteNew() {
             status = HttpStatusCode.OK,
             message = response.message
         )
+    }
+
+    authenticate("auth-jwt") {
+        post("register-device") {
+            withClaim { claim ->
+                val id = claim.id
+                val body = call.receive<RegisterDeviceBody>()
+            }
+
+        }
     }
 }

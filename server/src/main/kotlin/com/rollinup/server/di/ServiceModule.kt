@@ -1,13 +1,22 @@
 package com.rollinup.server.di
 
-import com.rollinup.server.mapper.AuthMapper
-import com.rollinup.server.mapper.UserMapper
+import com.rollinup.server.service.attendance.AttendanceService
+import com.rollinup.server.service.attendance.AttendanceServiceImpl
 import com.rollinup.server.service.auth.AuthService
 import com.rollinup.server.service.auth.AuthServiceImpl
 import com.rollinup.server.service.email.EmailService
 import com.rollinup.server.service.email.EmailServiceImpl
+import com.rollinup.server.service.file.FileService
+import com.rollinup.server.service.file.FileServiceImpl
+import com.rollinup.server.service.file.GoogleStorage
+import com.rollinup.server.service.generalsetting.GeneralSettingService
+import com.rollinup.server.service.generalsetting.GeneralSettingServiceImpl
+import com.rollinup.server.service.holiday.HolidayService
+import com.rollinup.server.service.holiday.HolidayServiceImpl
 import com.rollinup.server.service.jwt.JWTService
 import com.rollinup.server.service.jwt.TokenService
+import com.rollinup.server.service.permit.PermitService
+import com.rollinup.server.service.permit.PermitServiceImpl
 import com.rollinup.server.service.security.HashingService
 import com.rollinup.server.service.security.HashingServiceImpl
 import com.rollinup.server.service.user.UserService
@@ -19,11 +28,9 @@ import org.koin.dsl.module
 object ServiceModule {
     val module = module {
 
-        single<UserMapper> {
-            UserMapper()
+        single<GoogleStorage> {
+            GoogleStorage()
         }
-
-        single { AuthMapper() }
 
         single<TransactionManager> {
             TransactionManagerImpl()
@@ -52,6 +59,11 @@ object ServiceModule {
                 transactionManager = get(),
             )
         }
+        single<FileService> {
+            FileServiceImpl(
+                googleStorage = get()
+            )
+        }
 
         single<AuthService> {
             AuthServiceImpl(
@@ -64,6 +76,45 @@ object ServiceModule {
             )
         }
 
+        single<AttendanceService> {
+            AttendanceServiceImpl(
+                attendanceRepository = get(),
+                transactionManager = get(),
+                mapper = get(),
+                permitRepository = get(),
+                fileService = get(),
+                generalSetting = get(),
+                holidayCache = get(),
+            )
+        }
+
+        single<GeneralSettingService> {
+            GeneralSettingServiceImpl(
+                generalSettingRepository = get(),
+                transactionManager = get(),
+                mapper = get()
+            )
+        }
+
+        single<PermitService> {
+            PermitServiceImpl(
+                permitRepository = get(),
+                attendanceRepository = get(),
+                permitMapper = get(),
+                transactionManager = get(),
+                fileService = get(),
+                generalSetting = get(),
+                holidayCache = get()
+            )
+        }
+
+        single<HolidayService> {
+            HolidayServiceImpl(
+                transactionManager = get(),
+                holidayRepository = get(),
+                mapper = get()
+            )
+        }
 
     }
 }

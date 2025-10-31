@@ -110,13 +110,10 @@ class UserRepositoryImpl : UserRepository {
                     email?.let { statement[UserTable.email] = it }
                     role?.let { statement[UserTable.role] = UUID.fromString(it) }
                     gender?.let { statement[UserTable.gender] = Gender.fromValue(it) }
+                    deviceId?.let { statement[UserTable.device] = it }
                 }
-
             }
-
-
         )
-
     }
 
     override fun deleteUser(id: List<String>) {
@@ -132,12 +129,11 @@ class UserRepositoryImpl : UserRepository {
             otherTable = RoleTable,
             joinType = JoinType.LEFT,
             additionalConstraint = {
-                UserTable.role eq RoleTable._id
+                role eq RoleTable._id
             }
         ).selectAll()
             .where {
                 (UserTable.user_id eq UUID.fromString(id))
-
             }
 
         return query.firstOrNull()?.toUser()
@@ -148,7 +144,7 @@ class UserRepositoryImpl : UserRepository {
             otherTable = RoleTable,
             joinType = JoinType.LEFT,
             additionalConstraint = {
-                UserTable.role eq RoleTable._id
+                role eq RoleTable._id
             }
         )
             .selectAll()
@@ -185,9 +181,10 @@ class UserRepositoryImpl : UserRepository {
             firstName = this[UserTable.firstName],
             lastName = this[UserTable.lastName],
             role = Role.fromValue(this[RoleTable.name]) ?: Role.STUDENT,
-            gender = this[UserTable.gender].name,
+            gender = this[gender].name,
             password = this[UserTable.password],
-            salt = this[UserTable.salt]
+            salt = this[UserTable.salt],
+            device = this[UserTable.device],
         )
     }
 }
