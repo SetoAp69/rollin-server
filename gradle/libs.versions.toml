@@ -88,6 +88,7 @@ system-lambda = {group = "com.github.stefanbirkner", name="system-lambda", versi
 koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koin" }
 koin-ktor = { group = "io.insert-koin", name = "koin-ktor", version.ref = "koin" }
 koin-logger = { group = "io.insert-koin", name = "koin-logger-slf4j", version.ref = "koin" }
+koin-test = {group = "io.insert-koin", name = "koin-test", version.ref="koin"}
 
 #System stubs
 system-stubs-testng = {group = "uk.org.webcompere", name = "system-stubs-testng", version.ref ="testNG"}

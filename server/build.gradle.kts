@@ -124,7 +124,9 @@ dependencies {
     testImplementation(libs.kotlin.testJunit)
     testImplementation(libs.ktor.serverTestHost)
     testImplementation(libs.json.path)
+    testImplementation(libs.ktor.content.negotiation)
     testImplementation(libs.mockk)
+    testImplementation(libs.koin.test)
     testImplementation(libs.system.lambda)
     testImplementation(libs.system.stubs.testng)
 

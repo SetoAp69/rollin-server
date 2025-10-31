@@ -14,7 +14,7 @@ object GeneralSettingTable : Table("general_setting") {
         onDelete = ReferenceOption.CASCADE,
         onUpdate = ReferenceOption.CASCADE
     )
-    val updatedAt = time("updated_at")
+    val updatedAt = timestampWithTimeZone("updated_at")
     val schoolPeriodStart = time("school_period_start")
     val schoolPeriodEnd = time("school_period_end")
     val checkInPeriodStart = time("check_in_period_start")

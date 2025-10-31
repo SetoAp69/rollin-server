@@ -54,7 +54,7 @@ class HolidayServiceImpl(
             holidayRepository.editHoliday(id, body)
 
             return@suspendTransaction Response(
-                status = 201,
+                status = 202,
                 message = "holiday".successEditResponse()
             )
         }
@@ -63,7 +63,7 @@ class HolidayServiceImpl(
         transactionManager.suspendTransaction {
             holidayRepository.deleteHoliday(listId)
             return@suspendTransaction Response(
-                status = 201,
+                status = 202,
                 message = "holiday".successDeleteResponse()
             )
         }

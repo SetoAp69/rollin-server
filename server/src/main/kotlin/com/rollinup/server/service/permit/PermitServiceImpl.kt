@@ -13,7 +13,6 @@ import com.rollinup.server.datasource.database.repository.attendance.AttendanceR
 import com.rollinup.server.datasource.database.repository.permit.PermitRepository
 import com.rollinup.server.mapper.PermitMapper
 import com.rollinup.server.model.request.attendance.EditAttendanceBody
-import com.rollinup.server.model.request.attendance.GetAttendanceByStudentQueryParams
 import com.rollinup.server.model.request.permit.CreatePermitBody
 import com.rollinup.server.model.request.permit.EditPermitBody
 import com.rollinup.server.model.request.permit.GetPermitQueryParams
@@ -36,12 +35,8 @@ import com.rollinup.server.util.successDeleteResponse
 import com.rollinup.server.util.successEditResponse
 import com.rollinup.server.util.successGettingResponse
 import com.rollinup.server.util.uploadFileException
-import io.ktor.http.content.MultiPartData
-import io.ktor.http.content.PartData
-import io.ktor.http.content.forEachPart
 import java.io.File
 import java.time.LocalTime
-import java.time.OffsetDateTime
 import java.time.OffsetTime
 
 
@@ -137,24 +132,18 @@ class PermitServiceImpl(
         )
 
         return@suspendTransaction Response(
-            status = 201,
+            status = 202,
             message = "permit".successEditResponse(),
         )
     }
 
-    override suspend fun createPermit(multiPart: MultiPartData): Response<Unit> {
+    override suspend fun createPermit(
+        formHashMap: HashMap<String, String>,
+        fileHashMap: HashMap<String, File>,
+    ): Response<Unit> {
 
-        val formHash: HashMap<String, String> = hashMapOf()
-        val fileHash: HashMap<String, File> = hashMapOf()
-
-        multiPart.forEachPart { partData ->
-            when (partData) {
-                is PartData.FileItem -> Utils.fetchFileData(partData, fileHash)
-                is PartData.FormItem -> Utils.fetchFormData(partData, formHash)
-                else -> {}
-            }
-            partData.dispose()
-        }
+        val formHash: HashMap<String, String> = formHashMap
+        val fileHash: HashMap<String, File> = fileHashMap
 
         if (listOf(formHash, fileHash).any { it.isEmpty() })
             throw IllegalArgumentException()
@@ -167,16 +156,17 @@ class PermitServiceImpl(
         val upload = fileService.uploadFile(path, file)
 
         transactionManager.suspendTransaction {
-            val permitId = permitRepository.createPermit(body.copy(attachment = upload))
-
             val duration = body.duration.map { it.toLocalDate() }
-
             val dates = Utils.generateDateRange(
                 start = duration.first(),
                 end = duration.last()
             ).filter {
                 !it.isWeekend() && it !in holidayCache.get()
+            }.ifEmpty {
+                throw CommonException(Message.INVALID_DURATIONS)
             }
+
+            val permitId = permitRepository.createPermit(body.copy(attachment = upload))
 
             attendanceRepository.createAttendanceFromPermit(
                 permitId = permitId,
@@ -192,18 +182,13 @@ class PermitServiceImpl(
         )
     }
 
-    override suspend fun editPermit(id: String, multiPart: MultiPartData): Response<Unit> {
-        val formHash: HashMap<String, String> = hashMapOf()
-        val fileHash: HashMap<String, File> = hashMapOf()
-
-        multiPart.forEachPart { partData ->
-            when (partData) {
-                is PartData.FileItem -> Utils.fetchFileData(partData, fileHash)
-                is PartData.FormItem -> Utils.fetchFormData(partData, formHash)
-                else -> {}
-            }
-            partData.dispose()
-        }
+    override suspend fun editPermit(
+        id: String,
+        formHashMap: HashMap<String, String>,
+        fileHashMap: HashMap<String, File>,
+    ): Response<Unit> {
+        val formHash: HashMap<String, String> = formHashMap
+        val fileHash: HashMap<String, File> = fileHashMap
 
         val attachment = fileHash["attachment"]
         val body = EditPermitBody.fromHashMap(formHash)
@@ -222,7 +207,7 @@ class PermitServiceImpl(
         }
 
         return Response(
-            status = 201,
+            status = 202,
             message = "permit".successEditResponse(),
         )
     }
@@ -292,15 +277,10 @@ class PermitServiceImpl(
         val attendanceList =
             attendanceRepository.getAttendanceListByPermit(permitList.map { it.id })
 
-        println("PermitList: ${permitList.map { it.id }}")
-
         val attendanceByPermit = attendanceList.groupBy { it.permit }
-        println("Att By Permit: $attendanceByPermit")
 
         attendanceByPermit.forEach { permit, att ->
             permit ?: return@forEach
-            println("att id: ${att.map { it.id }}")
-
             val id = att.map { it.id }
 
             if (isApproved) {
@@ -368,19 +348,19 @@ class PermitServiceImpl(
         return status
     }
 
-    private fun validateAttendanceStatus(studentId: String): Boolean {
-        val allowedStatus = listOf(AttendanceStatus.CHECKED_IN, AttendanceStatus.LATE)
-        val currentDate = OffsetDateTime.now(Utils.getOffset()).toInstant().toEpochMilli()
-        val queryParams =
-            GetAttendanceByStudentQueryParams(dateRange = listOf(currentDate, currentDate))
-
-        val attendanceData = attendanceRepository.getAttendanceListByStudent(
-            studentId = studentId,
-            queryParams = queryParams
-        ).lastOrNull()
-
-        return attendanceData?.status in allowedStatus
-    }
+//    private fun validateAttendanceStatus(studentId: String): Boolean {
+//        val allowedStatus = listOf(AttendanceStatus.CHECKED_IN, AttendanceStatus.LATE)
+//        val currentDate = OffsetDateTime.now(Utils.getOffset()).toInstant().toEpochMilli()
+//        val queryParams =
+//            GetAttendanceByStudentQueryParams(dateRange = listOf(currentDate, currentDate))
+//
+//        val attendanceData = attendanceRepository.getAttendanceListByStudent(
+//            studentId = studentId,
+//            queryParams = queryParams
+//        ).lastOrNull()
+//
+//        return attendanceData?.status in allowedStatus
+//    }
 
     private suspend fun handleEditWithAttachment(
         id: String,

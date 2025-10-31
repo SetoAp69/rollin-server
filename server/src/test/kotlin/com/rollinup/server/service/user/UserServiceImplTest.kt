@@ -12,6 +12,7 @@ import com.rollinup.server.datasource.database.repository.resetpassword.ResetPas
 import com.rollinup.server.datasource.database.repository.user.UserRepository
 import com.rollinup.server.mapper.UserMapper
 import com.rollinup.server.model.request.user.EditUserRequest
+import com.rollinup.server.model.request.user.RegisterDeviceBody
 import com.rollinup.server.model.request.user.RegisterUserRequest
 import com.rollinup.server.model.request.user.UserQueryParams
 import com.rollinup.server.model.response.Response
@@ -571,4 +572,72 @@ class UserServiceImplTest {
         assertEquals(Message.USER_NOT_FOUND, exception.message)
     }
     //endregion
+
+    //region registerDevice test
+    @Test
+    fun `registerDevice should return correct response`() = runTest {
+        //Arrange
+        val id = "userId"
+        val body = RegisterDeviceBody(
+            deviceId = "deviceId"
+        )
+        val mockUser = mockk<UserEntity>()
+        val editBody = EditUserRequest(deviceId = "deviceId")
+
+        val expectedResponse = Response<Unit>(
+            status = 201,
+            message = "user device data successfully updated"
+        )
+        coEvery { userRepository.getUserById(id) }returns mockUser
+        coEvery { mockUser.device } returns null
+        coEvery { userRepository.editUser(id = id, request = editBody) } just runs
+
+        //Act
+        val result = userService.registerDevice(id, body)
+
+        //Assert
+        assertEquals(expectedResponse, result)
+        assertEquals("user device data successfully updated", result.message)
+        assertEquals(201, result.status)
+        coVerify { userRepository.editUser(id = id, request = editBody) }
+    }
+
+    @Test
+    fun `registerDevice should throw correct exception when no user data found`() = runTest {
+        //arrange
+        val id = "userId"
+        val body = RegisterDeviceBody("deviceId")
+
+        val expectedMessage = "can't find user data"
+
+        coEvery { userRepository.getUserById(id) } returns null
+
+        //Act & Assert
+        val result = assertFailsWith<CommonException> {
+            userService.registerDevice(id = id, body = body)
+        }
+
+        assertEquals(expectedMessage, result.message)
+    }
+
+    @Test
+    fun `registerDevice should throw correct exception when user already have device id` () = runTest {
+        //arrange
+        //arrange
+        val id = "userId"
+        val body = RegisterDeviceBody("deviceId")
+
+        val expectedMessage = "This account already have a registered device id"
+        val mockUser = mockk<UserEntity>()
+
+        coEvery { userRepository.getUserById(id) } returns mockUser
+        coEvery { mockUser.device } returns "deviceId"
+
+        //Act & Assert
+        val result = assertFailsWith<CommonException> {
+            userService.registerDevice(id = id, body = body)
+        }
+
+        assertEquals(expectedMessage, result.message)
+    }
 }

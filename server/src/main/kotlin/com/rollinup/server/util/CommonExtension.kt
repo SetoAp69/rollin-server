@@ -61,11 +61,11 @@ fun String.illegalStatusExeptions(): CommonException {
 }
 
 fun String.uploadFileException(): CommonException {
-    return CommonException("failed to upload $this file ")
+    return CommonException("failed to upload $this file")
 }
 
 fun String.deleteFileException(): CommonException {
-    return CommonException("failed to delete $this file ")
+    return CommonException("failed to delete $this file")
 }
 
 fun String.toCensoredEmail(): String {

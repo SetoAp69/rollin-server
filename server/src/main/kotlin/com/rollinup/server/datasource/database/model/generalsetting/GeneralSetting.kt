@@ -16,7 +16,7 @@ data class GeneralSetting(
     val rad: Double,
     val long: Double,
     val lat: Double,
-    val updatedAt: LocalTime,
+    val updatedAt: OffsetDateTime,
     val modifiedBy: String,
     val modifiedByName: String,
 ) {

@@ -33,13 +33,23 @@ import com.rollinup.server.util.successCreateResponse
 import com.rollinup.server.util.successEditResponse
 import com.rollinup.server.util.successGettingResponse
 import com.rollinup.server.util.uploadFileException
-import io.ktor.http.content.MultiPartData
-import io.ktor.http.content.PartData
-import io.ktor.http.content.forEachPart
 import java.io.File
 import java.time.LocalTime
 import java.time.OffsetDateTime
 
+/**
+ * Service implementation for handling attendance-related operations.
+ * This class is responsible for managing student attendance, including creating, retrieving, and updating attendance records.
+ * It interacts with repositories, caches, and other services to perform its tasks.
+ *
+ * @property attendanceRepository The repository for accessing attendance data.
+ * @property permitRepository The repository for accessing permit data.
+ * @property fileService The service for handling file uploads.
+ * @property mapper The mapper for converting data models to response models.
+ * @property transactionManager The manager for handling database transactions.
+ * @property generalSetting The cache for general application settings.
+ * @property holidayCache The cache for holiday information.
+ */
 class AttendanceServiceImpl(
     private val attendanceRepository: AttendanceRepository,
     private val permitRepository: PermitRepository,
@@ -49,40 +59,52 @@ class AttendanceServiceImpl(
     private val generalSetting: GeneralSettingCache,
     private val holidayCache: HolidayCache,
 ) : AttendanceService {
+    /**
+     * Retrieves attendance data by its unique ID.
+     *
+     * @param id The unique ID of the attendance record.
+     * @return A [Response] containing the [GetAttendanceByIdResponse] if found.
+     * @throws CommonException if the attendance record is not found.
+     */
     override suspend fun getAttendanceById(id: String): Response<GetAttendanceByIdResponse> =
         transactionManager.suspendTransaction {
             val result = attendanceRepository.getAttendanceById(id)
-                ?: throw "Attendance".notFoundException()
+                ?: throw "attendance".notFoundException()
 
             return@suspendTransaction Response(
                 status = 200,
-                message = "Attendance".successGettingResponse(),
+                message = "attendance".successGettingResponse(),
                 data = mapper.mapAttendanceById(result)
             )
         }
 
+    /**
+     * Creates a new attendance record for a student.
+     * This method handles multipart form data containing attendance information and an attachment.
+     * It performs validation for location, time, and existing records before creating the new attendance data.
+     *
+     * @param multiPartData The multipart data containing the attendance request and attachment.
+     * @param userId The user ID of the student.
+     * @param role The role of the user creating the attendance.
+     * @return A [Response] indicating the result of the operation.
+     * @throws UnauthorizedTokenException if the student user ID is blank.
+     * @throws CommonException if the request is invalid or an error occurs during processing.
+     * @throws IllegalLocationException if the student's location is outside the allowed radius.
+     */
     override suspend fun createAttendanceData(
-        multiPartData: MultiPartData,
-        studentUserId: String,
+        userId: String,
         role: Role,
+        formHashMap: HashMap<String, String>,
+        fileHashMap: HashMap<String, File>,
     ): Response<Unit> {
 
-        val formHash: HashMap<String, String> = hashMapOf()
-        val fileHash: HashMap<String, File> = hashMapOf()
+        val formHash: HashMap<String, String> = formHashMap
+        val fileHash: HashMap<String, File> = fileHashMap
 
-        studentUserId.ifBlank { throw UnauthorizedTokenException() }
-
-        multiPartData.forEachPart { partData ->
-            when (partData) {
-                is PartData.FormItem -> Utils.fetchFormData(partData, formHash)
-
-                is PartData.FileItem -> Utils.fetchFileData(partData, fileHash)
-
-                else -> {}
-            }
-        }
+        userId.ifBlank { throw UnauthorizedTokenException() }
 
         fileHash.ifEmpty { throw "attendance attachment".uploadFileException() }
+        formHash.ifEmpty { throw CommonException(Message.INVALID_REQUEST_BODY) }
 
         val checkInAt = OffsetDateTime.now(Utils.getOffset())
 
@@ -92,9 +114,12 @@ class AttendanceServiceImpl(
         formHash["checkedInAt"] = checkInAt.toInstant().toEpochMilli().toString()
         formHash["status"] = getAttendanceStatus(checkInAt.toOffsetTime().toLocalTime()).value
 
+        val file = fileHash["attachment"]
+            ?: throw "attendance attachment".uploadFileException()
+
         val body = CreateAttendanceBody.fromHashMap(formHash)
 
-        if (role == Role.STUDENT && studentUserId != body.studentUserId) {
+        if (role == Role.STUDENT && userId != body.studentUserId) {
             throw IllegalArgumentException("studentId")
         }
 
@@ -118,14 +143,11 @@ class AttendanceServiceImpl(
             )
 
             if (attendance.isNotEmpty())
-                throw "attendance data".isExistException()
+                throw "attendance".isExistException()
 
         }
 
-        val file = fileHash["attachment"]
-            ?: throw "attendance attachment".uploadFileException()
         val filePath = Utils.getUploadDir(Constant.ATTENDANCE_FILE_PATH, file.name)
-
         val upload = fileService.uploadFile(filePath, file)
 
         transactionManager.suspendTransaction {
@@ -134,19 +156,26 @@ class AttendanceServiceImpl(
             )
             return@suspendTransaction Response(
                 status = 201,
-                message = "Attendance".successCreateResponse(),
+                message = "attendance".successCreateResponse(),
                 data = null
             )
         }
 
         return Response(
             status = 201,
-            message = "Attendance".successCreateResponse(),
+            message = "attendance".successCreateResponse(),
             data = null
         )
 
     }
 
+    /**
+     * Retrieves a list of attendance records for a specific student based on query parameters.
+     *
+     * @param queryParams The query parameters for filtering the attendance list (e.g., date range).
+     * @param studentId The ID of the student.
+     * @return A [Response] containing the [GetAttendanceByStudentListResponse].
+     */
     override suspend fun getAttendanceListByStudent(
         queryParams: GetAttendanceByStudentQueryParams,
         studentId: String,
@@ -170,18 +199,29 @@ class AttendanceServiceImpl(
 
         return@suspendTransaction Response(
             status = 200,
-            message = "Attendance".successGettingResponse(),
+            message = "attendance".successGettingResponse(),
             data = result
         )
 
     }
 
+    /**
+     * Retrieves a list of attendance records for a specific class based on query parameters.
+     *
+     * @param queryParams The query parameters for filtering the attendance list.
+     * @param classKey The key of the class.
+     * @return A [Response] containing the [GetAttendanceByClassListResponse].
+     */
     override suspend fun getAttendanceListByClass(
         queryParams: GetAttendanceByClassQueryParams,
         classKey: Int,
     ): Response<GetAttendanceByClassListResponse> = transactionManager.suspendTransaction {
 
-        val summary = attendanceRepository.getSummary()
+        val dateRange = queryParams.date?.let {
+            listOf(it, it)
+        }
+
+        val summary = attendanceRepository.getSummary(classKey = classKey, dateRange = dateRange)
 
         val attendanceList = attendanceRepository.getAttendanceListByClass(
             queryParams = queryParams,
@@ -196,27 +236,31 @@ class AttendanceServiceImpl(
 
         return@suspendTransaction Response(
             status = 200,
-            message = "Attendance".successGettingResponse(),
+            message = "attendance".successGettingResponse(),
             data = result
         )
 
     }
 
+    /**
+     * Updates an existing attendance record.
+     * The update behavior depends on the new status provided in the multipart data.
+     *
+     * @param id The ID of the attendance record to update.
+     * @param editBy The ID of the user performing the update.
+     * @param multiPartData The multipart data containing the updated information.
+     * @return A [Response] indicating the result of the operation.
+     * @throws CommonException if the request is invalid.
+     */
     override suspend fun updateAttendance(
         id: String,
         editBy: String,
-        multiPartData: MultiPartData,
+        formHashMap: HashMap<String, String>,
+        fileHashMap: HashMap<String, File>,
     ): Response<Unit> {
-        val formHash: HashMap<String, String> = hashMapOf()
-        val fileHash: HashMap<String, File> = hashMapOf()
+        val formHash: HashMap<String, String> = formHashMap
+        val fileHash: HashMap<String, File> = fileHashMap
 
-        multiPartData.forEachPart { partData ->
-            when (partData) {
-                is PartData.FormItem -> Utils.fetchFormData(partData, formHash)
-                is PartData.FileItem -> Utils.fetchFileData(partData, fileHash)
-                else -> {}
-            }
-        }
 
         val type = formHash["status"]?.let {
             AttendanceStatus.fromValue(it)
@@ -246,6 +290,12 @@ class AttendanceServiceImpl(
     }
 
 
+    /**
+     * Handles the update of an attendance record to 'CHECKED_IN' or 'LATE'.
+     *
+     * @param id The ID of the attendance record.
+     * @param formHash The hash map containing form data from the request.
+     */
     private suspend fun handleUpdateCheckIn(
         id: String,
         formHash: HashMap<String, String>,
@@ -257,6 +307,16 @@ class AttendanceServiceImpl(
         }
     }
 
+    /**
+     * Handles the update of an attendance record that requires a permit (e.g., 'ABSENT', 'EXCUSED').
+     * This involves creating a new permit and associating it with the attendance.
+     *
+     * @param id The ID of the attendance record.
+     * @param type The type of permit to create.
+     * @param formHash The hash map containing form data from the request.
+     * @param fileHash The hash map containing file data from the request.
+     * @throws CommonException if the permit attachment is missing or student ID is not found.
+     */
     private suspend fun handleUpdateWithPermit(
         id: String,
         type: PermitType,
@@ -312,6 +372,11 @@ class AttendanceServiceImpl(
 
     }
 
+    /**
+     * Handles the update of an attendance record to 'ALPHA' by deleting the record.
+     *
+     * @param id The ID of the attendance record to delete.
+     */
     private suspend fun handleUpdateAlpha(id: String) {
         transactionManager.suspendTransaction {
             attendanceRepository.deleteAttendanceData(listOf(id))
@@ -319,6 +384,13 @@ class AttendanceServiceImpl(
     }
 
 
+    /**
+     * Determines the attendance status based on the check-in time.
+     *
+     * @param checkInTime The time of check-in.
+     * @return The calculated [AttendanceStatus].
+     * @throws CommonException if the check-in time is outside the allowed period.
+     */
     private fun getAttendanceStatus(
         checkInTime: LocalTime,
     ): AttendanceStatus {

@@ -7,18 +7,34 @@ import com.rollinup.server.model.response.Response
 import com.rollinup.server.model.response.attendance.GetAttendanceByClassListResponse
 import com.rollinup.server.model.response.attendance.GetAttendanceByIdResponse
 import com.rollinup.server.model.response.attendance.GetAttendanceByStudentListResponse
-import io.ktor.http.content.MultiPartData
+import java.io.File
 
 interface AttendanceService {
 //    suspend fun getAttendance(queryParams: AttendanceQueryParams): Response<GetAttendanceListResponse>
 
     suspend fun getAttendanceById(id: String): Response<GetAttendanceByIdResponse>
 
-    suspend fun createAttendanceData(multiPartData: MultiPartData, studentUserId: String,role: Role): Response<Unit>
+    suspend fun createAttendanceData(
+        userId: String,
+        role: Role,
+        formHashMap: HashMap<String, String>,
+        fileHashMap: HashMap<String, File>,
+    ): Response<Unit>
 
-    suspend fun getAttendanceListByStudent(queryParams: GetAttendanceByStudentQueryParams, studentId:String):Response<GetAttendanceByStudentListResponse>
+    suspend fun getAttendanceListByStudent(
+        queryParams: GetAttendanceByStudentQueryParams,
+        studentId: String,
+    ): Response<GetAttendanceByStudentListResponse>
 
-    suspend fun getAttendanceListByClass(queryParams: GetAttendanceByClassQueryParams, classKey:Int): Response<GetAttendanceByClassListResponse>
+    suspend fun getAttendanceListByClass(
+        queryParams: GetAttendanceByClassQueryParams,
+        classKey: Int,
+    ): Response<GetAttendanceByClassListResponse>
 
-    suspend fun updateAttendance(id:String, editBy:String, multiPartData: MultiPartData):Response<Unit>
+    suspend fun updateAttendance(
+        id: String,
+        editBy: String,
+        formHashMap: HashMap<String, String>,
+        fileHashMap: HashMap<String, File>,
+    ): Response<Unit>
 }

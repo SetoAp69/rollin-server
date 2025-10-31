@@ -28,4 +28,5 @@ object Message {
     const val INVALID_FILE_FORMAT = "Invalid file format"
     const val DEVICE_ALREADY_REGISTERED = "This account already have a registered device id"
     const val INVALID_CACHE = "There's a problem on getting cache data"
+    const val INVALID_DURATIONS = "Invalid durations"
 }

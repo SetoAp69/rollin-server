@@ -6,8 +6,11 @@ import com.rollinup.server.model.Role
 import com.rollinup.server.model.request.attendance.GetAttendanceByClassQueryParams
 import com.rollinup.server.model.request.attendance.GetAttendanceByStudentQueryParams
 import com.rollinup.server.service.attendance.AttendanceService
+import com.rollinup.server.util.Utils
 import com.rollinup.server.util.Utils.decodeJsonList
 import com.rollinup.server.util.withClaim
+import io.ktor.http.content.PartData
+import io.ktor.http.content.forEachPart
 import io.ktor.server.auth.authenticate
 import io.ktor.server.request.receiveMultipart
 import io.ktor.server.response.respond
@@ -16,6 +19,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import org.koin.ktor.ext.inject
+import java.io.File
 
 fun Route.attendanceRoute() {
     val attendanceService by inject<AttendanceService>()
@@ -95,13 +99,27 @@ fun Route.attendanceRoute() {
         withRole(Role.ADMIN, Role.TEACHER, Role.STUDENT) {
             post("/check-in") {
                 withClaim { claim ->
-                    val studentUserId = claim.id
+                    val userId = claim.id
                     val multiPart = call.receiveMultipart()
+                    val formHashMap: HashMap<String, String> = hashMapOf()
+                    val fileHashMap: HashMap<String, File> = hashMapOf()
+
+                    multiPart.forEachPart { partData ->
+                        when (partData) {
+                            is PartData.FormItem -> Utils.fetchFormData(partData, formHashMap)
+
+                            is PartData.FileItem -> Utils.fetchFileData(partData, fileHashMap)
+
+                            else -> {}
+                        }
+                        partData.dispose()
+                    }
 
                     val response = attendanceService.createAttendanceData(
-                        multiPartData = multiPart,
-                        studentUserId = studentUserId,
-                        role = claim.role
+                        userId = userId,
+                        role = claim.role,
+                        formHashMap = formHashMap,
+                        fileHashMap = fileHashMap,
                     )
                     call.respond(response.statusCode, response.message)
                 }
@@ -120,11 +138,23 @@ fun Route.attendanceRoute() {
                     } ?: throw IllegalPathParameterException("id")
 
                     val multiPart = call.receiveMultipart()
+                    val formHashMap: HashMap<String, String> = hashMapOf()
+                    val fileHashMap: HashMap<String, File> = hashMapOf()
+
+                    multiPart.forEachPart { partData ->
+                        when (partData) {
+                            is PartData.FormItem -> Utils.fetchFormData(partData, formHashMap)
+                            is PartData.FileItem -> Utils.fetchFileData(partData, fileHashMap)
+                            else -> {}
+                        }
+                        partData.dispose()
+                    }
 
                     val response = attendanceService.updateAttendance(
                         id = id,
                         editBy = claim.id,
-                        multiPartData = multiPart
+                        formHashMap = formHashMap,
+                        fileHashMap = fileHashMap,
                     )
                     call.respond(status = response.statusCode, message = response.message)
                 }

@@ -6,7 +6,7 @@ import com.rollinup.server.model.response.Response
 import com.rollinup.server.model.response.permit.GetPermitByIdResponse
 import com.rollinup.server.model.response.permit.GetPermitListByClassResponse
 import com.rollinup.server.model.response.permit.GetPermitListByStudentResponse
-import io.ktor.http.content.MultiPartData
+import java.io.File
 
 interface PermitService {
     suspend fun getPermitByStudent(
@@ -23,9 +23,15 @@ interface PermitService {
 
     suspend fun doApproval(approverId: String, body: PermitApprovalBody): Response<Unit>
 
-    suspend fun createPermit(multiPart: MultiPartData): Response<Unit>
+    suspend fun createPermit(
+        formHashMap: HashMap<String, String>,
+        fileHashMap: HashMap<String, File>,
+    ): Response<Unit>
 
-    suspend fun editPermit(id: String, multiPart: MultiPartData): Response<Unit>
+    suspend fun editPermit(
+        id: String, formHashMap: HashMap<String, String>,
+        fileHashMap: HashMap<String, File>,
+    ): Response<Unit>
 
     suspend fun cancelPermit(id: List<String>): Response<Unit>
 

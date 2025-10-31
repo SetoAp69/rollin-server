@@ -252,8 +252,7 @@ class UserServiceImpl(
 
         return@suspendTransaction Response(
             status = 201,
-            message = "user device".successEditResponse(),
-            data = Unit
+            message = "user device".successEditResponse()
         )
     }
 }

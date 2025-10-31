@@ -75,6 +75,7 @@ class PermitMapper {
         },
         startTime = data.permitStart,
         endTime = data.permitEnd,
+        attachment = data.attachment,
         note = data.note,
         reason = data.reason,
         createdAt = data.createdAt,

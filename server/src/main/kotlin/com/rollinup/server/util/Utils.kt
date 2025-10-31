@@ -100,8 +100,9 @@ object Utils {
     }
 
     fun getUploadDir(path: String, fileName: String): String {
-        val date = LocalDate
-            .ofInstant(Instant.now(), getOffset())
+        val date = OffsetDateTime
+            .now(getOffset())
+            .toLocalDate()
             .toString()
             .replace("-", "")
         return "${System.getenv("UPLOAD_DIR")}/$path/$date/$fileName"
@@ -202,9 +203,8 @@ object Utils {
     }
 
     fun String.toLocalTime(): LocalTime {
-        return Instant.parse(this).let {
-            LocalTime.ofInstant(it, getOffset())
-        }
+        return OffsetDateTime.parse(this).toInstant()
+            .let { LocalTime.ofInstant(it, getOffset()) }
     }
 
     fun getContentType(extension: String): ContentType {

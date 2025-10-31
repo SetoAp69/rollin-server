@@ -17,6 +17,8 @@ data class GetPermitByIdResponse(
     val startTime: String = "",
     @SerialName("endTime")
     val endTime: String = "",
+    @SerialName("attachment")
+    val attachment:String = "",
     @SerialName("note")
     val note: String? = null,
     @SerialName("reason")

@@ -10,6 +10,8 @@ import com.rollinup.server.service.permit.PermitService
 import com.rollinup.server.util.Utils
 import com.rollinup.server.util.withClaim
 import io.ktor.http.content.MultiPartData
+import io.ktor.http.content.PartData
+import io.ktor.http.content.forEachPart
 import io.ktor.server.auth.authenticate
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
@@ -18,6 +20,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import org.koin.ktor.ext.inject
+import java.io.File
 
 fun Route.permitRoute() {
     val service by inject<PermitService>()
@@ -111,7 +114,22 @@ fun Route.permitRoute() {
         withRole(Role.TEACHER, Role.ADMIN, Role.STUDENT) {
             post {
                 val multiPart = call.receive<MultiPartData>()
-                val response = service.createPermit(multiPart = multiPart)
+                val fileHashMap: HashMap<String, File> = hashMapOf()
+                val formHashMap: HashMap<String, String> = hashMapOf()
+
+                multiPart.forEachPart { partData ->
+                    when (partData) {
+                        is PartData.FormItem -> Utils.fetchFormData(partData, formHashMap)
+                        is PartData.FileItem -> Utils.fetchFileData(partData, fileHashMap)
+                        else -> {}
+                    }
+                    partData.dispose()
+                }
+
+                val response = service.createPermit(
+                    formHashMap = formHashMap,
+                    fileHashMap = fileHashMap
+                )
                 call.respond(status = response.statusCode, message = response)
             }
         }
@@ -125,7 +143,23 @@ fun Route.permitRoute() {
                 } ?: throw IllegalPathParameterException("id")
 
                 val multiPart = call.receive<MultiPartData>()
-                val response = service.editPermit(id = id, multiPart = multiPart)
+                val fileHashMap: HashMap<String, File> = hashMapOf()
+                val formHashMap: HashMap<String, String> = hashMapOf()
+
+                multiPart.forEachPart { partData ->
+                    when (partData) {
+                        is PartData.FormItem -> Utils.fetchFormData(partData, formHashMap)
+                        is PartData.FileItem -> Utils.fetchFileData(partData, fileHashMap)
+                        else -> {}
+                    }
+                    partData.dispose()
+                }
+
+                val response = service.editPermit(
+                    id = id,
+                    formHashMap = formHashMap,
+                    fileHashMap = fileHashMap,
+                )
                 call.respond(status = response.statusCode, message = response)
             }
         }
