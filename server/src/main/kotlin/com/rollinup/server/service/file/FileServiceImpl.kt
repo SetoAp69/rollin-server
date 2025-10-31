@@ -4,8 +4,10 @@ import com.google.cloud.storage.BlobId
 import com.google.cloud.storage.BlobInfo
 import com.google.cloud.storage.Storage
 import com.google.cloud.storage.StorageException
-import com.rollinup.server.CommonException
 import com.rollinup.server.util.Utils
+import com.rollinup.server.util.deleteFileException
+import com.rollinup.server.util.getFileException
+import com.rollinup.server.util.uploadFileException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -13,7 +15,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.concurrent.TimeUnit
 
-class   FileServiceImpl(
+class FileServiceImpl(
     private val googleStorage: GoogleStorage,
 ) : FileService {
 
@@ -36,8 +38,7 @@ class   FileServiceImpl(
             return@withContext fileName
 
         } catch (e: StorageException) {
-            throw CommonException("${e.message}") //for dev
-//            throw filePath.uploadFileException()  //for prod
+            throw filePath.uploadFileException()
         } finally {
             file.delete()
         }
@@ -50,8 +51,7 @@ class   FileServiceImpl(
                 storage.delete(blobId)
 
             } catch (e: StorageException) {
-                throw CommonException("${e.message}") //for dev
-//            throw filePath.uploadFileException()  //for prod
+                throw filePath.last().deleteFileException()
             }
         }
     }
@@ -64,8 +64,7 @@ class   FileServiceImpl(
             )
             return@withContext blob.readBytes()
         } catch (e: StorageException) {
-            throw CommonException("${e.message}") //for dev
-//            throw file.uploadFileException()  //for prod
+            throw file.getFileException()
         }
 
     }

@@ -29,4 +29,5 @@ object Message {
     const val DEVICE_ALREADY_REGISTERED = "This account already have a registered device id"
     const val INVALID_CACHE = "There's a problem on getting cache data"
     const val INVALID_DURATIONS = "Invalid durations"
+    const val INTERNAL_SERVER_ERROR = "Internal server error"
 }

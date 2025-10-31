@@ -68,6 +68,10 @@ fun String.deleteFileException(): CommonException {
     return CommonException("failed to delete $this file")
 }
 
+fun String.getFileException() : CommonException{
+    return CommonException("failed to get $this file")
+}
+
 fun String.toCensoredEmail(): String {
     val email = this.substringBefore("@")
     return "${email.firstOrNull() ?: "*"}*****${email.lastOrNull() ?: "*"}@***.***"
