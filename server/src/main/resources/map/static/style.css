@@ -1,0 +1,266 @@
+
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body, html {
+    height: 100%;
+    width: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+    overflow: hidden;
+}
+
+/* Map container */
+#map {
+    height: 100%;
+    width: 100%;
+}
+
+/* Search box container */
+#search-container {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+    width: 90%;
+    max-width: 400px;
+}
+
+/* Search input styling */
+#pac-input {
+    width: 100%;
+    height: 44px;
+    padding: 0 16px;
+    border-radius: 8px;
+    border: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    font-size: 15px;
+    outline: none;
+    background: white;
+    transition: box-shadow 0.2s ease;
+}
+
+#pac-input:focus {
+    box-shadow: 0 2px 12px rgba(66, 133, 244, 0.5);
+}
+
+#pac-input::placeholder {
+    color: #999;
+}
+
+/* Autocomplete dropdown styling */
+.pac-container {
+    border-radius: 8px;
+    margin-top: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    font-family: inherit;
+    z-index: 1000;
+    border-top: none;
+}
+
+.pac-item {
+    padding: 10px 12px;
+    cursor: pointer;
+    border-top: 1px solid #e6e6e6;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.pac-item:first-child {
+    border-top: none;
+}
+
+.pac-item:hover {
+    background-color: #f5f5f5;
+}
+
+.pac-item-selected,
+.pac-item-selected:hover {
+    background-color: #ebf2fe;
+}
+
+.pac-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+}
+
+.pac-item-query {
+    font-weight: 500;
+    color: #202124;
+}
+
+.pac-matched {
+    font-weight: 700;
+}
+
+/* Loading indicator */
+#loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 24px 48px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    font-size: 16px;
+    font-weight: 500;
+    z-index: 1000;
+    display: none;
+    text-align: center;
+    color: #202124;
+}
+
+#loading::after {
+    content: '';
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-left: 8px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #4285f4;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Error state */
+#loading.error {
+    background: #fdecea;
+    color: #d93025;
+    border: 1px solid #f5c6cb;
+}
+
+#loading.error::after {
+    display: none;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    #search-container {
+        width: 95%;
+        max-width: none;
+    }
+
+    #pac-input {
+        height: 40px;
+        font-size: 14px;
+    }
+
+    #loading {
+        padding: 20px 32px;
+        font-size: 14px;
+    }
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+    #search-container {
+        top: 8px;
+    }
+
+    #pac-input {
+        height: 38px;
+        font-size: 13px;
+        padding: 0 12px;
+    }
+
+    .pac-item {
+        padding: 8px 10px;
+        font-size: 13px;
+    }
+}
+
+/* Dark mode support (optional) */
+@media (prefers-color-scheme: dark) {
+    #pac-input {
+        background: #202124;
+        color: #e8eaed;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+    }
+
+    #pac-input::placeholder {
+        color: #9aa0a6;
+    }
+
+    .pac-container {
+        background: #292a2d;
+    }
+
+    .pac-item {
+        border-top-color: #3c4043;
+        color: #e8eaed;
+    }
+
+    .pac-item:hover {
+        background-color: #3c4043;
+    }
+
+    .pac-item-selected {
+        background-color: #1a73e8;
+    }
+
+    #loading {
+        background: #292a2d;
+        color: #e8eaed;
+    }
+}
+
+#mini-control {
+    position: absolute;
+    bottom: 24px;
+    left: 24px;
+    z-index: 20;
+    padding: 10px;
+}
+
+.mini-row {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+}
+
+.mini-row input {
+    width: 160px;
+    padding: 12px 16px;
+    border: none;
+    background: white;
+    border-radius: 10px;
+    font-size: 15px;
+    color: #333;
+     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.mini-row input:focus {
+    outline: 2px solid #b08dff;
+}
+
+#apply-btn {
+    background: #9b5cf9;
+    color: white;
+    border: none;
+    border-radius: 14px;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 600;
+     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+#apply-btn:hover {
+    transform: scale(1.04);
+}
+
+#apply-btn:active {
+    transform: scale(0.97);
+}

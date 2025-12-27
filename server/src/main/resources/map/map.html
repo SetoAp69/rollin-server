@@ -36,10 +36,8 @@
 
 <script th:inline="javascript">
     let GOOGLE_MAPS_CONFIG = {
-      // Replace with your actual Google Maps API key
-      apiKey: "AIzaSyDqL3C6lKjkhzZh1soKaDSVxRMWro64YJE",
+      apiKey: /*[[${config.apiKey}]]*/,
 
-      // Optional: Additional configuration
       options: {
         defaultZoom: 15,
         initialLat: /*[[${config.initialLat}]]*/,

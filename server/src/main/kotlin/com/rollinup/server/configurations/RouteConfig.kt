@@ -1,7 +1,6 @@
 package com.rollinup.server.configurations
 
 import com.rollinup.server.route.Route
-import com.rollinup.server.route.test.testRoute
 import io.ktor.server.application.Application
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
@@ -53,11 +52,6 @@ fun Application.configureRouting() {
         ) {
             Route.Dashboard.route(this)
         }
-
-        route("test") {
-            testRoute()
-        }
-
     }
 }
 

@@ -43,7 +43,7 @@ fun Route.generalSettingRoute() {
             initialLat = setting.lat,
             initialLong = setting.long,
             initialRad = setting.rad,
-            apiKey = mapApiKey
+            apiKey = mapApiKey,
         )
 
         call.respond(
