@@ -65,7 +65,8 @@ fun Application.configureStatusPage() {
                         status = HttpStatusCode.InternalServerError,
                         message = Response(
                             status = 500,
-                            message = Message.INTERNAL_SERVER_ERROR,
+//                            message = Message.INTERNAL_SERVER_ERROR,
+                            message = error.toString(),
                             data = Unit
                         )
                     )

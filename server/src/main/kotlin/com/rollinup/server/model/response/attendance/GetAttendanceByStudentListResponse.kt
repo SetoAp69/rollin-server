@@ -47,6 +47,8 @@ data class GetAttendanceByStudentListResponse(
         val createdAt: String = "",
         @SerialName("updatedAt")
         val updatedAt: String = "",
+        @SerialName("date")
+        val date:String = ""
     )
 
     @Serializable

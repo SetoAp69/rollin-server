@@ -72,6 +72,10 @@ fun String.getFileException() : CommonException{
     return CommonException("failed to get $this file")
 }
 
+fun String.missingArgumentException(): CommonException{
+    return CommonException("Missing argument $this")
+}
+
 fun String.toCensoredEmail(): String {
     val email = this.substringBefore("@")
     return "${email.firstOrNull() ?: "*"}*****${email.lastOrNull() ?: "*"}@***.***"
@@ -95,9 +99,11 @@ inline fun <T> Query.addFilter(value: T?, block: Query.(T) -> Unit) {
 
 fun Query.addOffset(limit: Int?, page: Int?) {
     if (listOf(limit, page).all { it != null && it > 0 })
-        this.offset(
-            (page!! * limit!!).toLong()
-        ).limit(
-            limit
-        )
+        apply {
+            limit(
+                limit!!
+            ).offset(
+                ((page!!-1 )* limit).toLong()
+            )
+        }
 }

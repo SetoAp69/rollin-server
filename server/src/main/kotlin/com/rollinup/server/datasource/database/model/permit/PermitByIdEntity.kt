@@ -66,6 +66,7 @@ data class PermitByIdEntity(
                     )
                 },
                 approvalNote = row.getOrNull(PermitTable.approvalNote),
+                attachment = row.getOrNull(PermitTable.attachment)?:"",
                 createdAt = row[PermitTable.createdAt].toString(),
                 updatedAt = row[PermitTable.updatedAt].toString(),
                 approvedAt = row.getOrNull(PermitTable.approvedAt)?.toString()

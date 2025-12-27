@@ -6,6 +6,8 @@ import com.rollinup.server.util.Utils
 
 data class EditPermitBody(
     val duration: List<Long>? = null,
+    val dateRange: List<String>? = null,
+    val timeRange:List<String>? = null,
     val reason: String? = null,
     val type: PermitType? = null,
     val attachment: String? = null,

@@ -16,7 +16,7 @@ class ResetPasswordRepositoryImpl() : ResetPasswordRepository {
         return ResetPasswordEntity(
             id = this[userId].toString(),
             token = this[ResetPasswordTokenTable.token],
-            expiredAt = this[ResetPasswordTokenTable.expiredAt].toString(),
+            expiredAt = this[ResetPasswordTokenTable.expiredAt],
             salt = this[ResetPasswordTokenTable.salt]
         )
     }

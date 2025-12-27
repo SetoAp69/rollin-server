@@ -2,6 +2,7 @@ package com.rollinup.server.route
 
 import com.rollinup.server.route.attendance.attendanceRoute
 import com.rollinup.server.route.auth.authRoute
+import com.rollinup.server.route.dashboard.dashboardRoute
 import com.rollinup.server.route.file.fileRoute
 import com.rollinup.server.route.generalsetting.generalSettingRoute
 import com.rollinup.server.route.holiday.holidayRoute
@@ -48,7 +49,7 @@ sealed class Route(
     )
 
     object GeneralSetting : Route(
-        path = "/general-setting",
+        path = "/global-setting",
         route = {
             generalSettingRoute()
         }
@@ -58,6 +59,13 @@ sealed class Route(
         path = "/holiday",
         route = {
             holidayRoute()
+        }
+    )
+
+    object Dashboard:Route(
+        path = "/dashboard",
+        route = {
+            dashboardRoute()
         }
     )
 

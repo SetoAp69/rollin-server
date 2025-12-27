@@ -8,5 +8,6 @@ class GeneralSettingEventBus {
 
     suspend fun emit(event: GeneralSetting) {
         events.emit(event)
+        println("Emitting event :${event}")
     }
 }

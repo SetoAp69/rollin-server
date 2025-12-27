@@ -8,6 +8,7 @@ import com.rollinup.server.model.request.permit.GetPermitQueryParams
 import com.rollinup.server.model.request.permit.PermitApprovalBody
 import com.rollinup.server.service.permit.PermitService
 import com.rollinup.server.util.Utils
+import com.rollinup.server.util.Utils.stringJsonToList
 import com.rollinup.server.util.withClaim
 import io.ktor.http.content.MultiPartData
 import io.ktor.http.content.PartData
@@ -25,7 +26,7 @@ import java.io.File
 fun Route.permitRoute() {
     val service by inject<PermitService>()
     authenticate("auth-jwt") {
-        withRole(Role.TEACHER, Role.ADMIN) {
+        withRole(Role.TEACHER, Role.ADMIN, Role.STUDENT) {
             get("/by-student/{studentId}") {
                 val queryParams = GetPermitQueryParams(
                     limit = call.queryParameters["limit"]?.toIntOrNull(),
@@ -33,12 +34,12 @@ fun Route.permitRoute() {
                     sortBy = call.queryParameters["sortBy"],
                     order = call.queryParameters["order"],
                     search = call.queryParameters["search"],
-                    listId = Utils.decodeJsonList(call.queryParameters["listId"]),
+                    listId = call.queryParameters["listId"]?.stringJsonToList(),
                     isActive = call.queryParameters["isActive"]?.toBoolean() ?: true,
-                    type = Utils.decodeJsonList(call.queryParameters["type"]),
-                    dateRange = Utils.decodeJsonList(call.queryParameters["dateRange"]),
+                    type = call.queryParameters["type"]?.stringJsonToList(),
+                    sDateRange = call.queryParameters["dateRange"]?.stringJsonToList(),
                     date = call.queryParameters["date"]?.toLong(),
-                    status = Utils.decodeJsonList(call.queryParameters["status"])
+                    status = call.queryParameters["status"]?.stringJsonToList()
                 )
 
 
@@ -64,12 +65,12 @@ fun Route.permitRoute() {
                     sortBy = call.queryParameters["sortBy"],
                     order = call.queryParameters["order"],
                     search = call.queryParameters["search"],
-                    listId = Utils.decodeJsonList(call.queryParameters["listId"]),
+                    listId = call.queryParameters["listId"]?.stringJsonToList(),
                     isActive = call.queryParameters["isActive"]?.toBoolean() ?: true,
-                    type = Utils.decodeJsonList(call.queryParameters["type"]),
-                    dateRange = Utils.decodeJsonList(call.queryParameters["dateRange"]),
+                    type = call.queryParameters["type"]?.stringJsonToList(),
+                    sDateRange = call.queryParameters["dateRange"]?.stringJsonToList(),
                     date = call.queryParameters["date"]?.toLong(),
-                    status = Utils.decodeJsonList(call.queryParameters["status"])
+                    status = call.queryParameters["status"]?.stringJsonToList()
                 )
 
                 val classKey = call.pathParameters["classKey"]?.toIntOrNull()

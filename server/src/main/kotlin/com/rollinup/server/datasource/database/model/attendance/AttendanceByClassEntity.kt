@@ -46,7 +46,7 @@ data class AttendanceByClassEntity(
                 Attendance(
                     id = row[AttendanceTable._id].toString(),
                     status = row[AttendanceTable.status],
-                    checkedInAt = row.getOrNull(AttendanceTable.checkedInAt).toString(),
+                    checkedInAt = row.getOrNull(AttendanceTable.checkedInAt)?.toString(),
                     date = row[AttendanceTable.date].toString(),
                 )
             },

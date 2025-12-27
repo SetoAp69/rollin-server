@@ -11,15 +11,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import java.io.File
+import java.security.SecureRandom
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.OffsetDateTime
-import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
+import java.time.temporal.TemporalAdjusters
 import java.util.UUID
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -47,11 +48,11 @@ object Utils {
 
 
     fun generateRandom(digit: Int): String {
-        val digit = if (digit < 5) 5 else digit
-        val random = UUID.randomUUID()
+        val random = UUID
+            .randomUUID()
             .toString()
+            .filter { it.isDigit() }
             .take(digit)
-            .replace("-", "")
 
         return random
     }
@@ -83,9 +84,8 @@ object Utils {
         )
     }
 
-    fun getLocalTime(epochMilli: Long): LocalTime {
-        return LocalTime.ofSecondOfDay(epochMilli / 1000)
-
+    fun getLocalTime(epochSecond: Long): LocalTime {
+        return LocalTime.ofSecondOfDay(epochSecond)
     }
 
     fun generateDateRange(start: LocalDate, end: LocalDate): List<LocalDate> {
@@ -98,6 +98,17 @@ object Utils {
         }
         return dates
     }
+
+//    fun generateDateRange(start: LocalDate, end: LocalDate): List<LocalDate> {
+//        val dates = mutableListOf<LocalDate>()
+//        var currentDate = start
+//
+//        while (currentDate <= end) {
+//            dates.add(currentDate)
+//            currentDate = currentDate.plusDays(1)
+//        }
+//        return dates
+//    }
 
     fun getUploadDir(path: String, fileName: String): String {
         val date = OffsetDateTime
@@ -147,7 +158,8 @@ object Utils {
                 val allowedType = listOf(
                     ContentType.Application.Pdf,
                     ContentType.Image.JPEG,
-                    ContentType.Image.PNG
+                    ContentType.Image.PNG,
+                    ContentType.Image.Any
                 )
                 if (partData.contentType !in allowedType) {
                     throw CommonException(Message.INVALID_FILE_FORMAT)
@@ -162,11 +174,8 @@ object Utils {
         }
     }
 
-    fun OffsetDateTime.isWeekend(): Boolean {
-        return this.dayOfWeek in listOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)
-    }
-
     fun LocalDate.isWeekend(): Boolean {
+        return false
         return this.dayOfWeek in listOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)
     }
 
@@ -188,7 +197,7 @@ object Utils {
         val c = 2 * atan2(sqrt(a), sqrt(1 - a))
         val finalDistance = c * earthRad
 
-        return finalDistance
+        return finalDistance * 1000
     }
 
     fun validateLocations(
@@ -220,6 +229,32 @@ object Utils {
             Instant.ofEpochMilli(this),
             offset
         )
+    }
+
+    fun getStartOfMonth(): LocalDate {
+        val now = LocalDate.now()
+        return now.with(TemporalAdjusters.firstDayOfMonth())
+    }
+
+    fun getEndOfMonth(): LocalDate {
+        val now = LocalDate.now()
+        return now.with(TemporalAdjusters.lastDayOfMonth())
+    }
+
+    inline fun <reified T> String.stringJsonToList(): List<T> {
+        return Json.decodeFromString(this)
+    }
+
+    fun generateRandomPassword(): String {
+        val secureRandom = SecureRandom()
+        val charPool =
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+
+        return buildString(12) {
+            repeat(12) {
+                append(charPool[secureRandom.nextInt(charPool.length)])
+            }
+        }
     }
 
 }

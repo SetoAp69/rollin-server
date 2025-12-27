@@ -11,6 +11,8 @@ object GeneralSettingModule {
             GeneralSettingCache()
         }
 
+        single <GeneralSettingEventBus> { GeneralSettingEventBus() }
+
         single<GeneralSettingListener> {
             GeneralSettingListener(
                 generalSettingCache = get(),
@@ -19,7 +21,6 @@ object GeneralSettingModule {
                 generalSettingEventBus = get()
             )
         }
-        single <GeneralSettingEventBus> { GeneralSettingEventBus() }
 
     }
 }

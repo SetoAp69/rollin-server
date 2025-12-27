@@ -2,6 +2,7 @@ package com.rollinup.server.di
 
 import com.rollinup.server.mapper.AttendanceMapper
 import com.rollinup.server.mapper.AuthMapper
+import com.rollinup.server.mapper.DashboardMapper
 import com.rollinup.server.mapper.GeneralSettingMapper
 import com.rollinup.server.mapper.HolidayMapper
 import com.rollinup.server.mapper.PermitMapper
@@ -22,6 +23,8 @@ object MapperModule {
         single { GeneralSettingMapper() }
 
         single { HolidayMapper() }
+
+        single { DashboardMapper() }
 
     }
 }

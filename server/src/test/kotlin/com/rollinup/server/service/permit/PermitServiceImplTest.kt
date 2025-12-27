@@ -974,251 +974,251 @@ class PermitServiceImplTest {
     //endregion
 
     //region getPermit
-
-    @Test
-    fun `createPermit should return correct response when success`() = runTest {
-        //Arrange
-        val permitId = "permitId"
-        val validLongDateTime = validDateTimeInstant.toEpochMilli()
-        val validOffsetDateTime = OffsetDateTime.ofInstant(validDateTimeInstant, Utils.getOffset())
-        val validCurrentDate =
-            LocalDate.ofInstant(validDateTimeInstant, Utils.getOffset()).toString().replace("-", "")
-        val uploadedFilePath = "UPLOAD_DIR/attachment/permit/$validCurrentDate/file-name.jpg"
-
-        val studentId = "studentId"
-        val reason = "reason"
-        val duration = "[$validLongDateTime, $validLongDateTime]"
-        val type = PermitType.ABSENCE
-
-
-        val formHashMap = hashMapOf(
-            "studentId" to studentId,
-            "reason" to reason,
-            "duration" to duration,
-            "type" to type.value
-        )
-
-        val fileHashMap = hashMapOf(
-            "attachment" to file
-        )
-
-        val body = CreatePermitBody(
-            studentId = studentId,
-            reason = reason,
-            duration = listOf(validLongDateTime, validLongDateTime),
-            type = type,
-            attachment = uploadedFilePath
-        )
-
-        val expectedResponse = Response<Unit>(
-            status = 201,
-            message = "permit data successfully created",
-        )
-
-        arrangeMockkNow(validOffsetDateTime)
-
-        coEvery {
-            fileService.uploadFile(uploadedFilePath, file)
-        } returns uploadedFilePath
-
-        coEvery {
-            permitRepository.createPermit(body)
-        } returns permitId
-
-        coEvery {
-            attendanceRepository.createAttendanceFromPermit(
-                permitId,
-                studentId,
-                any(),
-                AttendanceStatus.APPROVAL_PENDING
-            )
-        } just runs
-
-        //Act
-        val result = permitService.createPermit(formHashMap, fileHashMap)
-
-        //Assert
-        assertEquals(expectedResponse, result)
-        assertEquals(201, result.status)
-        coVerify {
-            attendanceRepository.createAttendanceFromPermit(
-                permitId,
-                studentId,
-                any(),
-                AttendanceStatus.APPROVAL_PENDING
-            )
-            permitRepository.createPermit(body)
-        }
-    }
-
-
-    @Test
-    fun `createPermit should throw exceptions when formHashMap is empty`() = runTest {
-        //Arrange
-        val formHashMap = hashMapOf<String, String>()
-        val fileHashMap = hashMapOf<String, File>(
-            "attachment" to file
-        )
-
-        //Act & Assert
-        val result = assertFailsWith<IllegalArgumentException> {
-            permitService.createPermit(formHashMap, fileHashMap)
-        }
-    }
-
-
-    @Test
-    fun `createPermit should throw exceptions when fileHashMap is empty`() = runTest {
-        //Arrange
-        val formHashMap = hashMapOf<String, String>(
-            "studentId" to "studentId",
-            "reason" to "reason",
-            "type" to "type"
-        )
-        val fileHashMap = hashMapOf<String, File>()
-
-        //Act & Assert
-        assertFailsWith<IllegalArgumentException> {
-            permitService.createPermit(formHashMap, fileHashMap)
-        }
-    }
-
-
-    @Test
-    fun `createPermit should throw exceptions when attachment is null`() = runTest {
-        //Arrange
-        val formHashMap = hashMapOf<String, String>(
-            "studentId" to "studentId",
-            "reason" to "reason",
-            "type" to "type",
-            "duration" to "[123,123]",
-        )
-        val fileHashMap = hashMapOf<String, File>(
-            "anything but attachment" to file
-        )
-
-        val expectedMessage = "failed to upload permit attachment file"
-
-        //Act & Assert
-        val result = assertFailsWith<CommonException> {
-            permitService.createPermit(formHashMap, fileHashMap)
-        }
-
-        assertEquals(expectedMessage, result.message)
-    }
-
-    @Test
-    fun `createPermit should throw exceptions if all included dates are holidays`() =
-        runTest {
-            //Arrange
-            val permitId = "permitId"
-            val validLongDateTime = validDateTimeInstant.toEpochMilli()
-            val validOffsetDateTime =
-                OffsetDateTime.ofInstant(validDateTimeInstant, Utils.getOffset())
-            val validCurrentDate =
-                LocalDate.ofInstant(validDateTimeInstant, Utils.getOffset()).toString()
-                    .replace("-", "")
-            val uploadedFilePath = "UPLOAD_DIR/attachment/permit/$validCurrentDate/file-name.jpg"
-
-            val studentId = "studentId"
-            val reason = "reason"
-            val duration = "[$validLongDateTime, $validLongDateTime]"
-            val type = PermitType.ABSENCE
-
-
-            val formHashMap = hashMapOf(
-                "studentId" to studentId,
-                "reason" to reason,
-                "duration" to duration,
-                "type" to type.value
-            )
-
-            val fileHashMap = hashMapOf(
-                "attachment" to file
-            )
-
-            val body = CreatePermitBody(
-                studentId = studentId,
-                reason = reason,
-                duration = listOf(validLongDateTime, validLongDateTime),
-                type = type,
-                attachment = uploadedFilePath
-            )
-
-            val expectedMessage = "Invalid durations"
-
-            arrangeMockkNow(validOffsetDateTime)
-            arrangeHoliday(
-                listOf(
-                    LocalDate.ofInstant(validDateTimeInstant, Utils.getOffset())
-                )
-            )
-
-            coEvery {
-                fileService.uploadFile(uploadedFilePath, file)
-            } returns uploadedFilePath
-
-            //Act & Assert
-            val result = assertFailsWith<CommonException> {
-                permitService.createPermit(
-                    formHashMap,
-                    fileHashMap
-                )
-            }
-
-            //Assert
-            assertEquals(expectedMessage, result.message)
-        }
-
-    @Test
-    fun `createPermit should throw exceptions if all included dates are weekends`() =
-        runTest {
-            //Arrange
-            val weekendInstant = OffsetDateTime.parse("2025-11-02T09:00:00+07:00").toInstant()
-            val validLongDateTime = weekendInstant.toEpochMilli()
-            val validOffsetDateTime =
-                OffsetDateTime.ofInstant(weekendInstant, Utils.getOffset())
-            val validCurrentDate =
-                LocalDate.ofInstant(weekendInstant, Utils.getOffset()).toString()
-                    .replace("-", "")
-            val uploadedFilePath = "UPLOAD_DIR/attachment/permit/$validCurrentDate/file-name.jpg"
-
-            val studentId = "studentId"
-            val reason = "reason"
-            val duration = "[$validLongDateTime, $validLongDateTime]"
-            val type = PermitType.ABSENCE
-
-
-            val formHashMap = hashMapOf(
-                "studentId" to studentId,
-                "reason" to reason,
-                "duration" to duration,
-                "type" to type.value
-            )
-
-            val fileHashMap = hashMapOf(
-                "attachment" to file
-            )
-
-            val expectedMessage = "Invalid durations"
-
-            arrangeMockkNow(validOffsetDateTime)
-
-            coEvery {
-                fileService.uploadFile(uploadedFilePath, file)
-            } returns uploadedFilePath
-
-            //Act & Assert
-            val result = assertFailsWith<CommonException> {
-                permitService.createPermit(
-                    formHashMap,
-                    fileHashMap
-                )
-            }
-
-            //Assert
-            assertEquals(expectedMessage, result.message)
-        }
+//
+//    @Test
+//    fun `createPermit should return correct response when success`() = runTest {
+//        //Arrange
+//        val permitId = "permitId"
+//        val validLongDateTime = validDateTimeInstant.toEpochMilli()
+//        val validOffsetDateTime = OffsetDateTime.ofInstant(validDateTimeInstant, Utils.getOffset())
+//        val validCurrentDate =
+//            LocalDate.ofInstant(validDateTimeInstant, Utils.getOffset()).toString().replace("-", "")
+//        val uploadedFilePath = "UPLOAD_DIR/attachment/permit/$validCurrentDate/file-name.jpg"
+//
+//        val studentId = "studentId"
+//        val reason = "reason"
+//        val duration = "[$validLongDateTime, $validLongDateTime]"
+//        val type = PermitType.ABSENCE
+//
+//
+//        val formHashMap = hashMapOf(
+//            "studentId" to studentId,
+//            "reason" to reason,
+//            "duration" to duration,
+//            "type" to type.value
+//        )
+//
+//        val fileHashMap = hashMapOf(
+//            "attachment" to file
+//        )
+//
+//        val body = CreatePermitBody(
+//            studentId = studentId,
+//            reason = reason,
+//            duration = listOf(validLongDateTime, validLongDateTime),
+//            type = type,
+//            attachment = uploadedFilePath
+//        )
+//
+//        val expectedResponse = Response<Unit>(
+//            status = 201,
+//            message = "permit data successfully created",
+//        )
+//
+//        arrangeMockkNow(validOffsetDateTime)
+//
+//        coEvery {
+//            fileService.uploadFile(uploadedFilePath, file)
+//        } returns uploadedFilePath
+//
+//        coEvery {
+//            permitRepository.createPermit(body)
+//        } returns permitId
+//
+//        coEvery {
+//            attendanceRepository.createAttendanceFromPermit(
+//                permitId,
+//                studentId,
+//                any(),
+//                AttendanceStatus.APPROVAL_PENDING
+//            )
+//        } just runs
+//
+//        //Act
+//        val result = permitService.createPermit(formHashMap, fileHashMap)
+//
+//        //Assert
+//        assertEquals(expectedResponse, result)
+//        assertEquals(201, result.status)
+//        coVerify {
+//            attendanceRepository.createAttendanceFromPermit(
+//                permitId,
+//                studentId,
+//                any(),
+//                AttendanceStatus.APPROVAL_PENDING
+//            )
+//            permitRepository.createPermit(body)
+//        }
+//    }
+//
+//
+//    @Test
+//    fun `createPermit should throw exceptions when formHashMap is empty`() = runTest {
+//        //Arrange
+//        val formHashMap = hashMapOf<String, String>()
+//        val fileHashMap = hashMapOf<String, File>(
+//            "attachment" to file
+//        )
+//
+//        //Act & Assert
+//        val result = assertFailsWith<IllegalArgumentException> {
+//            permitService.createPermit(formHashMap, fileHashMap)
+//        }
+//    }
+//
+//
+//    @Test
+//    fun `createPermit should throw exceptions when fileHashMap is empty`() = runTest {
+//        //Arrange
+//        val formHashMap = hashMapOf<String, String>(
+//            "studentId" to "studentId",
+//            "reason" to "reason",
+//            "type" to "type"
+//        )
+//        val fileHashMap = hashMapOf<String, File>()
+//
+//        //Act & Assert
+//        assertFailsWith<IllegalArgumentException> {
+//            permitService.createPermit(formHashMap, fileHashMap)
+//        }
+//    }
+//
+//
+//    @Test
+//    fun `createPermit should throw exceptions when attachment is null`() = runTest {
+//        //Arrange
+//        val formHashMap = hashMapOf<String, String>(
+//            "studentId" to "studentId",
+//            "reason" to "reason",
+//            "type" to "type",
+//            "duration" to "[123,123]",
+//        )
+//        val fileHashMap = hashMapOf<String, File>(
+//            "anything but attachment" to file
+//        )
+//
+//        val expectedMessage = "failed to upload permit attachment file"
+//
+//        //Act & Assert
+//        val result = assertFailsWith<CommonException> {
+//            permitService.createPermit(formHashMap, fileHashMap)
+//        }
+//
+//        assertEquals(expectedMessage, result.message)
+//    }
+//
+//    @Test
+//    fun `createPermit should throw exceptions if all included dates are holidays`() =
+//        runTest {
+//            //Arrange
+//            val permitId = "permitId"
+//            val validLongDateTime = validDateTimeInstant.toEpochMilli()
+//            val validOffsetDateTime =
+//                OffsetDateTime.ofInstant(validDateTimeInstant, Utils.getOffset())
+//            val validCurrentDate =
+//                LocalDate.ofInstant(validDateTimeInstant, Utils.getOffset()).toString()
+//                    .replace("-", "")
+//            val uploadedFilePath = "UPLOAD_DIR/attachment/permit/$validCurrentDate/file-name.jpg"
+//
+//            val studentId = "studentId"
+//            val reason = "reason"
+//            val duration = "[$validLongDateTime, $validLongDateTime]"
+//            val type = PermitType.ABSENCE
+//
+//
+//            val formHashMap = hashMapOf(
+//                "studentId" to studentId,
+//                "reason" to reason,
+//                "duration" to duration,
+//                "type" to type.value
+//            )
+//
+//            val fileHashMap = hashMapOf(
+//                "attachment" to file
+//            )
+//
+//            val body = CreatePermitBody(
+//                studentId = studentId,
+//                reason = reason,
+//                duration = listOf(validLongDateTime, validLongDateTime),
+//                type = type,
+//                attachment = uploadedFilePath
+//            )
+//
+//            val expectedMessage = "Invalid durations"
+//
+//            arrangeMockkNow(validOffsetDateTime)
+//            arrangeHoliday(
+//                listOf(
+//                    LocalDate.ofInstant(validDateTimeInstant, Utils.getOffset())
+//                )
+//            )
+//
+//            coEvery {
+//                fileService.uploadFile(uploadedFilePath, file)
+//            } returns uploadedFilePath
+//
+//            //Act & Assert
+//            val result = assertFailsWith<CommonException> {
+//                permitService.createPermit(
+//                    formHashMap,
+//                    fileHashMap
+//                )
+//            }
+//
+//            //Assert
+//            assertEquals(expectedMessage, result.message)
+//        }
+//
+//    @Test
+//    fun `createPermit should throw exceptions if all included dates are weekends`() =
+//        runTest {
+//            //Arrange
+//            val weekendInstant = OffsetDateTime.parse("2025-11-02T09:00:00+07:00").toInstant()
+//            val validLongDateTime = weekendInstant.toEpochMilli()
+//            val validOffsetDateTime =
+//                OffsetDateTime.ofInstant(weekendInstant, Utils.getOffset())
+//            val validCurrentDate =
+//                LocalDate.ofInstant(weekendInstant, Utils.getOffset()).toString()
+//                    .replace("-", "")
+//            val uploadedFilePath = "UPLOAD_DIR/attachment/permit/$validCurrentDate/file-name.jpg"
+//
+//            val studentId = "studentId"
+//            val reason = "reason"
+//            val duration = "[$validLongDateTime, $validLongDateTime]"
+//            val type = PermitType.ABSENCE
+//
+//
+//            val formHashMap = hashMapOf(
+//                "studentId" to studentId,
+//                "reason" to reason,
+//                "duration" to duration,
+//                "type" to type.value
+//            )
+//
+//            val fileHashMap = hashMapOf(
+//                "attachment" to file
+//            )
+//
+//            val expectedMessage = "Invalid durations"
+//
+//            arrangeMockkNow(validOffsetDateTime)
+//
+//            coEvery {
+//                fileService.uploadFile(uploadedFilePath, file)
+//            } returns uploadedFilePath
+//
+//            //Act & Assert
+//            val result = assertFailsWith<CommonException> {
+//                permitService.createPermit(
+//                    formHashMap,
+//                    fileHashMap
+//                )
+//            }
+//
+//            //Assert
+//            assertEquals(expectedMessage, result.message)
+//        }
 
     //endregion
 

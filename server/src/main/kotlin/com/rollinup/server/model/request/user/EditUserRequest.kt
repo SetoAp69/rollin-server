@@ -1,26 +1,31 @@
 package com.rollinup.server.model.request.user
 
 import com.rollinup.server.util.Utils.isEmail
+import com.rollinup.server.util.Utils.toLocalDate
 import io.ktor.server.plugins.requestvalidation.ValidationResult
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class EditUserRequest(
-    @SerialName("userName")
+    @SerialName("username")
     val userName: String? = null,
-    @SerialName("firstName")
+    @SerialName("firstname")
     val firstName: String? = null,
-    @SerialName("lastName")
+    @SerialName("lastname")
     val lastName: String? = null,
     @SerialName("email")
     val email: String? = null,
     @SerialName("role")
     val role: String? = null,
+    @SerialName("studentId")
+    val studentId: String? = null,
     @SerialName("address")
     val address: String? = null,
-    @SerialName("assignedClass")
-    val assignedClass: String? = null,
+    @SerialName("class")
+    val classX: String? = null,
+    @SerialName("birthday")
+    val birthDay: Long? = null,
     @SerialName("phoneNumber")
     val phoneNumber: String? = null,
     @SerialName("gender")
@@ -29,6 +34,9 @@ data class EditUserRequest(
     @SerialName("deviceId")
     val deviceId: String? = null,
 ) {
+    val birthdayDate
+        get() = birthDay?.toLocalDate()
+
     private object ValidationMessages {
         // Updated to be more granular based on the user's new checks
         const val USERNAME_BLANK = "Username cannot be empty."
@@ -50,8 +58,8 @@ data class EditUserRequest(
             lastName?.isBlank()
                 ?: false -> ValidationResult.Invalid(ValidationMessages.LAST_NAME_BLANK)
 
-            email?.isEmail()
-                ?: false -> ValidationResult.Invalid(ValidationMessages.INVALID_EMAIL_FORMAT)
+            email?.isEmail() == false
+                 -> ValidationResult.Invalid(ValidationMessages.INVALID_EMAIL_FORMAT)
 
             role?.isBlank() ?: false -> ValidationResult.Invalid(ValidationMessages.ROLE_BLANK)
             deviceId?.isBlank()

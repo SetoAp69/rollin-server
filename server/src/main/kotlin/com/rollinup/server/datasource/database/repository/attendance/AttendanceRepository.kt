@@ -5,6 +5,7 @@ import com.rollinup.server.datasource.database.model.attendance.AttendanceByClas
 import com.rollinup.server.datasource.database.model.attendance.AttendanceByStudentEntity
 import com.rollinup.server.datasource.database.model.attendance.AttendanceEntity
 import com.rollinup.server.datasource.database.model.attendance.AttendanceSummaryEntity
+import com.rollinup.server.datasource.database.model.attendance.ExportAttendanceDataEntity
 import com.rollinup.server.model.request.attendance.CreateAttendanceBody
 import com.rollinup.server.model.request.attendance.EditAttendanceBody
 import com.rollinup.server.model.request.attendance.GetAttendanceByClassQueryParams
@@ -49,4 +50,6 @@ interface AttendanceRepository {
     )
 
     fun getAttendanceListByPermit(listId: List<String>): List<AttendanceEntity>
+
+    fun getExportAttendanceData(classKey:Int, dateRange:List<LocalDate>):List<ExportAttendanceDataEntity>
 }

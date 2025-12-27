@@ -2,19 +2,23 @@ package com.rollinup.server.route.auth
 
 import com.rollinup.server.model.request.auth.LoginRequest
 import com.rollinup.server.model.request.user.RefreshTokenRequest
-import com.rollinup.server.model.response.Response
+import com.rollinup.server.model.request.user.UpdatePasswordAndDeviceRequest
 import com.rollinup.server.service.auth.AuthService
-import com.rollinup.server.util.Message
+import com.rollinup.server.service.user.UserService
+import com.rollinup.server.util.withClaim
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.auth.authenticate
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
+import io.ktor.server.routing.patch
 import io.ktor.server.routing.post
 import org.koin.ktor.ext.inject
 
 fun Route.authRoute() {
     val authService by inject<AuthService>()
+    val userService by inject<UserService>()
 
     post("/login") {
         val request = call.receive<LoginRequest>()
@@ -38,15 +42,15 @@ fun Route.authRoute() {
 
     authenticate("auth-jwt") {
         get("/login") {
-            val response = Response<String>(
-                status = 200,
-                message = Message.LOGIN_SUCCESS,
-            )
+            withClaim { claim ->
+                val id = claim.id
+                val response = authService.loginJWT(id)
 
-            call.respond(
-                status = response.statusCode,
-                message = response.message
-            )
+                call.respond(
+                    status = response.statusCode,
+                    message = response
+                )
+            }
         }
     }
 }

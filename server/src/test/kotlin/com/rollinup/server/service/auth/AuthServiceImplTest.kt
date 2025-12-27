@@ -4,8 +4,10 @@ import com.rollinup.server.CommonException
 import com.rollinup.server.Constant
 import com.rollinup.server.MockkEnvironment
 import com.rollinup.server.datasource.database.model.user.UserEntity
+import com.rollinup.server.datasource.database.model.verification.VerificationTokenEntity
 import com.rollinup.server.datasource.database.repository.refreshtoken.RefreshTokenRepository
 import com.rollinup.server.datasource.database.repository.user.UserRepository
+import com.rollinup.server.datasource.database.repository.verification.VerificationTokenRepository
 import com.rollinup.server.mapper.AuthMapper
 import com.rollinup.server.mockkEnvironment
 import com.rollinup.server.model.Role
@@ -14,6 +16,7 @@ import com.rollinup.server.model.response.Response
 import com.rollinup.server.model.response.auth.LoginResponse
 import com.rollinup.server.model.response.auth.RefreshTokenResponse
 import com.rollinup.server.model.response.user.UserDTO
+import com.rollinup.server.service.email.EmailService
 import com.rollinup.server.service.jwt.TokenClaim
 import com.rollinup.server.service.jwt.TokenConfig
 import com.rollinup.server.service.jwt.TokenService
@@ -57,6 +60,12 @@ class AuthServiceImplTest {
     @MockK
     private var transactionManager: TransactionManager = mockk()
 
+    @MockK
+    private var emailService : EmailService = mockk()
+
+    @MockK
+    private var verificationTokenRepository: VerificationTokenRepository = mockk()
+
     private var authMapper: AuthMapper = AuthMapper()
 
     private val envMock = MockkEnvironment()
@@ -81,6 +90,15 @@ class AuthServiceImplTest {
     ) {
         coEvery {
             userRepository.getUserByEmailOrUsername(username)
+        } returns result
+    }
+
+    private fun arrangeGetVerificationToken(
+        id:String,
+        result: VerificationTokenEntity?
+    ){
+        coEvery {
+            verificationTokenRepository.getTokenByUser(id)
         } returns result
     }
 
@@ -150,7 +168,9 @@ class AuthServiceImplTest {
             userRepository = userRepository,
             refreshTokenRepository = refreshTokenRepository,
             authMapper = authMapper,
-            transactionManager = transactionManager
+            transactionManager = transactionManager,
+            emailService = emailService,
+            verificationTokenRepository = verificationTokenRepository ,
         )
 
         coEvery {
@@ -185,10 +205,14 @@ class AuthServiceImplTest {
             email = "email",
             firstName = "firstName",
             lastName = "lastName",
-            role = Role.STUDENT,
+            role = UserEntity.Role(
+                id = "id",
+                key = 2,
+                name = "student"
+            ),
             gender = "F",
             password = "hashedPassword",
-            salt = "salt"
+            salt = "salt",
         )
 
         val expectedUserDTO = UserDTO(
@@ -198,7 +222,8 @@ class AuthServiceImplTest {
             firstName = "firstName",
             lastName = "lastName",
             role = "student",
-            gender = "F"
+            gender = "F",
+            classX = ""
         )
         val expectedAccessToken = "AccessToken"
         val expectedRefreshToken = "RefreshToken"
@@ -214,6 +239,7 @@ class AuthServiceImplTest {
             message = Message.LOGIN_SUCCESS,
             data = expectedLoginResponse
         )
+
         arrangeUserRepositoryGetUserByEmailOrUserName(
             username = loginRequest.username,
             result = mockkUserEntity
@@ -227,6 +253,8 @@ class AuthServiceImplTest {
             ),
             result = true
         )
+
+        arrangeGetVerificationToken(mockkUserEntity.id, null)
 
         arrangeJWTServiceGenerateToken(
             config = Config.getTokenConfig().copy(expiresIn = Constant.ACCESS_TOKEN_DURATION),
@@ -262,11 +290,15 @@ class AuthServiceImplTest {
             userId = mockkUserEntity.id
         )
 
-//        coEvery { suspendTransaction { any() } } returns expectedResponse
+        coEvery {
+            hashingService.generateSaltedHash(any())
+        } returns SaltedHash("hash", "salt")
+
+        coEvery { emailService.sendEmail(any(), any(), any()) } returns Unit
+        coEvery { verificationTokenRepository.createToken(any(), any(), any(), any()) } returns Unit
 
         //Act
         val result = authService.login(loginRequest)
-
 
         //Assert
         coVerify {
@@ -324,7 +356,11 @@ class AuthServiceImplTest {
             email = "email",
             firstName = "firstName",
             lastName = "lastName",
-            role = Role.STUDENT,
+            role = UserEntity.Role(
+                id = "id",
+                key = 2,
+                name = "student"
+            ),
             gender = "F",
             password = "hashedPassword",
             salt = "salt"
@@ -373,7 +409,11 @@ class AuthServiceImplTest {
             email = "email",
             firstName = "firstName",
             lastName = "lastName",
-            role = Role.ADMIN,
+            role = UserEntity.Role(
+                id = "id",
+                key = 2,
+                name = "admin"
+            ),
             gender = "M",
             password = "hashedPassword",
             salt = "salt"
@@ -493,7 +533,11 @@ class AuthServiceImplTest {
                 email = "email",
                 firstName = "firstName",
                 lastName = "lastName",
-                role = Role.ADMIN,
+                role = UserEntity.Role(
+                    id = "id",
+                    key = 2,
+                    name = "admin"
+                ),
                 gender = "M",
                 password = "hashedPassword",
                 salt = "salt"

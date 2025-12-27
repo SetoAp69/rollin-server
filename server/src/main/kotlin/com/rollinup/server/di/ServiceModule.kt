@@ -4,6 +4,8 @@ import com.rollinup.server.service.attendance.AttendanceService
 import com.rollinup.server.service.attendance.AttendanceServiceImpl
 import com.rollinup.server.service.auth.AuthService
 import com.rollinup.server.service.auth.AuthServiceImpl
+import com.rollinup.server.service.dashboard.DashboardService
+import com.rollinup.server.service.dashboard.DashboardServiceImpl
 import com.rollinup.server.service.email.EmailService
 import com.rollinup.server.service.email.EmailServiceImpl
 import com.rollinup.server.service.file.FileService
@@ -27,7 +29,6 @@ import org.koin.dsl.module
 
 object ServiceModule {
     val module = module {
-
         single<GoogleStorage> {
             GoogleStorage()
         }
@@ -57,6 +58,7 @@ object ServiceModule {
                 emailService = get(),
                 mapper = get(),
                 transactionManager = get(),
+                verificationTokenRepository = get(),
             )
         }
         single<FileService> {
@@ -73,6 +75,8 @@ object ServiceModule {
                 refreshTokenRepository = get(),
                 authMapper = get(),
                 transactionManager = get(),
+                emailService = get(),
+                verificationTokenRepository = get(),
             )
         }
 
@@ -112,6 +116,14 @@ object ServiceModule {
             HolidayServiceImpl(
                 transactionManager = get(),
                 holidayRepository = get(),
+                mapper = get()
+            )
+        }
+
+        single<DashboardService> {
+            DashboardServiceImpl(
+                attendanceRepository = get(),
+                transactionManager = get(),
                 mapper = get()
             )
         }

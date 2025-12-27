@@ -5,6 +5,7 @@ import org.jetbrains.exposed.v1.core.Table
 object RoleTable : Table("role") {
     val _id = uuid("role_id")
     val name = varchar("name", 50)
+    val key = integer("key")
     val searchField
         get() = listOf(name)
     val sortField

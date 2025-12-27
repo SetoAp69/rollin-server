@@ -7,6 +7,7 @@ import org.jetbrains.exposed.v1.core.Column
 import org.jetbrains.exposed.v1.core.ReferenceOption
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.javatime.date
+import org.jetbrains.exposed.v1.javatime.timestamp
 import org.jetbrains.exposed.v1.javatime.timestampWithTimeZone
 import java.time.OffsetDateTime
 import java.util.UUID
@@ -38,7 +39,7 @@ object AttendanceTable : Table("attendance") {
         timestampWithTimeZone(name = "created_at").clientDefault { OffsetDateTime.now(Utils.getOffset()) }
     val updatedAt =
         timestampWithTimeZone(name = "updated_at").clientDefault { OffsetDateTime.now(Utils.getOffset()) }
-    val checkedInAt = timestampWithTimeZone(name = "checked_in_at").nullable()
+    val checkedInAt = timestamp(name = "checked_in_at").nullable()
     val date = date("date")
     val attachment = varchar("attachment", 256).nullable()
     val latitude = double("latitude").nullable()
