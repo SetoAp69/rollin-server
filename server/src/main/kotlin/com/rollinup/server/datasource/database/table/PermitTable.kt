@@ -5,6 +5,8 @@ import com.rollinup.server.datasource.database.model.ApprovalStatus
 import com.rollinup.server.datasource.database.model.PermitType
 import org.jetbrains.exposed.v1.core.ReferenceOption
 import org.jetbrains.exposed.v1.core.Table
+import org.jetbrains.exposed.v1.javatime.datetime
+import org.jetbrains.exposed.v1.javatime.timestamp
 import org.jetbrains.exposed.v1.javatime.timestampWithTimeZone
 import java.util.UUID
 
@@ -26,8 +28,8 @@ object PermitTable : Table("permit") {
     val name = text("name")
     val reason = varchar("reason", 30).nullable()
     val note = varchar("note", 120).nullable()
-    val startTime = timestampWithTimeZone("start_time")
-    val endTime = timestampWithTimeZone("end_time")
+    val startTime = timestamp("start_time")
+    val endTime = timestamp("end_time")
     val attachment = varchar("attachment", 256)
 
     val approvalStatus = customEnumeration(

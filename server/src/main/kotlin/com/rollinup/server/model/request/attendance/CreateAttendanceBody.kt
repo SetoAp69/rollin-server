@@ -2,6 +2,7 @@ package com.rollinup.server.model.request.attendance
 
 import com.rollinup.server.CommonException
 import com.rollinup.server.datasource.database.model.AttendanceStatus
+import java.time.LocalDate
 
 data class CreateAttendanceBody(
     val studentUserId: String = "",
@@ -10,12 +11,15 @@ data class CreateAttendanceBody(
     val attachment: String = "",
     val status: AttendanceStatus = AttendanceStatus.CHECKED_IN,
     val checkedInAt: Long = 0L,
+    val sDate:String = ""
 ) {
-
+    val date: LocalDate
+        get() = LocalDate.parse(sDate)
 
     private object ValidationMessages {
         const val ID_BLANK_OR_NULL = "Id cannot be empty"
         const val LOCATION_INVALID = "Location is invalid"
+        const val DATE_INVALID = "Date cannot be empty"
         const val CHECKED_IN_AT_INVALID = "Check in time is invalid"
     }
 
@@ -34,8 +38,10 @@ data class CreateAttendanceBody(
                     if (it.isNullOrBlank()) AttendanceStatus.CHECKED_IN
                     else AttendanceStatus.fromValue(it)
                 },
-                checkedInAt = hashMap["checkedInAt"]?.toLongOrNull()
-                    ?: throw CommonException(ValidationMessages.CHECKED_IN_AT_INVALID)
+                checkedInAt = hashMap["checkInAt"]?.toLongOrNull()
+                    ?: throw CommonException(ValidationMessages.CHECKED_IN_AT_INVALID),
+                sDate = hashMap["date"]
+                    ?:throw CommonException(ValidationMessages.DATE_INVALID)
             )
         }
     }

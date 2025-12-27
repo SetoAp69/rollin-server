@@ -4,7 +4,6 @@ import com.rollinup.server.datasource.database.model.AttendanceStatus
 import com.rollinup.server.model.request.attendance.EditAttendanceBody
 import org.junit.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
 
 class EditAttendanceBodyTest {
@@ -15,7 +14,7 @@ class EditAttendanceBodyTest {
             "latitude" to "12.345",
             "longitude" to "67.890",
             "status" to "LATE",
-            "checkedInAt" to "1678886400000"
+            "checkInAt" to "1678886400000"
         )
 
         val expectedBody = EditAttendanceBody(
@@ -24,7 +23,7 @@ class EditAttendanceBodyTest {
                 longitude = 67.890
             ),
             status = AttendanceStatus.LATE,
-            checkedInAt = 1678886400000L
+            checkInAt = 1678886400000L
         )
 
         val result = EditAttendanceBody.fromHashMap(hashMap)
@@ -43,7 +42,7 @@ class EditAttendanceBodyTest {
                 longitude = null
             ),
             status = AttendanceStatus.CHECKED_IN,
-            checkedInAt = null
+            checkInAt = null
         )
 
         val result = EditAttendanceBody.fromHashMap(hashMap)
@@ -63,7 +62,7 @@ class EditAttendanceBodyTest {
                 longitude = 2.2
             ),
             status = null,
-            checkedInAt = null
+            checkInAt = null
         )
 
         val result = EditAttendanceBody.fromHashMap(hashMap)
@@ -73,7 +72,7 @@ class EditAttendanceBodyTest {
     @Test
     fun `fromHashMap should create body with only checkedInAt`() {
         val hashMap = hashMapOf(
-            "checkedInAt" to "12345"
+            "checkInAt" to "12345"
         )
 
         val expectedBody = EditAttendanceBody(
@@ -82,7 +81,7 @@ class EditAttendanceBodyTest {
                 longitude = null
             ),
             status = null,
-            checkedInAt = 12345L
+            checkInAt = 12345L
         )
 
         val result = EditAttendanceBody.fromHashMap(hashMap)
@@ -99,7 +98,7 @@ class EditAttendanceBodyTest {
                 longitude = null
             ),
             status = null,
-            checkedInAt = null
+            checkInAt = null
         )
 
         val result = EditAttendanceBody.fromHashMap(hashMap)
@@ -111,14 +110,14 @@ class EditAttendanceBodyTest {
         val hashMap = hashMapOf(
             "latitude" to "not-a-double",
             "longitude" to "also-not-a-double",
-            "checkedInAt" to "not-a-long"
+            "checkInAt" to "not-a-long"
         )
 
         val result = EditAttendanceBody.fromHashMap(hashMap)
 
         assertNull(result.location.latitude)
         assertNull(result.location.longitude)
-        assertNull(result.checkedInAt)
+        assertNull(result.checkInAt)
     }
 
 }

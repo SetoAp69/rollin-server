@@ -4,6 +4,8 @@ import com.rollinup.server.CommonException
 import com.rollinup.server.datasource.database.model.ApprovalStatus
 import com.rollinup.server.datasource.database.model.PermitType
 import com.rollinup.server.util.Utils
+import java.time.LocalDate
+import java.time.LocalTime
 
 data class CreatePermitBody(
     val studentId: String = "",
@@ -17,6 +19,7 @@ data class CreatePermitBody(
     val approvedAt: Long? = null,
     val approvalNote: String? = null,
 ) {
+
     private object ValidationMessages {
         // Updated to be more granular based on the user's new checks
         const val ID_BLANK_OR_NULL = "Id cannot be empty"

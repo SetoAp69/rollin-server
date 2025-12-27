@@ -1,19 +1,22 @@
 package com.rollinup.server.datasource.database.repository.permit
 
+import com.rollinup.server.datasource.database.model.ApprovalStatus
+import com.rollinup.server.datasource.database.model.PermitType
 import com.rollinup.server.datasource.database.model.permit.PermitByIdEntity
 import com.rollinup.server.datasource.database.model.permit.PermitListEntity
 import com.rollinup.server.datasource.database.table.ClassTable
 import com.rollinup.server.datasource.database.table.PermitTable
 import com.rollinup.server.datasource.database.table.UserTable
-import com.rollinup.server.datasource.database.model.ApprovalStatus
 import com.rollinup.server.model.request.permit.CreatePermitBody
 import com.rollinup.server.model.request.permit.EditPermitBody
 import com.rollinup.server.model.request.permit.GetPermitQueryParams
 import com.rollinup.server.util.Utils
+import com.rollinup.server.util.Utils.toLocalDate
 import com.rollinup.server.util.addFilter
 import com.rollinup.server.util.addOffset
 import com.rollinup.server.util.likePattern
 import org.jetbrains.exposed.v1.core.JoinType
+import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.SqlExpressionBuilder.inList
 import org.jetbrains.exposed.v1.core.alias
 import org.jetbrains.exposed.v1.core.and
@@ -24,6 +27,8 @@ import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.update
 import java.time.Instant
+import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.OffsetDateTime
 import java.util.UUID
 
@@ -69,6 +74,13 @@ class PermitRepositoryImpl() : PermitRepository {
                 }
             }
 
+            query.addFilter(type) { type ->
+                val typeList = type.map { PermitType.fromValue(it) }
+                andWhere {
+                    PermitTable.type inList typeList
+                }
+            }
+
             query.addFilter(isActive) {
                 andWhere {
                     if (it)
@@ -80,19 +92,27 @@ class PermitRepositoryImpl() : PermitRepository {
 
             query.addFilter(dateRange) { dRange ->
                 andWhere {
-                    val dates = dRange.map { Utils.getOffsetDateTime(it) }
+                    val from = LocalDateTime
+                        .of(dRange.first(), LocalTime.of(0, 0))
+                        .toInstant(Utils.getOffset())
+                    val to = LocalDateTime
+                        .of(dRange.last(), LocalTime.of(23, 59))
+                        .toInstant(Utils.getOffset())
 
-                    (PermitTable.startTime.greaterEq(dates.first())) and (PermitTable.endTime.lessEq(
-                        dates.last()
-                    ))
+                    (PermitTable.startTime.greaterEq(from)) and (PermitTable.endTime.lessEq(to))
                 }
             }
 
-
-            query.addFilter(date) {
+            query.addFilter(date) { d ->
                 andWhere {
-                    val d = Utils.getOffsetDateTime(it)
-                    (PermitTable.startTime.greaterEq(d)) and (PermitTable.endTime.lessEq(d))
+                    val from = LocalDateTime
+                        .of(d.toLocalDate(), LocalTime.of(0, 0))
+                        .toInstant(Utils.getOffset())
+                    val to = LocalDateTime
+                        .of(d.toLocalDate(), LocalTime.of(23, 59))
+                        .toInstant(Utils.getOffset())
+
+                    (PermitTable.startTime.greaterEq(from)) and (PermitTable.endTime.lessEq(to))
                 }
             }
 
@@ -120,9 +140,10 @@ class PermitRepositoryImpl() : PermitRepository {
         }
 
         return query
-            .sortedByDescending {
-                PermitTable.createdAt
-            }
+            .orderBy(
+                column = PermitTable.createdAt,
+                order = SortOrder.DESC
+            )
             .map { row ->
                 PermitListEntity.fromResultRow(row)
             }
@@ -153,6 +174,9 @@ class PermitRepositoryImpl() : PermitRepository {
                 otherColumn = PermitTable.approvedBy
             )
             .selectAll()
+            .where {
+                PermitTable._id eq UUID.fromString(id)
+            }
 
         val result = query.firstOrNull()?.let { row ->
             PermitByIdEntity.fromResultRow(row = row, student = student, approver = approver)
@@ -162,15 +186,8 @@ class PermitRepositoryImpl() : PermitRepository {
     }
 
     override fun createPermit(body: CreatePermitBody): String {
-        val from = OffsetDateTime.ofInstant(
-            Instant.ofEpochMilli(body.duration.first()),
-            Utils.getOffset()
-        )
-
-        val to = OffsetDateTime.ofInstant(
-            Instant.ofEpochMilli(body.duration.last()),
-            Utils.getOffset()
-        )
+        val from = Instant.ofEpochMilli(body.duration.first())
+        val to = Instant.ofEpochMilli(body.duration.last())
 
         val approvedAt = body.approvedAt?.let {
             OffsetDateTime.ofInstant(Instant.ofEpochMilli(it), Utils.getOffset())
@@ -205,14 +222,8 @@ class PermitRepositoryImpl() : PermitRepository {
         ) { statement ->
             with(body) {
                 duration?.let {
-                    val from = OffsetDateTime.ofInstant(
-                        Instant.ofEpochMilli(it.first()),
-                        Utils.getOffset()
-                    )
-                    val to = OffsetDateTime.ofInstant(
-                        Instant.ofEpochMilli(it.first()),
-                        Utils.getOffset()
-                    )
+                    val from = Instant.ofEpochMilli(it.first())
+                    val to = Instant.ofEpochMilli(it.first())
                     statement[PermitTable.startTime] = from
                     statement[PermitTable.endTime] = to
                 }
@@ -243,5 +254,35 @@ class PermitRepositoryImpl() : PermitRepository {
         }
     }
 
+    override fun getOverlappingPendingPermits(
+        studentId: String,
+        startTime: Instant,
+        endTime: Instant,
+    ): List<PermitListEntity> {
+        val query = PermitTable
+            .join(
+                joinType = JoinType.INNER,
+                onColumn = PermitTable.user_id,
+                otherColumn = PermitTable.user_id,
+                otherTable = UserTable
+            )
+            .join(
+                otherTable = ClassTable,
+                onColumn = ClassTable._id,
+                otherColumn = UserTable.classX,
+                joinType = JoinType.INNER
+            )
+            .selectAll()
+            .where {
+                (PermitTable.user_id eq UUID.fromString(studentId)) and
+                        (PermitTable.approvalStatus eq ApprovalStatus.APPROVAL_PENDING) and
+                        (PermitTable.startTime lessEq endTime) and
+                        (PermitTable.endTime greaterEq startTime)
+            }
+
+        return query.map { row ->
+            PermitListEntity.fromResultRow(row)
+        }
+    }
 
 }

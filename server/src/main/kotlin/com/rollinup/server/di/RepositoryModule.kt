@@ -1,8 +1,8 @@
 package com.rollinup.server.di
 
-import com.rollinup.server.datasource.database.repository.generalsetting.GeneralSettingRepository
 import com.rollinup.server.datasource.database.repository.attendance.AttendanceRepository
 import com.rollinup.server.datasource.database.repository.attendance.AttendanceRepositoryImpl
+import com.rollinup.server.datasource.database.repository.generalsetting.GeneralSettingRepository
 import com.rollinup.server.datasource.database.repository.generalsetting.GeneralSettingRepositoryImpl
 import com.rollinup.server.datasource.database.repository.holiday.HolidayRepository
 import com.rollinup.server.datasource.database.repository.holiday.HolidayRepositoryImpl
@@ -14,6 +14,8 @@ import com.rollinup.server.datasource.database.repository.resetpassword.ResetPas
 import com.rollinup.server.datasource.database.repository.resetpassword.ResetPasswordRepositoryImpl
 import com.rollinup.server.datasource.database.repository.user.UserRepository
 import com.rollinup.server.datasource.database.repository.user.UserRepositoryImpl
+import com.rollinup.server.datasource.database.repository.verification.VerificationTokenRepository
+import com.rollinup.server.datasource.database.repository.verification.VerificationTokenRepositoryImpl
 import org.koin.dsl.module
 
 object RepositoryModule {
@@ -43,8 +45,12 @@ object RepositoryModule {
             GeneralSettingRepositoryImpl()
         }
 
-        single<HolidayRepository>{
+        single<HolidayRepository> {
             HolidayRepositoryImpl()
+        }
+
+        single<VerificationTokenRepository> {
+            VerificationTokenRepositoryImpl()
         }
     }
 }

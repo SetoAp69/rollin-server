@@ -16,7 +16,8 @@ class CreateAttendanceBodyTest {
             "latitude" to "12.345",
             "longitude" to "67.890",
             "status" to "LATE",
-            "checkedInAt" to "1678886400000"
+            "checkInAt" to "1678886400000",
+            "date" to "2025-08-06"
         )
 
         val expectedBody = CreateAttendanceBody(
@@ -24,7 +25,8 @@ class CreateAttendanceBodyTest {
             latitude = 12.345,
             longitude = 67.890,
             status = AttendanceStatus.LATE,
-            checkedInAt = 1678886400000L
+            checkedInAt = 1678886400000L,
+            sDate = "2025-08-06"
         )
 
         val result = CreateAttendanceBody.fromHashMap(hashMap)
@@ -37,7 +39,8 @@ class CreateAttendanceBodyTest {
             "studentUserId" to "student123",
             "latitude" to "12.345",
             "longitude" to "67.890",
-            "checkedInAt" to "1678886400000"
+            "checkInAt" to "1678886400000",
+            "date" to "2025-08-06"
             // "status" is missing
         )
 
@@ -48,8 +51,9 @@ class CreateAttendanceBodyTest {
             "studentUserId" to "student123",
             "latitude" to "12.345",
             "longitude" to "67.890",
+            "date" to "2025-08-06",
             "status" to "", // Blank status
-            "checkedInAt" to "1678886400000"
+            "checkInAt" to "1678886400000"
         )
 
         val resultBlank = CreateAttendanceBody.fromHashMap(hashMapBlank)
@@ -61,7 +65,7 @@ class CreateAttendanceBodyTest {
         val hashMap = hashMapOf(
             "latitude" to "12.345",
             "longitude" to "67.890",
-            "checkedInAt" to "1678886400000"
+            "checkInAt" to "1678886400000"
         )
 
         val ex = assertFailsWith<CommonException> {
@@ -73,7 +77,7 @@ class CreateAttendanceBodyTest {
             "studentUserId" to "",
             "latitude" to "12.345",
             "longitude" to "67.890",
-            "checkedInAt" to "1678886400000"
+            "checkInAt" to "1678886400000"
         )
 
         val exBlank = assertFailsWith<CommonException> {
@@ -88,7 +92,7 @@ class CreateAttendanceBodyTest {
             "studentUserId" to "student123",
             // "latitude" is missing
             "longitude" to "67.890",
-            "checkedInAt" to "1678886400000"
+            "checkInAt" to "1678886400000"
         )
 
         val ex = assertFailsWith<CommonException> {
@@ -100,7 +104,7 @@ class CreateAttendanceBodyTest {
             "studentUserId" to "student123",
             "latitude" to "not-a-double",
             "longitude" to "67.890",
-            "checkedInAt" to "1678886400000"
+            "checkInAt" to "1678886400000"
         )
 
         val exInvalid = assertFailsWith<CommonException> {
@@ -115,7 +119,7 @@ class CreateAttendanceBodyTest {
             "studentUserId" to "student123",
             "latitude" to "12.345",
             // "longitude" is missing
-            "checkedInAt" to "1678886400000"
+            "checkInAt" to "1678886400000"
         )
 
         val ex = assertFailsWith<CommonException> {
@@ -127,7 +131,7 @@ class CreateAttendanceBodyTest {
             "studentUserId" to "student123",
             "latitude" to "12.345",
             "longitude" to "not-a-double",
-            "checkedInAt" to "1678886400000"
+            "checkInAt" to "1678886400000"
         )
 
         val exInvalid = assertFailsWith<CommonException> {
@@ -142,7 +146,7 @@ class CreateAttendanceBodyTest {
             "studentUserId" to "student123",
             "latitude" to "12.345",
             "longitude" to "67.890"
-            // "checkedInAt" is missing
+            // "checkInAt" is missing
         )
 
         val ex = assertFailsWith<CommonException> {
@@ -154,7 +158,7 @@ class CreateAttendanceBodyTest {
             "studentUserId" to "student123",
             "latitude" to "12.345",
             "longitude" to "67.890",
-            "checkedInAt" to "not-a-long"
+            "checkInAt" to "not-a-long"
         )
 
         val exInvalid = assertFailsWith<CommonException> {

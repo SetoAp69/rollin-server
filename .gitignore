@@ -23,3 +23,5 @@ env.properties
 /server/src/main/resources/end-point-test/
 /server/src/main/kotlin/com/rollinup/server/route/test/
 /server/src/main/kotlin/com/rollinup/server/route/test
+*.spec.yaml
+

@@ -5,6 +5,7 @@ import com.rollinup.server.datasource.database.model.permit.PermitListEntity
 import com.rollinup.server.model.request.permit.CreatePermitBody
 import com.rollinup.server.model.request.permit.EditPermitBody
 import com.rollinup.server.model.request.permit.GetPermitQueryParams
+import java.time.Instant
 
 interface PermitRepository {
     fun getPermitList(
@@ -20,4 +21,10 @@ interface PermitRepository {
     fun editPermit(listId: List<String>, body: EditPermitBody)
 
     fun deletePermit(listId: List<String>)
+
+    fun getOverlappingPendingPermits(
+        studentId: String,
+        startTime: Instant,
+        endTime: Instant,
+    ): List<PermitListEntity>
 }

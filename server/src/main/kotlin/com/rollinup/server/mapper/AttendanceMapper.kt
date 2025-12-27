@@ -4,11 +4,15 @@ import com.rollinup.server.datasource.database.model.attendance.AttendanceByClas
 import com.rollinup.server.datasource.database.model.attendance.AttendanceByStudentEntity
 import com.rollinup.server.datasource.database.model.attendance.AttendanceEntity
 import com.rollinup.server.datasource.database.model.attendance.AttendanceSummaryEntity
+import com.rollinup.server.datasource.database.model.attendance.ExportAttendanceDataEntity
 import com.rollinup.server.model.request.attendance.GetAttendanceByClassQueryParams
 import com.rollinup.server.model.request.attendance.GetAttendanceByStudentQueryParams
 import com.rollinup.server.model.response.attendance.GetAttendanceByClassListResponse
 import com.rollinup.server.model.response.attendance.GetAttendanceByIdResponse
 import com.rollinup.server.model.response.attendance.GetAttendanceByStudentListResponse
+import com.rollinup.server.model.response.attendance.GetAttendanceListSummaryResponse
+import com.rollinup.server.model.response.attendance.GetExportAttendanceResponse
+import java.time.LocalDate
 
 class AttendanceMapper {
 
@@ -51,21 +55,11 @@ class AttendanceMapper {
 
     fun mapAttendanceListByClass(
         data: List<AttendanceByClassEntity>,
-        summary: AttendanceSummaryEntity,
         queryParams: GetAttendanceByClassQueryParams,
     ) =
         GetAttendanceByClassListResponse(
             record = data.size,
             page = queryParams.page ?: 1,
-            summary = GetAttendanceByClassListResponse.Summary(
-                checkedIn = summary.checkedIn,
-                late = summary.late,
-                excused = summary.excused,
-                approvalPending = summary.approvalPending,
-                absent = summary.absent,
-                sick = summary.sick,
-                other = summary.other
-            ),
             data = data.map {
                 GetAttendanceByClassListResponse.GetAttendanceByClassListDTO(
                     student = GetAttendanceByClassListResponse.User(
@@ -93,6 +87,19 @@ class AttendanceMapper {
                 )
             }
         )
+
+    fun mapAttendanceSummary(
+        data: AttendanceSummaryEntity,
+    ) = GetAttendanceListSummaryResponse(
+        checkedIn = data.checkedIn,
+        late = data.late,
+        excused = data.excused,
+        approvalPending = data.approvalPending,
+        absent = data.absent,
+        sick = data.sick,
+        other = data.other
+    )
+
 
     fun mapAttendanceListByStudent(
         data: List<AttendanceByStudentEntity>,
@@ -125,11 +132,19 @@ class AttendanceMapper {
                             endTime = permit.endTime
                         )
                     },
+                    date = att.date,
                     createdAt = att.createdAt,
                     updatedAt = att.updatedAt
                 )
             }
         )
 
-
+    fun mapExportAttendanceData(
+        from: LocalDate,
+        to: LocalDate,
+        data: List<ExportAttendanceDataEntity>,
+    ) = GetExportAttendanceResponse(
+        dateRange = listOf(from.toString(), to.toString()),
+        data = data
+    )
 }

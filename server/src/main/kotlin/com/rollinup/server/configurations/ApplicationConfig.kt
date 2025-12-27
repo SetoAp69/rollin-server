@@ -35,4 +35,5 @@ fun Application.module() {
     configureDatabase()
     configureListener()
     configureRouting()
+    configureTemplating()
 }

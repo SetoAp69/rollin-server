@@ -9,28 +9,9 @@ data class GetAttendanceByClassListResponse(
     val record: Int = 0,
     @SerialName("page")
     val page: Int = 0,
-    @SerialName("summary")
-    val summary: Summary = Summary(),
     @SerialName("data")
     val data: List<GetAttendanceByClassListDTO> = emptyList(),
 ) {
-    @Serializable
-    data class Summary(
-        @SerialName("checkedIn")
-        val checkedIn: Long = 0L,
-        @SerialName("late")
-        val late: Long = 0L,
-        @SerialName("excused")
-        val excused: Long = 0L,
-        @SerialName("approvalPending")
-        val approvalPending: Long = 0L,
-        @SerialName("absent")
-        val absent: Long = 0L,
-        @SerialName("sick")
-        val sick: Long = 0L,
-        @SerialName("other")
-        val other: Long = 0L,
-    )
 
     @Serializable
     data class GetAttendanceByClassListDTO(

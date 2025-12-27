@@ -4,5 +4,7 @@ data class GetAttendanceByStudentQueryParams(
     val search:String? = null,
     val limit:Int? = null,
     val page:Int? = null,
-    val dateRange:List<Long>? = null
+    val status:List<String>? = null,
+    val dateRange:List<Long>? = null,
+    val date:Long? = null
 )

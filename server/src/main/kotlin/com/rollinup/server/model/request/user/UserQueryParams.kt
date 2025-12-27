@@ -17,6 +17,8 @@ data class UserQueryParams(
     val sortOrder: String? = null,
     @SerialName("gender")
     val gender: List<String>? = null,
+    @SerialName("class")
+    val classX:List<Int>? = null,
     @SerialName("role")
-    val role: List<String>? = null,
+    val role: List<Int>? = null,
 )

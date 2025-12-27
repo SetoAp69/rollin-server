@@ -17,8 +17,12 @@ class AuthMapper {
                 email = data.email,
                 firstName = data.firstName,
                 lastName = data.lastName,
-                role = data.role.value,
-                gender = data.gender
+                role = data.role.name,
+                gender = data.gender,
+                classX = data.classX?.name?:"",
+                classId = data.classX?.id,
+                classKey = data.classX?.key,
+                isVerified = data.isVerified
             ),
             accessToken = accessToken,
             refreshToken = refreshToken

@@ -47,6 +47,11 @@ fun Application.configureRouting() {
             Route.Holiday.route(this)
         }
 
+        route(
+            path = Route.Dashboard.path
+        ) {
+            Route.Dashboard.route(this)
+        }
     }
 }
 

@@ -9,6 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.postgresql.PGConnection
 import java.sql.DriverManager
 
@@ -41,15 +42,14 @@ class GeneralSettingListener(
                     if (notif == null) return@let
                     println(" Received notification: ${notif.name} - payload: ${notif.parameter}")
 
-                }
 
-                val newSetting = transactionManager.suspendTransaction {
-                    generalSettingRepository.getGeneralSetting()
-                        ?: throw "general setting".notFoundException()
+                    val newSetting = transactionManager.suspendTransaction {
+                        generalSettingRepository.getGeneralSetting()
+                            ?: throw "general setting".notFoundException()
+                    }
+                    generalSettingCache.update(newSetting)
+                    generalSettingEventBus.emit(newSetting)
                 }
-                generalSettingCache.update(newSetting)
-                generalSettingEventBus.emit(newSetting)
-
             }
             delay(1000)
 

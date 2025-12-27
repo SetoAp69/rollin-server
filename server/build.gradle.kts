@@ -116,6 +116,9 @@ dependencies {
     //Email
     implementation(libs.common.email)
 
+    //Templating
+    implementation(libs.ktor.server.thymeleaf)
+
     //Google cloud storage
     implementation(libs.gc.storage)
     implementation(libs.gc.storage.control)

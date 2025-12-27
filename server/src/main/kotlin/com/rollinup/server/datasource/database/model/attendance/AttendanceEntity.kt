@@ -81,7 +81,7 @@ data class AttendanceEntity(
                     studentId = row.getOrNull(UserTable.studentId)
                 ),
                 status = row[AttendanceTable.status],
-                checkedInAt = row.getOrNull(AttendanceTable.checkedInAt).toString(),
+                checkedInAt = row.getOrNull(AttendanceTable.checkedInAt)?.toString(),
                 createdAt = row[AttendanceTable.createdAt].toString(),
                 updatedAt = row[AttendanceTable.updatedAt].toString(),
                 date = row[AttendanceTable.date].toString(),

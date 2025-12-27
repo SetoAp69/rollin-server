@@ -97,6 +97,9 @@ system-stubs-testng = {group = "uk.org.webcompere", name = "system-stubs-testng"
 gc-storage = {group = "com.google.cloud", name = "google-cloud-storage", version.ref = "googleCloud"}
 gc-storage-control = {group = "com.google.cloud", name = "google-cloud-storage-control", version.ref = "googleCloud"}
 
+#Templating
+ktor-server-thymeleaf = {group = "io.ktor", name = "ktor-server-thymeleaf", version.ref = "ktor"}
+
 [plugins]
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ktor = { id = "io.ktor.plugin", version.ref = "ktor" }

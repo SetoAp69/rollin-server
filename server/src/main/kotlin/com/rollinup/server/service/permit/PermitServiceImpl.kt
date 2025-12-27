@@ -36,9 +36,9 @@ import com.rollinup.server.util.successEditResponse
 import com.rollinup.server.util.successGettingResponse
 import com.rollinup.server.util.uploadFileException
 import java.io.File
+import java.time.Instant
 import java.time.LocalTime
 import java.time.OffsetTime
-
 
 class PermitServiceImpl(
     private val permitRepository: PermitRepository,
@@ -145,34 +145,57 @@ class PermitServiceImpl(
         val formHash: HashMap<String, String> = formHashMap
         val fileHash: HashMap<String, File> = fileHashMap
 
-        if (listOf(formHash, fileHash).any { it.isEmpty() })
-            throw IllegalArgumentException()
-
         val body = CreatePermitBody.fromHashMap(formHash)
         val file = fileHash["attachment"]
             ?: throw "permit attachment".uploadFileException()
         val path = Utils.getUploadDir(path = Constant.PERMIT_FILE_PATH, file.name)
 
+        if (listOf(formHash, fileHash).any { it.isEmpty() })
+            throw IllegalArgumentException()
+
         val upload = fileService.uploadFile(path, file)
 
         transactionManager.suspendTransaction {
-            val duration = body.duration.map { it.toLocalDate() }
+            val from = body.duration.first().toLocalDate()
+            val to = body.duration.last().toLocalDate()
+
+            val instantFrom = Instant.ofEpochMilli(body.duration.first())
+            val instantTo = Instant.ofEpochMilli(body.duration.last())
+
+            val overLappingPermits = permitRepository.getOverlappingPendingPermits(
+                studentId = body.studentId,
+                startTime = instantFrom,
+                endTime = instantTo
+            )
+
+            if(overLappingPermits.isNotEmpty()){
+                val overLappingPermitsId = overLappingPermits.map { it.id }
+                handleCancelWithRollback(overLappingPermitsId)
+            }
+
+            val permitId = permitRepository.createPermit(body.copy(attachment = upload))
+
             val dates = Utils.generateDateRange(
-                start = duration.first(),
-                end = duration.last()
+                start = from,
+                end = to
             ).filter {
                 !it.isWeekend() && it !in holidayCache.get()
             }.ifEmpty {
                 throw CommonException(Message.INVALID_DURATIONS)
             }
 
-            val permitId = permitRepository.createPermit(body.copy(attachment = upload))
-
             attendanceRepository.createAttendanceFromPermit(
                 permitId = permitId,
                 studentId = body.studentId,
                 dates = dates,
-                status = AttendanceStatus.APPROVAL_PENDING
+                status = if (body.approvalStatus == ApprovalStatus.APPROVED) {
+                    when (body.type) {
+                        PermitType.DISPENSATION -> AttendanceStatus.EXCUSED
+                        PermitType.ABSENCE -> AttendanceStatus.ABSENT
+                    }
+                } else {
+                    AttendanceStatus.APPROVAL_PENDING
+                }
             )
         }
 
@@ -214,35 +237,7 @@ class PermitServiceImpl(
 
     override suspend fun cancelPermit(id: List<String>): Response<Unit> =
         transactionManager.suspendTransaction {
-            val permit =
-                permitRepository
-                    .getPermitList(GetPermitQueryParams(listId = id))
-                    .ifEmpty {
-                        throw "permit".notFoundException()
-                    }
-
-            if (permit.any { it.approvalStatus != ApprovalStatus.APPROVAL_PENDING }) {
-                throw "permit".illegalStatusExeptions()
-            }
-
-            val attendanceList = attendanceRepository.getAttendanceListByPermit(id)
-            val attendanceListByPermit = attendanceList.groupBy { it.permit }
-
-            attendanceListByPermit.forEach { permit, att ->
-                permit ?: return@forEach
-                rollBackAttendance(
-                    attendanceList = att,
-                    permitType = permit.type
-                )
-            }
-
-            permitRepository.editPermit(
-                listId = id,
-                body = EditPermitBody(
-                    approvalStatus = ApprovalStatus.CANCELED
-                )
-            )
-
+            handleCancelWithRollback(id)
             return@suspendTransaction Response(
                 status = 201,
                 message = "permit".successEditResponse(),
@@ -382,8 +377,6 @@ class PermitServiceImpl(
 
             permitRepository.editPermit(listOf(id), body.copy(attachment = upload))
         }
-
-
     }
 
     private suspend fun handleEditWithoutAttachment(
@@ -401,5 +394,39 @@ class PermitServiceImpl(
             body = body
         )
     }
+
+    private fun handleCancelWithRollback(
+        listId: List<String>
+    ){
+        val permit =
+            permitRepository
+                .getPermitList(GetPermitQueryParams(listId = listId))
+                .ifEmpty {
+                    throw "permit".notFoundException()
+                }
+
+        if (permit.any { it.approvalStatus != ApprovalStatus.APPROVAL_PENDING }) {
+            throw "permit".illegalStatusExeptions()
+        }
+
+        val attendanceList = attendanceRepository.getAttendanceListByPermit(listId)
+        val attendanceListByPermit = attendanceList.groupBy { it.permit }
+
+        attendanceListByPermit.forEach { permit, att ->
+            permit ?: return@forEach
+            rollBackAttendance(
+                attendanceList = att,
+                permitType = permit.type
+            )
+        }
+
+        permitRepository.editPermit(
+            listId = listId,
+            body = EditPermitBody(
+                approvalStatus = ApprovalStatus.CANCELED
+            )
+        )
+    }
+
 
 }

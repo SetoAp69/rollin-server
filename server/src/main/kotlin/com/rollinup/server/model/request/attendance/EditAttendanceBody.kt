@@ -6,7 +6,7 @@ import com.rollinup.server.datasource.database.model.AttendanceStatus
 data class EditAttendanceBody(
     val location: Location = Location(),
     val status: AttendanceStatus? = null,
-    val checkedInAt: Long? = null,
+    val checkInAt: Long? = null,
 ) {
     data class Location(
         val latitude: Double? = null,
@@ -21,7 +21,7 @@ data class EditAttendanceBody(
                     longitude = hash.get("longitude")?.toDoubleOrNull()
                 ),
                 status = hash.get("status")?.let { AttendanceStatus.fromValue(it) },
-                checkedInAt = hash.get("checkedInAt")?.toLongOrNull()
+                checkInAt = hash.get("checkInAt")?.toLongOrNull()
             )
         }
     }

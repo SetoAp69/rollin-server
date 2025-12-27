@@ -1,15 +1,16 @@
 package com.rollinup.server.datasource.database.table
 
-import com.rollinup.server.datasource.database.model.user.Gender
 import com.rollinup.server.datasource.database.model.PGEnum
+import com.rollinup.server.datasource.database.model.user.Gender
 import org.jetbrains.exposed.v1.core.Column
 import org.jetbrains.exposed.v1.core.ReferenceOption
 import org.jetbrains.exposed.v1.core.Table
+import org.jetbrains.exposed.v1.javatime.date
 
 object UserTable : Table("users") {
     val user_id = uuid("user_id")
     val username = varchar("username", 50)
-    val studentId = varchar("student_id",30).nullable()
+    val studentId = varchar("student_id", 30).nullable()
     val email = varchar("email", 100)
     val firstName = varchar("first_name", 50)
     val lastName = varchar("last_name", 50)
@@ -30,15 +31,17 @@ object UserTable : Table("users") {
         toDb = { gender -> PGEnum("gender", gender) }
     )
 
-    val device = varchar("device", 30).nullable()
+    val birthDay = date("birthday")
+    val device = varchar("device", 64).nullable()
     val profilePicture = varchar("profile_pictures", 120).nullable()
+    val isVerified = bool("is_verified").default(false)
     val classX = reference(
         name = "class",
         refColumn = ClassTable._id,
-        onDelete = ReferenceOption.CASCADE ,
+        onDelete = ReferenceOption.CASCADE,
         onUpdate = ReferenceOption.CASCADE,
         fkName = "fk_user_class"
-    )
+    ).nullable()
 
     val searchField
         get() = listOf(

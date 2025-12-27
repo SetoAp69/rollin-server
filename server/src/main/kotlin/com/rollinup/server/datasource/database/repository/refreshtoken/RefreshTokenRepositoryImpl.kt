@@ -70,7 +70,11 @@ class RefreshTokenRepositoryImpl() : RefreshTokenRepository {
             email = this[UserTable.email],
             firstName = this[UserTable.firstName],
             lastName = this[UserTable.lastName],
-            role = Role.fromValue(this[RoleTable.name]) ?: Role.STUDENT,
+            role = UserEntity.Role(
+                id = this[RoleTable._id].toString(),
+                key = this[RoleTable.key],
+                name = this[RoleTable.name]
+            ),
             gender = this[UserTable.gender].name,
             password = this[UserTable.password],
             salt = this[UserTable.salt]

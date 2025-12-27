@@ -9,4 +9,6 @@ interface AuthService {
     suspend fun login(loginRequest: LoginRequest): Response<LoginResponse>
 
     suspend fun refreshToken(token: String): Response<RefreshTokenResponse>
+
+    suspend fun loginJWT(id:String):Response<LoginResponse>
 }
