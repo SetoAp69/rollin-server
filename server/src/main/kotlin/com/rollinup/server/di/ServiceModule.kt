@@ -46,7 +46,7 @@ object ServiceModule {
         }
 
         single<EmailService> {
-            EmailServiceImpl()
+            EmailServiceImpl(get())
         }
 
         single<UserService> {

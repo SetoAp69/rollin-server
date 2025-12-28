@@ -2,16 +2,15 @@ package com.rollinup.server.util
 
 import com.rollinup.server.service.jwt.TokenConfig
 
-object Config {
-    val smtpConfig
-        get() = SmtpConfig(
-            port = System.getenv("SMTP_PORT").toIntOrNull() ?: 457,
-            hostName = System.getenv("SMTP_HOST"),
-            userName = System.getenv("SMTP_USERNAME"),
-            password = System.getenv("SMTP_PASSWORD"),
-            sender = System.getenv("SMTP_SENDER")
-        )
 
+object Config {
+    val emailConfig
+        get() = EmailConfig(
+            postUrl = System.getenv("EMAIL_POST_URL"),
+            token = System.getenv("EMAIL_API_KEY"),
+            sender = System.getenv("EMAIL_SENDER"),
+            senderName = System.getenv("EMAIL_SENDER_NAME"),
+        )
 
     fun getUploadDir(path: String): String {
         return "${System.getenv("UPLOAD_DIR")}/$path/"
@@ -39,13 +38,11 @@ object Config {
     )
 }
 
-
-data class SmtpConfig(
-    val port: Int = 0,
-    val hostName: String = "",
-    val userName: String = "",
-    val password: String = "",
-    val sender: String = "",
+data class EmailConfig(
+    val postUrl :String= "",
+    val token:String = "",
+    val sender:String = "",
+    val senderName:String = ""
 )
 
 data class DBConfig(

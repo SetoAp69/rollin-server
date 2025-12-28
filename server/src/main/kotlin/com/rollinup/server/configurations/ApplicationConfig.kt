@@ -2,6 +2,7 @@ package com.rollinup.server.configurations
 
 import com.rollinup.server.di.GeneralSettingModule
 import com.rollinup.server.di.HolidayModule
+import com.rollinup.server.di.HttpClient
 import com.rollinup.server.di.MapperModule
 import com.rollinup.server.di.RepositoryModule
 import com.rollinup.server.di.ServiceModule
@@ -21,6 +22,7 @@ fun Application.module() {
                 ServiceModule.module,
                 GeneralSettingModule.module,
                 HolidayModule.module,
+                HttpClient()
             )
         )
     }
