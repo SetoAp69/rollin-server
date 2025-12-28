@@ -17,6 +17,7 @@ import io.ktor.server.response.respond
 fun Application.configureStatusPage() {
     install(StatusPages) {
         exception<Throwable> { call, error ->
+            error.printStackTrace()
             when (error) {
                 is RequestValidationException -> {
                     call.respond(
@@ -66,7 +67,6 @@ fun Application.configureStatusPage() {
                         message = Response(
                             status = 500,
                             message = Message.INTERNAL_SERVER_ERROR,
-//                            message = error.toString(),
                             data = Unit
                         )
                     )

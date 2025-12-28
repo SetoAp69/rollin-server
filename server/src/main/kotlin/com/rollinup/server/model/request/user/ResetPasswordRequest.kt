@@ -20,7 +20,7 @@ data class ResetPasswordRequest(
     fun validation(): ValidationResult {
         return when {
             token.isBlank() -> ValidationResult.Invalid(ValidationMessages.TOKEN_BLANK)
-            newPassword.validatePassword() -> ValidationResult.Invalid(ValidationMessages.PASSWORD_INVALID)
+            !newPassword.validatePassword() -> ValidationResult.Invalid(ValidationMessages.PASSWORD_INVALID)
             else -> ValidationResult.Valid
         }
     }
