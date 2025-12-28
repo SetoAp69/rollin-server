@@ -42,7 +42,6 @@ class GeneralSettingListener(
                     if (notif == null) return@let
                     println(" Received notification: ${notif.name} - payload: ${notif.parameter}")
 
-
                     val newSetting = transactionManager.suspendTransaction {
                         generalSettingRepository.getGeneralSetting()
                             ?: throw "general setting".notFoundException()
@@ -52,7 +51,6 @@ class GeneralSettingListener(
                 }
             }
             delay(1000)
-
         }
     }
 

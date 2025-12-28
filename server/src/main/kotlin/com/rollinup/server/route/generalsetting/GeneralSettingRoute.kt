@@ -87,9 +87,7 @@ fun Route.generalSettingRoute() {
 
             launch {
                 eventBus.events.collect {
-                    val data = mapper.mapGetGeneralSettingResponse(it)
                     try {
-                        send(data = data, event = "global-setting")
                         send(event = "global-setting-update")
                     } catch (e: Exception) {
                         e.printStackTrace()
