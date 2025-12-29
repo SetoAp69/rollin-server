@@ -31,4 +31,6 @@ data class UserDTO(
     val classKey: Int? = null,
     @SerialName("isVerified")
     val isVerified: Boolean = false,
+    @SerialName("deviceId")
+    val deviceId:String? = null
 )

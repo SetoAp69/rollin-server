@@ -22,6 +22,7 @@ class AuthMapper {
                 classX = data.classX?.name?:"",
                 classId = data.classX?.id,
                 classKey = data.classX?.key,
+                deviceId = data.device,
                 isVerified = data.isVerified
             ),
             accessToken = accessToken,
