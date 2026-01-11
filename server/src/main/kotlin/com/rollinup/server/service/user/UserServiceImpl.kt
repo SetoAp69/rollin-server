@@ -154,41 +154,13 @@ class UserServiceImpl(
         val resetPasswordEntity = resetPasswordRepository.getToken(id = user.id)
             ?: throw CommonException(Message.INVALID_TOKEN)
 
-//        val currentTime = Instant.now()
-//        val tokenExpiredAt = resetPasswordEntity.expiredAt
-//
-//        if (tokenExpiredAt < currentTime) {
-//            throw CommonException(Message.EXPIRED_TOKEN)
-//        }
-//
-//        val saltedToken = SaltedHash(
-//            value = resetPasswordEntity.token,
-//            salt = resetPasswordEntity.salt
-//        )
-//
-//        val isValid = hashingService.verify(
-//            value = otp,
-//            saltedHash = saltedToken
-//        )
+        validateOtp(
+            expiredAt = resetPasswordEntity.expiredAt,
+            otp = otp,
+            saltedOtp = resetPasswordEntity.token,
+            salt = resetPasswordEntity.salt
+        )
 
-//        when (isValid) {
-//            false -> throw CommonException(Message.INVALID_TOKEN)
-//            true -> {
-//                val resetToken = tokenService.generateToken(
-//                    config = Config.getTokenConfig().copy(expiresIn = Constant.OTP_DURATION),
-//                    TokenClaim(
-//                        value = user.id,
-//                        name = "id"
-//                    )
-//                )
-//
-//                Response(
-//                    status = 200,
-//                    message = Message.VALIDATE_OTP_SUCCESS,
-//                    data = mapper.mapValidateResetOtpResponse(resetToken)
-//                )
-//            }
-//        }
         val resetToken = tokenService.generateToken(
             config = Config.getTokenConfig().copy(expiresIn = Constant.OTP_DURATION),
             TokenClaim(
@@ -223,7 +195,11 @@ class UserServiceImpl(
                     existedToken.expiredAt > Instant.now()
 
             if (isStillValid) {
-                throw CommonException(Message.EMAIL_ALREADY_SENT)
+                return@suspendTransaction Response(
+                    status = 200,
+                    message = Message.EMAIL_SENT,
+                    data = response
+                )
             }
 
             val otp = Utils.generateRandom(5)
