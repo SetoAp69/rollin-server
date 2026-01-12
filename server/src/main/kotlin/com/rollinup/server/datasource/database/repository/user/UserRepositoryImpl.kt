@@ -18,6 +18,7 @@ import org.jetbrains.exposed.v1.core.JoinType
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.compoundOr
+import org.jetbrains.exposed.v1.core.lowerCase
 import org.jetbrains.exposed.v1.core.or
 import org.jetbrains.exposed.v1.core.statements.UpsertSqlExpressionBuilder.inList
 import org.jetbrains.exposed.v1.jdbc.andWhere
@@ -188,7 +189,7 @@ class UserRepositoryImpl : UserRepository {
             )
             .selectAll()
             .where {
-                UserTable.username eq emailOrUsername or (UserTable.email eq emailOrUsername)
+                UserTable.username eq emailOrUsername or (UserTable.email.lowerCase() eq emailOrUsername.lowercase())
             }
 
 

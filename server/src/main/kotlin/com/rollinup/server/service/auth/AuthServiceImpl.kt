@@ -186,6 +186,4 @@ class AuthServiceImpl(
             expiredAt = Instant.now().plusSeconds(80)
         )
     }
-
-
 }
