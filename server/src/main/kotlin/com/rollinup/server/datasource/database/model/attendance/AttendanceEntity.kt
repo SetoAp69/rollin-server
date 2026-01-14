@@ -78,7 +78,7 @@ data class AttendanceEntity(
                     username = row[student[UserTable.username]],
                     name = row[student[UserTable.firstName]] + " " + row[student[UserTable.lastName]],
                     classX = row[ClassTable.name],
-                    studentId = row.getOrNull(UserTable.studentId)
+                    studentId = row.getOrNull(student[UserTable.studentId])
                 ),
                 status = row[AttendanceTable.status],
                 checkedInAt = row.getOrNull(AttendanceTable.checkedInAt)?.toString(),
