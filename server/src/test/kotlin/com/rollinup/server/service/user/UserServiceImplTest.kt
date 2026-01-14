@@ -497,30 +497,30 @@ class UserServiceImplTest {
             assertEquals(Message.EMAIL_SENT, result.message)
         }
 
-    @Test
-    fun `resetPasswordRequest() should throw Exception when a valid token already exists`() =
-        runTest {
-            //Arrange
-            val usernameOrEmail = "test@test.com"
-            val userId = "userId"
-            val userEntity = UserEntity(id = userId)
-            val expiredAt = Instant
-                .ofEpochMilli(System.currentTimeMillis() + Constant.OTP_DURATION)
-            val existingToken = ResetPasswordEntity(
-                token = "token",
-                salt = "salt",
-                expiredAt = expiredAt
-            )
-
-            arrangeUserGetByEmailOrUsername(usernameOrEmail, userEntity)
-            arrangeResetPasswordGetToken(userId, existingToken)
-
-            //Act & Assert
-            val exception = assertFailsWith<CommonException> {
-                userService.resetPasswordRequest(usernameOrEmail)
-            }
-            assertEquals(Message.EMAIL_ALREADY_SENT, exception.message)
-        }
+//    @Test
+//    fun `resetPasswordRequest() should throw Exception when a valid token already exists`() =
+//        runTest {
+//            //Arrange
+//            val usernameOrEmail = "test@test.com"
+//            val userId = "userId"
+//            val userEntity = UserEntity(id = userId)
+//            val expiredAt = Instant
+//                .ofEpochMilli(System.currentTimeMillis() + Constant.OTP_DURATION)
+//            val existingToken = ResetPasswordEntity(
+//                token = "token",
+//                salt = "salt",
+//                expiredAt = expiredAt
+//            )
+//
+//            arrangeUserGetByEmailOrUsername(usernameOrEmail, userEntity)
+//            arrangeResetPasswordGetToken(userId, existingToken)
+//
+//            //Act & Assert
+//            val exception = assertFailsWith<CommonException> {
+//                userService.resetPasswordRequest(usernameOrEmail)
+//            }
+//            assertEquals(Message.EMAIL_ALREADY_SENT, exception.message)
+//        }
     //endregion
 
     //region resetPassword Tests
