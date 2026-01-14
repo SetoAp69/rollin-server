@@ -5,6 +5,7 @@ import com.rollinup.server.datasource.database.model.attendance.AttendanceByStud
 import com.rollinup.server.datasource.database.model.attendance.AttendanceEntity
 import com.rollinup.server.datasource.database.model.attendance.AttendanceSummaryEntity
 import com.rollinup.server.datasource.database.model.attendance.ExportAttendanceDataEntity
+import com.rollinup.server.model.Role
 import com.rollinup.server.model.request.attendance.GetAttendanceByClassQueryParams
 import com.rollinup.server.model.request.attendance.GetAttendanceByStudentQueryParams
 import com.rollinup.server.model.response.attendance.GetAttendanceByClassListResponse
@@ -18,6 +19,7 @@ class AttendanceMapper {
 
     fun mapAttendanceById(
         data: AttendanceEntity,
+        role: Role
     ) = GetAttendanceByIdResponse(
         id = data.id,
         student = data.student.let { student ->
@@ -32,6 +34,7 @@ class AttendanceMapper {
         status = data.status.value,
         updatedAt = data.updatedAt,
         createdAt = data.createdAt,
+        attachment = if(role==Role.STUDENT) null else data.attachment,
         permit = data.permit?.let { permit ->
             GetAttendanceByIdResponse.Permit(
                 id = permit.id,

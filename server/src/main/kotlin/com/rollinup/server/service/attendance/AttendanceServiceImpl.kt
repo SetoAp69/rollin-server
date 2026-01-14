@@ -12,6 +12,7 @@ import com.rollinup.server.datasource.database.model.attendance.AttendanceEntity
 import com.rollinup.server.datasource.database.repository.attendance.AttendanceRepository
 import com.rollinup.server.datasource.database.repository.permit.PermitRepository
 import com.rollinup.server.mapper.AttendanceMapper
+import com.rollinup.server.model.Role
 import com.rollinup.server.model.request.attendance.CreateAttendanceBody
 import com.rollinup.server.model.request.attendance.CreateAttendanceRequest
 import com.rollinup.server.model.request.attendance.EditAttendanceBody
@@ -79,7 +80,10 @@ class AttendanceServiceImpl(
      * @return A [Response] containing the [GetAttendanceByIdResponse] if found.
      * @throws CommonException if the attendance record is not found.
      */
-    override suspend fun getAttendanceById(id: String): Response<GetAttendanceByIdResponse> =
+    override suspend fun getAttendanceById(
+        id: String,
+        role: Role,
+    ): Response<GetAttendanceByIdResponse> =
         transactionManager.suspendTransaction {
             val result = attendanceRepository.getAttendanceById(id)
                 ?: throw "attendance".notFoundException()
@@ -87,7 +91,7 @@ class AttendanceServiceImpl(
             return@suspendTransaction Response(
                 status = 200,
                 message = "attendance".successGettingResponse(),
-                data = mapper.mapAttendanceById(result)
+                data = mapper.mapAttendanceById(data = result, role = role)
             )
         }
 

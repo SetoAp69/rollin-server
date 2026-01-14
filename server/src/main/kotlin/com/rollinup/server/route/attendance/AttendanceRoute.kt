@@ -127,14 +127,17 @@ fun Route.attendanceRoute() {
     authenticate("auth-jwt") {
         withRole(Role.ADMIN, Role.TEACHER, Role.STUDENT) {
             get("/{id}") {
-                val attendanceId = call.pathParameters["id"]?.let {
-                    it.ifBlank { null }
-                } ?: throw IllegalPathParameterException("id")
+                withClaim { claim->
+                    val role = claim.role
+                    val attendanceId = call.pathParameters["id"]?.let {
+                        it.ifBlank { null }
+                    } ?: throw IllegalPathParameterException("id")
 
 
-                val response = attendanceService.getAttendanceById(id = attendanceId)
+                    val response = attendanceService.getAttendanceById(id = attendanceId,role = role)
 
-                call.respond(status = response.statusCode, message = response)
+                    call.respond(status = response.statusCode, message = response)
+                }
             }
         }
     }
@@ -226,7 +229,8 @@ fun Route.attendanceRoute() {
 
     authenticate("auth-jwt") {
         get("/export") {
-            val dateRange = call.queryParameters["dateRange"]?.stringJsonToList<String>()?.map { LocalDate.parse(it) }
+            val dateRange = call.queryParameters["dateRange"]?.stringJsonToList<String>()
+                ?.map { LocalDate.parse(it) }
             val classKey = call.queryParameters["class"]?.toIntOrNull()
             val queryParams =
                 GetExportAttendanceQueryParams(dateRange = dateRange, classKey = classKey)

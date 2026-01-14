@@ -12,6 +12,7 @@ import com.rollinup.server.datasource.database.model.generalsetting.GeneralSetti
 import com.rollinup.server.datasource.database.repository.attendance.AttendanceRepository
 import com.rollinup.server.datasource.database.repository.permit.PermitRepository
 import com.rollinup.server.mapper.AttendanceMapper
+import com.rollinup.server.model.Role
 import com.rollinup.server.model.request.attendance.GetAttendanceByStudentQueryParams
 import com.rollinup.server.model.response.Response
 import com.rollinup.server.model.response.attendance.GetAttendanceByIdResponse
@@ -211,7 +212,7 @@ class AttendanceServiceImplTest {
         } returns mockkEntity
 
         //Act
-        val response = attendanceService.getAttendanceById(id)
+        val response = attendanceService.getAttendanceById(id, Role.STUDENT)
 
         //Assert
         coVerify {
@@ -233,7 +234,7 @@ class AttendanceServiceImplTest {
 
         //Act
         val exception = assertFailsWith<CommonException> {
-            attendanceService.getAttendanceById(id)
+            attendanceService.getAttendanceById(id,Role.STUDENT)
         }
 
         //Assert

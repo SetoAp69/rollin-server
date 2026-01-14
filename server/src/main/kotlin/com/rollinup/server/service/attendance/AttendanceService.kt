@@ -1,5 +1,6 @@
 package com.rollinup.server.service.attendance
 
+import com.rollinup.server.model.Role
 import com.rollinup.server.model.request.attendance.CreateAttendanceRequest
 import com.rollinup.server.model.request.attendance.GetAttendanceByClassQueryParams
 import com.rollinup.server.model.request.attendance.GetAttendanceByStudentQueryParams
@@ -15,7 +16,7 @@ import java.io.File
 interface AttendanceService {
 //    suspend fun getAttendance(queryParams: AttendanceQueryParams): Response<GetAttendanceListResponse>
 
-    suspend fun getAttendanceById(id: String): Response<GetAttendanceByIdResponse>
+    suspend fun getAttendanceById(id: String, role: Role): Response<GetAttendanceByIdResponse>
 
     suspend fun checkIn(
         id: String,
