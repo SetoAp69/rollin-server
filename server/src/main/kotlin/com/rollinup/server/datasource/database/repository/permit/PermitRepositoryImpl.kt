@@ -222,6 +222,7 @@ class PermitRepositoryImpl() : PermitRepository {
             }
         ) { statement ->
             with(body) {
+                println("Durasi: $duration")
                 duration?.let {
                     val from = Instant.ofEpochMilli(it.first())
                     val to = Instant.ofEpochMilli(it.last())

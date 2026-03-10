@@ -484,6 +484,13 @@ class AttendanceRepositoryImpl() : AttendanceRepository {
         }
     }
 
+    override fun deleteAttendanceFromPermit(permitId: String) {
+        val permitUUID = UUID.fromString(permitId)
+        AttendanceTable.deleteWhere {
+            AttendanceTable.permit eq permitUUID
+        }
+    }
+
     override fun getAttendanceListByPermit(listId: List<String>): List<AttendanceEntity> {
         val permitUUID = listId.map { UUID.fromString(it) }
 
