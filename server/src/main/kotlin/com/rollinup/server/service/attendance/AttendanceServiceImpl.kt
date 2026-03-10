@@ -365,6 +365,7 @@ class AttendanceServiceImpl(
         transactionManager.suspendTransaction {
             attendanceRepository.updateAttendanceData(listOf(id), body)
             attendanceRepository.updatePermit(id, null)
+            rollbackFutureAttendance(id)
         }
     }
 
@@ -432,6 +433,8 @@ class AttendanceServiceImpl(
                     PermitType.ABSENCE -> AttendanceStatus.ABSENT
                 }
             )
+
+            rollbackFutureAttendance(studentId = studentId, currentDate = duration.last())
         }
     }
 
@@ -477,7 +480,6 @@ class AttendanceServiceImpl(
             permit ?: return@forEach
             rollBackAttendance(att, permit.type)
         }
-
     }
 
     private fun rollBackAttendance(attendanceList: List<AttendanceEntity>, permitType: PermitType) {
@@ -503,6 +505,19 @@ class AttendanceServiceImpl(
         }
     }
 
+    private fun rollbackFutureAttendance(id: String) {
+        val currentAttendance =
+            attendanceRepository.getAttendanceById(id) ?: throw "attendance".notFoundException()
+        val currentDate = LocalDate.parse(currentAttendance.date)
+
+        attendanceRepository.deleteFutureAttendanceData( currentAttendance.student.id, currentDate)
+    }
+
+    private fun rollbackFutureAttendance(studentId:String, currentDate: LocalDate){
+        attendanceRepository.deleteFutureAttendanceData(studentId, currentDate)
+    }
+
+
     private fun getDispensationStatus(time: LocalTime?): AttendanceStatus {
         time ?: throw CommonException(Message.INVALID_TIME_FORMAT)
         val offsetTime = OffsetTime.of(time, Utils.getOffset())
@@ -518,6 +533,7 @@ class AttendanceServiceImpl(
     private suspend fun handleUpdateAlpha(id: String) {
         transactionManager.suspendTransaction {
             attendanceRepository.deleteAttendanceData(listOf(id))
+            rollbackFutureAttendance(id)
         }
     }
 

@@ -29,7 +29,8 @@ interface PermitService {
     ): Response<Unit>
 
     suspend fun editPermit(
-        id: String, formHashMap: HashMap<String, String>,
+        id: String,
+        formHashMap: HashMap<String, String>,
         fileHashMap: HashMap<String, File>,
     ): Response<Unit>
 

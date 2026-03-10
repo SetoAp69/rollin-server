@@ -26,8 +26,7 @@ class FileServiceImpl(
         file: File,
     ): String = withContext(Dispatchers.IO) {
         try {
-
-            val blobId = BlobId.of(googleStorage.bucketName, filePath + file.name)
+            val blobId = BlobId.of(googleStorage.bucketName, filePath)
             val contentType = Utils.getContentType(file.extension).contentType
             val blobInfo = BlobInfo
                 .newBuilder(blobId)
@@ -66,6 +65,5 @@ class FileServiceImpl(
         } catch (e: StorageException) {
             throw file.getFileException()
         }
-
     }
 }

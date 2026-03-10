@@ -26,6 +26,7 @@ import com.rollinup.server.util.Message
 import com.rollinup.server.util.Utils
 import com.rollinup.server.util.Utils.isWeekend
 import com.rollinup.server.util.Utils.toLocalDate
+import com.rollinup.server.util.Utils.toLocalDateTime
 import com.rollinup.server.util.Utils.toLocalTime
 import com.rollinup.server.util.illegalStatusExeptions
 import com.rollinup.server.util.manager.TransactionManager
@@ -215,6 +216,24 @@ class PermitServiceImpl(
 
         val attachment = fileHash["attachment"]
         val body = EditPermitBody.fromHashMap(formHash)
+
+        val selectedPermit = permitRepository.getPermitById(id)
+            ?:throw "permit".notFoundException()
+
+
+        val start = selectedPermit.permitStart.toLocalDateTime().toInstant(Utils.getOffset())
+        val end = selectedPermit.permitEnd.toLocalDateTime().toInstant(Utils.getOffset())
+
+        val overLappingPermits = permitRepository.getOverlappingPendingPermits(
+            studentId = selectedPermit.student.id,
+            startTime = start,
+            endTime = end
+        )
+
+        if(overLappingPermits.isNotEmpty()){
+            val overLappingPermitsId = overLappingPermits.map { it.id }
+            handleCancelWithRollback(overLappingPermitsId)
+        }
 
         if (attachment != null) {
             handleEditWithAttachment(

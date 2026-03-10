@@ -22,15 +22,13 @@ fun Application.configureDatabase() {
                 sqlLogger = object : SqlLogger {
                     override fun log(
                         context: StatementContext,
-                        transaction: Transaction
+                        transaction: Transaction,
                     ) {
-                        println("transaction : $transaction")
+//                        println("transaction : $transaction")
                     }
                 }
             }
 
         ),
-
-
-        )
+    )
 }
