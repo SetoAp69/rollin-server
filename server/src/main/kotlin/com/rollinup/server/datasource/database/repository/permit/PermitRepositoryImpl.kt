@@ -21,6 +21,7 @@ import org.jetbrains.exposed.v1.core.SqlExpressionBuilder.inList
 import org.jetbrains.exposed.v1.core.alias
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.compoundOr
+import org.jetbrains.exposed.v1.core.or
 import org.jetbrains.exposed.v1.jdbc.andWhere
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insert
@@ -221,9 +222,10 @@ class PermitRepositoryImpl() : PermitRepository {
             }
         ) { statement ->
             with(body) {
+                println("Durasi: $duration")
                 duration?.let {
                     val from = Instant.ofEpochMilli(it.first())
-                    val to = Instant.ofEpochMilli(it.first())
+                    val to = Instant.ofEpochMilli(it.last())
                     statement[PermitTable.startTime] = from
                     statement[PermitTable.endTime] = to
                 }
@@ -275,8 +277,10 @@ class PermitRepositoryImpl() : PermitRepository {
             .selectAll()
             .where {
                 (PermitTable.user_id eq UUID.fromString(studentId)) and
-                        (PermitTable.approvalStatus eq ApprovalStatus.APPROVAL_PENDING) and
-                        (PermitTable.startTime lessEq endTime) and
+                        (PermitTable.approvalStatus eq ApprovalStatus.APPROVAL_PENDING)
+            }
+            .andWhere {
+                (PermitTable.startTime lessEq endTime) or
                         (PermitTable.endTime greaterEq startTime)
             }
 

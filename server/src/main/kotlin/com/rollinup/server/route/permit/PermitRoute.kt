@@ -18,6 +18,7 @@ import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
+import io.ktor.server.routing.patch
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import org.koin.ktor.ext.inject
@@ -121,7 +122,7 @@ fun Route.permitRoute() {
                 multiPart.forEachPart { partData ->
                     when (partData) {
                         is PartData.FormItem -> Utils.fetchFormData(partData, formHashMap)
-                        is PartData.FileItem -> Utils.fetchFileData(partData, fileHashMap)
+                        is PartData.FileItem -> Utils.fetchFileData(partData, fileHashMap, "attachment")
                         else -> {}
                     }
                     partData.dispose()
@@ -138,7 +139,7 @@ fun Route.permitRoute() {
 
     authenticate("auth-jwt") {
         withRole(Role.TEACHER, Role.ADMIN, Role.STUDENT) {
-            put("/{id}") {
+            patch("/{id}") {
                 val id = call.pathParameters["id"]?.let {
                     it.ifBlank { null }
                 } ?: throw IllegalPathParameterException("id")
@@ -168,9 +169,11 @@ fun Route.permitRoute() {
 
     authenticate("auth-jwt") {
         withRole(Role.TEACHER, Role.STUDENT, Role.ADMIN) {
-            put("/cancel") {
-                val body = call.receive<ListIdBody>()
-                val response = service.cancelPermit(body.listId)
+            put("/cancel/{id}") {
+                 val id = call.pathParameters["id"]?.let {
+                    it.ifBlank { null }
+                } ?: throw IllegalPathParameterException("id")
+                val response = service.cancelPermit(listOf(id))
                 call.respond(status = response.statusCode, message = response)
             }
         }

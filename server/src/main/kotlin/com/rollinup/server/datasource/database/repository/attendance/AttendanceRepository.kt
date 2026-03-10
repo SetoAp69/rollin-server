@@ -40,6 +40,8 @@ interface AttendanceRepository {
 
     fun deleteAttendanceData(listId: List<String>)
 
+    fun deleteFutureAttendanceData(studentId: String, currentDate:LocalDate)
+
     fun updatePermit(id: String, permitId: String?)
 
     fun createAttendanceFromPermit(
@@ -48,6 +50,8 @@ interface AttendanceRepository {
         dates: List<LocalDate>,
         status: AttendanceStatus,
     )
+
+    fun deleteAttendanceFromPermit(permitId: String)
 
     fun getAttendanceListByPermit(listId: List<String>): List<AttendanceEntity>
 

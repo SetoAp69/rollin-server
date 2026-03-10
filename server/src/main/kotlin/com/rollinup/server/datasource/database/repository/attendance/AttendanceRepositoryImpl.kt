@@ -27,6 +27,7 @@ import org.jetbrains.exposed.v1.core.JoinType
 import org.jetbrains.exposed.v1.core.Op
 import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.v1.core.SqlExpressionBuilder.greater
 import org.jetbrains.exposed.v1.core.SqlExpressionBuilder.inList
 import org.jetbrains.exposed.v1.core.SqlExpressionBuilder.neq
 import org.jetbrains.exposed.v1.core.alias
@@ -473,6 +474,20 @@ class AttendanceRepositoryImpl() : AttendanceRepository {
 
         AttendanceTable.deleteWhere {
             AttendanceTable._id inList uuidList
+        }
+    }
+
+    override fun deleteFutureAttendanceData(studentId: String, currentDate: LocalDate) {
+        val studentUUID = UUID.fromString(studentId)
+        AttendanceTable.deleteWhere {
+            AttendanceTable.userId eq studentUUID and (AttendanceTable.date greater currentDate)
+        }
+    }
+
+    override fun deleteAttendanceFromPermit(permitId: String) {
+        val permitUUID = UUID.fromString(permitId)
+        AttendanceTable.deleteWhere {
+            AttendanceTable.permit eq permitUUID
         }
     }
 
