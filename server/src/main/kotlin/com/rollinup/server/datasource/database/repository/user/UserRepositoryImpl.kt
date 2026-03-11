@@ -94,6 +94,7 @@ class UserRepositoryImpl : UserRepository {
         UserTable.insert { statement ->
             statement[username] = request.userName
             statement[studentId] = request.studentId
+            statement[firstName] = ""
             statement[lastName] = request.fullname
             statement[email] = request.email
             statement[classX] = classId

@@ -10,9 +10,9 @@ import kotlinx.serialization.Serializable
 data class EditUserRequest(
     @SerialName("username")
     val userName: String? = null,
-    @SerialName("firstname")
-    val firstName: String? = null,
-    @SerialName("lastname")
+//    @SerialName("firstname")
+    val firstName: String? = "",
+    @SerialName("fullName")
     val lastName: String? = null,
     @SerialName("email")
     val email: String? = null,
@@ -52,8 +52,8 @@ data class EditUserRequest(
             userName?.isBlank()
                 ?: false -> ValidationResult.Invalid(ValidationMessages.USERNAME_BLANK)
 
-            firstName?.isBlank()
-                ?: false -> ValidationResult.Invalid(ValidationMessages.FIRST_NAME_BLANK)
+//            firstName?.isBlank()
+//                ?: false -> ValidationResult.Invalid(ValidationMessages.FIRST_NAME_BLANK)
 
             lastName?.isBlank()
                 ?: false -> ValidationResult.Invalid(ValidationMessages.LAST_NAME_BLANK)
