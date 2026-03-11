@@ -39,7 +39,7 @@ data class PermitListEntity(
                 date = row[PermitTable.createdAt].toLocalDate().toString(),
                 student = User(
                     id = row[UserTable.user_id].toString(),
-                    name = row[UserTable.firstName] + " " + row[UserTable.firstName],
+                    name = row[UserTable.lastName],
                     username = row[UserTable.username],
                     classX = row[ClassTable.name]
                 ),
