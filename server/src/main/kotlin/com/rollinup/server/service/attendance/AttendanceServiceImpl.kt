@@ -363,9 +363,9 @@ class AttendanceServiceImpl(
             body = body.copy(status = status)
         }
         transactionManager.suspendTransaction {
+            rollbackFutureAttendance(id)
             attendanceRepository.updateAttendanceData(listOf(id), body)
             attendanceRepository.updatePermit(id, null)
-            rollbackFutureAttendance(id)
         }
     }
 
@@ -532,8 +532,8 @@ class AttendanceServiceImpl(
      */
     private suspend fun handleUpdateAlpha(id: String) {
         transactionManager.suspendTransaction {
-            attendanceRepository.deleteAttendanceData(listOf(id))
             rollbackFutureAttendance(id)
+            attendanceRepository.deleteAttendanceData(listOf(id))
         }
     }
 
