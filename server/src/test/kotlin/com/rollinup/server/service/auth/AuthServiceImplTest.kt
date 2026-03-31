@@ -202,7 +202,7 @@ class AuthServiceImplTest {
             userName = "username",
             email = "email",
             firstName = "firstName",
-            lastName = "lastName",
+            fullName = "lastName",
             role = UserEntity.Role(
                 id = "id",
                 key = 2,
@@ -352,7 +352,7 @@ class AuthServiceImplTest {
             userName = "username",
             email = "email",
             firstName = "firstName",
-            lastName = "lastName",
+            fullName = "lastName",
             role = UserEntity.Role(
                 id = "id",
                 key = 2,
@@ -405,7 +405,7 @@ class AuthServiceImplTest {
             userName = "username",
             email = "email",
             firstName = "firstName",
-            lastName = "lastName",
+            fullName = "lastName",
             role = UserEntity.Role(
                 id = "id",
                 key = 2,
@@ -529,7 +529,7 @@ class AuthServiceImplTest {
                 userName = "userName",
                 email = "email",
                 firstName = "firstName",
-                lastName = "lastName",
+                fullName = "lastName",
                 role = UserEntity.Role(
                     id = "id",
                     key = 2,

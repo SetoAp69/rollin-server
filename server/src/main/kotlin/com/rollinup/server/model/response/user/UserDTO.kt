@@ -13,7 +13,7 @@ data class UserDTO(
     val studentId: String? = null,
     @SerialName("email")
     val email: String = "",
-    @SerialName("last_name")
+    @SerialName("full_name")
     val fullName: String = "",
     @SerialName("role")
     val role: String = "",

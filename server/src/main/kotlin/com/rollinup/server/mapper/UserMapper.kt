@@ -23,7 +23,7 @@ class UserMapper {
                     id = it.id,
                     userName = it.userName,
                     email = it.email,
-                    fullName = it.lastName,
+                    fullName = it.fullName,
                     role = it.role.name,
                     gender = it.gender,
                     classX = it.classX?.name,
@@ -42,7 +42,7 @@ class UserMapper {
     ) = GetUserByIdResponse(
         id = data.id,
         username = data.userName,
-        fullName = data.lastName,
+        fullName = data.fullName,
         studentId = data.studentId,
         phoneNumber = data.phoneNumber,
         role = data.role.let {

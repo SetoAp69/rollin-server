@@ -15,7 +15,7 @@ class AuthMapper {
                 id = data.id,
                 userName = data.userName,
                 email = data.email,
-                fullName = data.lastName,
+                fullName = data.fullName,
                 role = data.role.name,
                 gender = data.gender,
                 classX = data.classX?.name?:"",

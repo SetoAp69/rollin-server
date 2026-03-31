@@ -297,7 +297,7 @@ class UserRepositoryImpl : UserRepository {
             id = this[UserTable.user_id].toString(),
             userName = this[UserTable.username],
             email = this[UserTable.email],
-            lastName = this[UserTable.fullName],
+            fullName = this[UserTable.fullName],
             role = UserEntity.Role(
                 id = this[RoleTable._id].toString(),
                 key = this[RoleTable.key],
