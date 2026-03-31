@@ -1,13 +1,11 @@
 package com.rollinup.server.datasource.database.model.user
 
-import com.rollinup.server.model.Role
-
 data class UserEntity(
     val id: String = "",
     val userName: String = "",
     val email: String = "",
     val firstName: String = "",
-    val lastName: String = "",
+    val fullName: String = "",
     val studentId: String? = null,
     val role: Role = Role(),
     val gender: String = "",
