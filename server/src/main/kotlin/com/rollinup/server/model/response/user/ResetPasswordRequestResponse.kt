@@ -6,5 +6,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ResetPasswordRequestResponse(
     @SerialName("email")
-    val email: String
+    val email: String = "",
+    @SerialName("expired_at")
+    val expiredAt: String = "",
 )

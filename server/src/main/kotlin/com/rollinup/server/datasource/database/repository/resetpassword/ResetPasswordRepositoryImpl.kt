@@ -36,7 +36,7 @@ class ResetPasswordRepositoryImpl() : ResetPasswordRepository {
     override fun saveToken(id: String, token: String, salt: String) {
 
         ResetPasswordTokenTable.upsert(
-            ResetPasswordTokenTable.userId,
+            userId,
             body = { statement ->
                 statement[userId] = UUID.fromString(id)
                 statement[ResetPasswordTokenTable.token] = token

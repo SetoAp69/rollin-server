@@ -4,7 +4,6 @@ import com.auth0.jwt.JWT
 import com.rollinup.server.CommonException
 import com.rollinup.server.Constant
 import com.rollinup.server.InvalidTokenExceptions
-import com.rollinup.server.datasource.database.model.verification.VerificationTokenEntity
 import com.rollinup.server.datasource.database.repository.resetpassword.ResetPasswordRepository
 import com.rollinup.server.datasource.database.repository.user.UserRepository
 import com.rollinup.server.datasource.database.repository.verification.VerificationTokenRepository
@@ -19,6 +18,7 @@ import com.rollinup.server.model.response.Response
 import com.rollinup.server.model.response.user.GetAllUserResponse
 import com.rollinup.server.model.response.user.GetUserByIdResponse
 import com.rollinup.server.model.response.user.GetUserOptionsResponse
+import com.rollinup.server.model.response.user.ResendOtpResponse
 import com.rollinup.server.model.response.user.ResetPasswordRequestResponse
 import com.rollinup.server.model.response.user.ValidateResetOtpResponse
 import com.rollinup.server.model.response.user.ValidateVerificationOtpResponse
@@ -37,7 +37,8 @@ import com.rollinup.server.util.notFoundException
 import com.rollinup.server.util.successEditResponse
 import com.rollinup.server.util.successGettingResponse
 import com.rollinup.server.util.toCensoredEmail
-import java.time.Instant
+import io.ktor.http.HttpStatusCode
+import java.time.OffsetDateTime
 
 class UserServiceImpl(
     private val userRepository: UserRepository,
@@ -178,44 +179,28 @@ class UserServiceImpl(
 
     override suspend fun resetPasswordRequest(usernameOrEmail: String): Response<ResetPasswordRequestResponse> =
         transactionManager.suspendTransaction {
-            val response = mapper.mapResetPasswordRequestResponse(
-                email = usernameOrEmail.toCensoredEmail()
-            )
-
             val user = userRepository.getUserByEmailOrUsername(usernameOrEmail)
                 ?: return@suspendTransaction Response(
-                    status = 200,
-                    message = Message.EMAIL_SENT,
-                    data = response
+                    status = HttpStatusCode.BadRequest.value,
+                    message = Message.EMAIL_NOT_FOUND,
                 )
-
             val existedToken = resetPasswordRepository.getToken(id = user.id)
+            val otpExpired = existedToken?.let {
+                it.expiredAt < OffsetDateTime.now()
+            } ?: true
 
-            val isStillValid = existedToken != null &&
-                    existedToken.expiredAt > Instant.now()
-
-            if (isStillValid) {
-                return@suspendTransaction Response(
-                    status = 200,
-                    message = Message.EMAIL_SENT,
-                    data = response
+            if (otpExpired) {
+                updateResetPasswordTokenAndSendOtp(
+                    receiver = user.email,
+                    userId = user.id
                 )
             }
 
-            val otp = Utils.generateRandom(5)
-
-            emailService.sendEmail(
-                receiver = usernameOrEmail,
-                message = Message.getResetPasswordEmail(otp),
-                subject = "Reset Password"
-            )
-
-            val saltedToken = hashingService.generateSaltedHash(otp)
-
-            resetPasswordRepository.saveToken(
-                id = user.id,
-                token = saltedToken.value,
-                salt = saltedToken.salt
+            val expiredAt =
+                resetPasswordRepository.getToken(user.id)?.expiredAt ?: OffsetDateTime.now()
+            val response = mapper.mapResetPasswordRequestResponse(
+                email = usernameOrEmail.toCensoredEmail(),
+                expiredAt = expiredAt
             )
 
             return@suspendTransaction Response(
@@ -224,6 +209,26 @@ class UserServiceImpl(
                 data = response
             )
         }
+
+    private fun updateResetPasswordTokenAndSendOtp(
+        receiver: String,
+        userId: String,
+    ) {
+        val otp = Utils.generateRandom(5)
+        val saltedToken = hashingService.generateSaltedHash(otp)
+
+        resetPasswordRepository.saveToken(
+            id = userId,
+            token = saltedToken.value,
+            salt = saltedToken.salt
+        )
+
+        emailService.sendEmail(
+            receiver = receiver,
+            message = Message.getResetPasswordEmail(otp),
+            subject = "Reset Password"
+        )
+    }
 
     override suspend fun resetPassword(
         token: String,
@@ -313,39 +318,54 @@ class UserServiceImpl(
         )
     }
 
-    override suspend fun resendVerificationOtp(id: String): Response<Unit> =
+    override suspend fun resendVerificationOtp(id: String): Response<ResendOtpResponse> =
         transactionManager.suspendTransaction {
             val user = userRepository.getUserById(id)
                 ?: throw CommonException(Message.USER_NOT_FOUND)
 
             val otp = verificationTokenRepository.getTokenByUser(id)
-            val isOTPExpired = otp?.let { isOTPExpired(it) } ?: true
 
-            if (isOTPExpired) {
-                val newOtp = Utils.generateRandom(5)
+            val otpExpired = otp?.let {
+                it.expiredAt < OffsetDateTime.now()
+            } ?: true
 
-                val saltedOtp = hashingService.generateSaltedHash(newOtp)
-
-                val expiredAT = (System.currentTimeMillis() + Constant.OTP_DURATION)
-                    .let { Instant.ofEpochMilli(it) }
-
-                verificationTokenRepository.createToken(
-                    id = id,
-                    token = saltedOtp.value,
-                    salt = saltedOtp.salt,
-                    expiredAt = expiredAT
+            if (otpExpired) {
+                updateAndSentVerificationOtp(
+                    userId = user.id,
+                    receiver = user.email
                 )
-
-                emailService.sendEmail(
-                    receiver = user.email,
-                    message = Message.getVerificationEmail(newOtp),
-                    subject = "First Time Login Verification"
-                )
-            } else {
-                throw CommonException(Message.EMAIL_ALREADY_SENT)
             }
-            return@suspendTransaction Response(status = 202, message = Message.EMAIL_ALREADY_SENT)
+            val expiredAt =
+                verificationTokenRepository.getTokenByUser(id)?.expiredAt ?: OffsetDateTime.now()
+
+            val response = ResendOtpResponse(expiredAt.toString())
+
+            return@suspendTransaction Response(
+                status = 202,
+                message = Message.EMAIL_ALREADY_SENT,
+                data = response
+            )
         }
+
+    private fun updateAndSentVerificationOtp(
+        userId: String,
+        receiver: String,
+    ) {
+        val newOtp = Utils.generateRandom(5)
+        val saltedOtp = hashingService.generateSaltedHash(newOtp)
+
+        verificationTokenRepository.createToken(
+            id = userId,
+            token = saltedOtp.value,
+            salt = saltedOtp.salt
+        )
+
+        emailService.sendEmail(
+            receiver = receiver,
+            message = Message.getVerificationEmail(newOtp),
+            subject = "First Time Login Verification"
+        )
+    }
 
     override suspend fun updatePasswordAndVerify(
         body: UpdatePasswordAndDeviceRequest,
@@ -387,12 +407,12 @@ class UserServiceImpl(
     }
 
     private fun validateOtp(
-        expiredAt: Instant,
+        expiredAt: OffsetDateTime,
         otp: String,
         saltedOtp: String,
         salt: String,
     ) {
-        val currentTime = Instant.now()
+        val currentTime = OffsetDateTime.now()
         if (expiredAt < currentTime)
             throw CommonException(Message.EXPIRED_TOKEN)
 
@@ -404,11 +424,6 @@ class UserServiceImpl(
         )
         if (!isValid)
             throw CommonException(Message.INVALID_TOKEN)
-    }
-
-    private fun isOTPExpired(otp: VerificationTokenEntity): Boolean {
-        val now = Instant.now()
-        return now > otp.expiredAt
     }
 
     private fun validateJWT(

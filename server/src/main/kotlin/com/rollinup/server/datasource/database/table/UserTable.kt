@@ -12,8 +12,7 @@ object UserTable : Table("users") {
     val username = varchar("username", 50)
     val studentId = varchar("student_id", 30).nullable()
     val email = varchar("email", 100)
-    val firstName = varchar("first_name", 30)
-    val lastName = varchar("last_name", 60)
+    val fullName = varchar("full_name", 60)
     val address = varchar("address", 100)
     val password = varchar("password", 128)
     val salt = varchar("salt", 64)
@@ -47,8 +46,7 @@ object UserTable : Table("users") {
         get() = listOf(
             username,
             email,
-            firstName,
-            lastName,
+            fullName,
             address,
             phoneNumber
         )
@@ -57,8 +55,7 @@ object UserTable : Table("users") {
         get() = mapOf(
             "username" to username,
             "email" to email,
-            "first_name" to firstName,
-            "last_name" to lastName,
+            "fullName" to fullName,
             "gender" to gender
         )
 }

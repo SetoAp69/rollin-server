@@ -94,8 +94,7 @@ class UserRepositoryImpl : UserRepository {
         UserTable.insert { statement ->
             statement[username] = request.userName
             statement[studentId] = request.studentId
-            statement[firstName] = ""
-            statement[lastName] = request.fullname
+            statement[fullName] = request.fullname
             statement[email] = request.email
             statement[classX] = classId
             statement[password] = request.password
@@ -119,8 +118,7 @@ class UserRepositoryImpl : UserRepository {
             body = { statement ->
                 with(request) {
                     userName?.let { statement[UserTable.username] = it }
-                    firstName?.let { statement[UserTable.firstName] = it }
-                    lastName?.let { statement[UserTable.lastName] = it }
+                    lastName?.let { statement[UserTable.fullName] = it }
                     email?.let { statement[UserTable.email] = it }
                     role?.let { statement[UserTable.role] = UUID.fromString(it) }
                     gender?.let { statement[UserTable.gender] = Gender.fromValue(it) }
@@ -299,8 +297,7 @@ class UserRepositoryImpl : UserRepository {
             id = this[UserTable.user_id].toString(),
             userName = this[UserTable.username],
             email = this[UserTable.email],
-            firstName = this[UserTable.firstName],
-            lastName = this[UserTable.lastName],
+            lastName = this[UserTable.fullName],
             role = UserEntity.Role(
                 id = this[RoleTable._id].toString(),
                 key = this[RoleTable.key],

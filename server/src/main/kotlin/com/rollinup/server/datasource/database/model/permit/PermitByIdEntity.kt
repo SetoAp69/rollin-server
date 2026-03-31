@@ -45,7 +45,7 @@ data class PermitByIdEntity(
                 name = row[PermitTable.name],
                 student = User(
                     id = row[student[UserTable.user_id]].toString(),
-                    name = row[student[UserTable.firstName]] + " " + row[student[UserTable.lastName]],
+                    name =  row[student[UserTable.fullName]],
                     username = row[student[UserTable.username]],
                     studentId = row.getOrNull(student[UserTable.studentId]),
                     classX = row.getOrNull(ClassTable.name)
@@ -61,7 +61,7 @@ data class PermitByIdEntity(
                     if (it == null) null
                     else User(
                         id = it.toString(),
-                        name = row[approver[UserTable.firstName]] + " " + row[approver[UserTable.lastName]],
+                        name = row[approver[UserTable.fullName]].substringBefore(" "),
                         username = row[approver[UserTable.username]]
                     )
                 },

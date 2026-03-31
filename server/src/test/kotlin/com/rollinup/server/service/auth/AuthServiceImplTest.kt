@@ -9,8 +9,6 @@ import com.rollinup.server.datasource.database.repository.refreshtoken.RefreshTo
 import com.rollinup.server.datasource.database.repository.user.UserRepository
 import com.rollinup.server.datasource.database.repository.verification.VerificationTokenRepository
 import com.rollinup.server.mapper.AuthMapper
-import com.rollinup.server.mockkEnvironment
-import com.rollinup.server.model.Role
 import com.rollinup.server.model.request.auth.LoginRequest
 import com.rollinup.server.model.response.Response
 import com.rollinup.server.model.response.auth.LoginResponse
@@ -219,8 +217,7 @@ class AuthServiceImplTest {
             id = "id",
             userName = "username",
             email = "email",
-            firstName = "firstName",
-            lastName = "lastName",
+            fullName = "lastName",
             role = "student",
             gender = "F",
             classX = ""
@@ -295,7 +292,7 @@ class AuthServiceImplTest {
         } returns SaltedHash("hash", "salt")
 
         coEvery { emailService.sendEmail(any(), any(), any()) } returns Unit
-        coEvery { verificationTokenRepository.createToken(any(), any(), any(), any()) } returns Unit
+        coEvery { verificationTokenRepository.createToken(any(), any(), any()) } returns Unit
 
         //Act
         val result = authService.login(loginRequest)

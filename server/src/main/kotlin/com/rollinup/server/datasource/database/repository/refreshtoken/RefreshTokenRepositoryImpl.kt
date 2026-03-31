@@ -4,7 +4,6 @@ import com.rollinup.server.datasource.database.model.user.UserEntity
 import com.rollinup.server.datasource.database.table.RefreshTokenTable
 import com.rollinup.server.datasource.database.table.RoleTable
 import com.rollinup.server.datasource.database.table.UserTable
-import com.rollinup.server.model.Role
 import org.jetbrains.exposed.v1.core.JoinType
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.statements.UpsertSqlExpressionBuilder.eq
@@ -68,8 +67,7 @@ class RefreshTokenRepositoryImpl() : RefreshTokenRepository {
             id = this[UserTable.user_id].toString(),
             userName = this[UserTable.username],
             email = this[UserTable.email],
-            firstName = this[UserTable.firstName],
-            lastName = this[UserTable.lastName],
+            lastName = this[UserTable.fullName],
             role = UserEntity.Role(
                 id = this[RoleTable._id].toString(),
                 key = this[RoleTable.key],

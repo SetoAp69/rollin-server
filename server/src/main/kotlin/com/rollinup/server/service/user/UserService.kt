@@ -9,6 +9,7 @@ import com.rollinup.server.model.response.Response
 import com.rollinup.server.model.response.user.GetAllUserResponse
 import com.rollinup.server.model.response.user.GetUserByIdResponse
 import com.rollinup.server.model.response.user.GetUserOptionsResponse
+import com.rollinup.server.model.response.user.ResendOtpResponse
 import com.rollinup.server.model.response.user.ResetPasswordRequestResponse
 import com.rollinup.server.model.response.user.ValidateResetOtpResponse
 import com.rollinup.server.model.response.user.ValidateVerificationOtpResponse
@@ -45,7 +46,7 @@ interface UserService {
         otp: String,
     ): Response<ValidateVerificationOtpResponse>
 
-    suspend fun resendVerificationOtp(id: String): Response<Unit>
+    suspend fun resendVerificationOtp(id: String): Response<ResendOtpResponse>
 
     suspend fun updatePasswordAndVerify(
         body: UpdatePasswordAndDeviceRequest,

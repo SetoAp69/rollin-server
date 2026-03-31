@@ -76,7 +76,7 @@ data class AttendanceEntity(
                 student = User(
                     id = row[student[UserTable.user_id]].toString(),
                     username = row[student[UserTable.username]],
-                    name = row[student[UserTable.firstName]] + " " + row[student[UserTable.lastName]],
+                    name = row[student[UserTable.fullName]],
                     classX = row[ClassTable.name],
                     studentId = row.getOrNull(student[UserTable.studentId])
                 ),
@@ -99,7 +99,7 @@ data class AttendanceEntity(
                             User(
                                 id = it.toString(),
                                 username = row[approver[UserTable.username]],
-                                name = row[approver[UserTable.firstName]] + " " + row[approver[UserTable.lastName]],
+                                name =row[approver[UserTable.fullName]].substringBefore(" "),
                             )
                         },
                         approvedAt = row.getOrNull(PermitTable.approvedAt)?.toString()

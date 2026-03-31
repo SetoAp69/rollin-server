@@ -8,6 +8,7 @@ import com.rollinup.server.model.response.user.ResetPasswordRequestResponse
 import com.rollinup.server.model.response.user.UserDTO
 import com.rollinup.server.model.response.user.ValidateResetOtpResponse
 import com.rollinup.server.model.response.user.ValidateVerificationOtpResponse
+import java.time.OffsetDateTime
 
 class UserMapper {
     fun mapGetAllUserResponse(
@@ -22,8 +23,7 @@ class UserMapper {
                     id = it.id,
                     userName = it.userName,
                     email = it.email,
-                    firstName = it.firstName,
-                    lastName = it.lastName,
+                    fullName = it.lastName,
                     role = it.role.name,
                     gender = it.gender,
                     classX = it.classX?.name,
@@ -42,8 +42,7 @@ class UserMapper {
     ) = GetUserByIdResponse(
         id = data.id,
         username = data.userName,
-        firsName = data.firstName,
-        lastName = data.lastName,
+        fullName = data.lastName,
         studentId = data.studentId,
         phoneNumber = data.phoneNumber,
         role = data.role.let {
@@ -77,9 +76,11 @@ class UserMapper {
 
     fun mapResetPasswordRequestResponse(
         email: String,
+        expiredAt: OffsetDateTime,
     ): ResetPasswordRequestResponse {
         return ResetPasswordRequestResponse(
-            email = email
+            email = email,
+            expiredAt = expiredAt.toString(),
         )
     }
 

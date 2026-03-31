@@ -6,7 +6,6 @@ import org.jetbrains.exposed.v1.core.statements.UpsertSqlExpressionBuilder.eq
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.upsert
-import java.time.Instant
 import java.util.UUID
 
 class VerificationTokenRepositoryImpl : VerificationTokenRepository {
@@ -22,7 +21,7 @@ class VerificationTokenRepositoryImpl : VerificationTokenRepository {
         return token
     }
 
-    override fun createToken(id: String, token: String, salt: String, expiredAt: Instant) {
+    override fun createToken(id: String, token: String, salt: String) {
         VerificationTokenTable.upsert(
             VerificationTokenTable.user_id,
             where = {
@@ -31,13 +30,11 @@ class VerificationTokenRepositoryImpl : VerificationTokenRepository {
             onUpdate = { body ->
                 body[VerificationTokenTable.token] = token
                 body[VerificationTokenTable.salt] = salt
-                body[VerificationTokenTable.expiredAt] = expiredAt
             }
         ) { body ->
             body[VerificationTokenTable.user_id] = UUID.fromString(id)
             body[VerificationTokenTable.token] = token
             body[VerificationTokenTable.salt] = salt
-            body[VerificationTokenTable.expiredAt] = expiredAt
         }
     }
 
