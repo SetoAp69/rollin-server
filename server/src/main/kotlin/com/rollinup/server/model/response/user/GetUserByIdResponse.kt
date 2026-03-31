@@ -9,15 +9,13 @@ data class GetUserByIdResponse(
     val id: String = "",
     @SerialName("username")
     val username: String = "",
-    @SerialName("firstName")
-    val firsName: String = "",
-    @SerialName("lastName")
-    val lastName: String = "",
+    @SerialName("fullName")
+    val fullName: String = "",
     @SerialName("studentId")
     val studentId: String? = null,
     @SerialName("phoneNumber")
     val phoneNumber: String? = null,
-    @SerialName("role")
+    @SerialName("role") 
     val role: Role = Role(),
     @SerialName("class")
     val classX: Class? = null,

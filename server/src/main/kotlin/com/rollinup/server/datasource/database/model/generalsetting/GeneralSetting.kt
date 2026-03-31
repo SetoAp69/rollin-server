@@ -33,7 +33,7 @@ data class GeneralSetting(
             lat = row[GeneralSettingTable.latitude],
             updatedAt = row[GeneralSettingTable.updatedAt],
             modifiedBy = row[GeneralSettingTable.modifiedBy].toString(),
-            modifiedByName = row[UserTable.firstName] + " " + row[UserTable.lastName]
+            modifiedByName = row[UserTable.fullName].substringBefore(" ")
         )
     }
 }

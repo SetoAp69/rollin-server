@@ -306,8 +306,7 @@ class AttendanceRepositoryImpl() : AttendanceRepository {
                     val statusLike = AttendanceStatus.like(searchQuery)
                     andWhere {
                         buildList {
-                            add(UserTable.firstName like searchQuery.likePattern())
-                            add(UserTable.lastName like searchQuery.likePattern())
+                            add(UserTable.fullName like searchQuery.likePattern())
                             add(ClassTable.name like searchQuery.likePattern())
                             add(PermitTable.reason like searchQuery.likePattern())
 
@@ -558,7 +557,7 @@ class AttendanceRepositoryImpl() : AttendanceRepository {
 
         return studentQuery.map { resultRow ->
             ExportAttendanceDataEntity(
-                fullName = resultRow[UserTable.firstName] + resultRow[UserTable.lastName],
+                fullName = resultRow[UserTable.fullName],
                 classX = resultRow[ClassTable.name],
                 studentId = resultRow[UserTable.studentId] ?: "-",
                 dataPerDate = attendanceMap[resultRow[UserTable.user_id]]?.map { row ->

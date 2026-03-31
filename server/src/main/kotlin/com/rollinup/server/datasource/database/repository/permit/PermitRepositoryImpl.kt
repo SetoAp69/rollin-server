@@ -121,8 +121,7 @@ class PermitRepositoryImpl() : PermitRepository {
                 if (s.isNotBlank()) {
                     andWhere {
                         listOf(
-                            UserTable.firstName like s.likePattern(),
-                            UserTable.lastName like s.likePattern(),
+                            UserTable.fullName like s.likePattern(),
                             ClassTable.name like s.likePattern(),
                             PermitTable.reason like s.likePattern(),
                             PermitTable.approvalStatus inList ApprovalStatus.like(s)

@@ -40,7 +40,7 @@ data class AttendanceByClassEntity(
                 id = row[UserTable.user_id].toString(),
                 studentId = row[UserTable.studentId],
                 username = row[UserTable.username],
-                name = row[UserTable.firstName] + " " + row[UserTable.lastName]
+                name = row[UserTable.fullName]
             ),
             attendance = row.getOrNull(AttendanceTable._id)?.let {
                 Attendance(

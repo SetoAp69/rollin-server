@@ -5,6 +5,7 @@ object Message {
     const val VALIDATE_OTP_SUCCESS = "Success validate otp"
     const val FAILED_TO_SEND_EMAIL = "Failed to send email"
     const val EMAIL_SENT = "If email is registered to an account, an OTP will be sent to your email"
+    const val EMAIL_NOT_FOUND = "Email not found"
     const val EMAIL_ALREADY_SENT = "Email already sent"
     const val USER_NOT_FOUND = "User not found"
     const val TOKEN_NOT_FOUND = "Token not found"

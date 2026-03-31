@@ -10,8 +10,6 @@ import kotlinx.serialization.Serializable
 data class EditUserRequest(
     @SerialName("username")
     val userName: String? = null,
-//    @SerialName("firstname")
-    val firstName: String? = "",
     @SerialName("fullName")
     val lastName: String? = null,
     @SerialName("email")
@@ -40,7 +38,6 @@ data class EditUserRequest(
     private object ValidationMessages {
         // Updated to be more granular based on the user's new checks
         const val USERNAME_BLANK = "Username cannot be empty."
-        const val FIRST_NAME_BLANK = "First name cannot be empty."
         const val LAST_NAME_BLANK = "Last name cannot be empty."
         const val INVALID_EMAIL_FORMAT = "Email address is invalid."
         const val ROLE_BLANK = "Role cannot be empty."
@@ -52,14 +49,11 @@ data class EditUserRequest(
             userName?.isBlank()
                 ?: false -> ValidationResult.Invalid(ValidationMessages.USERNAME_BLANK)
 
-//            firstName?.isBlank()
-//                ?: false -> ValidationResult.Invalid(ValidationMessages.FIRST_NAME_BLANK)
-
             lastName?.isBlank()
                 ?: false -> ValidationResult.Invalid(ValidationMessages.LAST_NAME_BLANK)
 
             email?.isEmail() == false
-                 -> ValidationResult.Invalid(ValidationMessages.INVALID_EMAIL_FORMAT)
+                -> ValidationResult.Invalid(ValidationMessages.INVALID_EMAIL_FORMAT)
 
             role?.isBlank() ?: false -> ValidationResult.Invalid(ValidationMessages.ROLE_BLANK)
             deviceId?.isBlank()

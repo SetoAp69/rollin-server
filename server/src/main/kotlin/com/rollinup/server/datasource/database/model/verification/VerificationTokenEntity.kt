@@ -2,13 +2,13 @@ package com.rollinup.server.datasource.database.model.verification
 
 import com.rollinup.server.datasource.database.table.VerificationTokenTable
 import org.jetbrains.exposed.v1.core.ResultRow
-import java.time.Instant
+import java.time.OffsetDateTime
 
 data class VerificationTokenEntity(
     val id: String = "",
     val token: String = "",
     val salt: String = "",
-    val expiredAt: Instant = Instant.now(),
+    val expiredAt: OffsetDateTime = OffsetDateTime.now(),
 ) {
     companion object {
         fun fromRow(resultRow: ResultRow) = VerificationTokenEntity(

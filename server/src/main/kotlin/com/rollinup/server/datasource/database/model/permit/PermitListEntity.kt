@@ -1,11 +1,11 @@
 package com.rollinup.server.datasource.database.model.permit
 
 
+import com.rollinup.server.datasource.database.model.ApprovalStatus
+import com.rollinup.server.datasource.database.model.PermitType
 import com.rollinup.server.datasource.database.table.ClassTable
 import com.rollinup.server.datasource.database.table.PermitTable
 import com.rollinup.server.datasource.database.table.UserTable
-import com.rollinup.server.datasource.database.model.ApprovalStatus
-import com.rollinup.server.datasource.database.model.PermitType
 import org.jetbrains.exposed.v1.core.ResultRow
 
 data class PermitListEntity(
@@ -39,7 +39,7 @@ data class PermitListEntity(
                 date = row[PermitTable.createdAt].toLocalDate().toString(),
                 student = User(
                     id = row[UserTable.user_id].toString(),
-                    name = row[UserTable.firstName] + " " + row[UserTable.firstName],
+                    name = row[UserTable.fullName],
                     username = row[UserTable.username],
                     classX = row[ClassTable.name]
                 ),

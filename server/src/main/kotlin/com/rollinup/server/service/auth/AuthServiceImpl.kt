@@ -22,7 +22,7 @@ import com.rollinup.server.util.Utils
 import com.rollinup.server.util.manager.TransactionManager
 import com.rollinup.server.util.notFoundException
 import com.rollinup.server.util.successCreateResponse
-import java.time.Instant
+import java.time.OffsetDateTime
 
 class AuthServiceImpl(
     private val hashingService: HashingService,
@@ -164,26 +164,26 @@ class AuthServiceImpl(
         user: UserEntity,
     ) {
         val existedOTP = verificationTokenRepository.getTokenByUser(user.id)
-        val isStillValid = existedOTP != null && existedOTP.expiredAt > Instant.now()
+        val otpExpired = existedOTP?.let {
+            it.expiredAt < OffsetDateTime.now()
+        } ?: true
 
         val otp = Utils.generateRandom(5)
         val saltedToken = hashingService.generateSaltedHash(otp)
 
-        if (isStillValid) {
-            throw CommonException(Message.EMAIL_ALREADY_SENT)
+        if (otpExpired) {
+            emailService.sendEmail(
+                receiver = user.email,
+                message = "This is your first time login on Rollin Up client, we require you to update your temporary password. Here's the OTP to update your password : $otp",
+                subject = "First Time Login Verification"
+            )
+
+            verificationTokenRepository.createToken(
+                id = user.id,
+                token = saltedToken.value,
+                salt = saltedToken.salt
+            )
         }
 
-        emailService.sendEmail(
-            receiver = user.email,
-            message = "This is your first time login on Rollin Up client, we require you to update your temporary password. Here's the OTP to update your password : $otp",
-            subject = "First Time Login Verification"
-        )
-
-        verificationTokenRepository.createToken(
-            id = user.id,
-            token = saltedToken.value,
-            salt = saltedToken.salt,
-            expiredAt = Instant.now().plusSeconds(80)
-        )
     }
 }
