@@ -11,7 +11,7 @@ data class CreateAttendanceBody(
     val attachment: String = "",
     val status: AttendanceStatus = AttendanceStatus.CHECKED_IN,
     val checkedInAt: Long = 0L,
-    val sDate:String = ""
+    val sDate: String = "",
 ) {
     val date: LocalDate
         get() = LocalDate.parse(sDate)
@@ -21,6 +21,7 @@ data class CreateAttendanceBody(
         const val LOCATION_INVALID = "Location is invalid"
         const val DATE_INVALID = "Date cannot be empty"
         const val CHECKED_IN_AT_INVALID = "Check in time is invalid"
+        const val NO_ATTACHMENT = "Attachment cannot be empty"
     }
 
     companion object {
@@ -34,6 +35,8 @@ data class CreateAttendanceBody(
                     ?: throw CommonException(ValidationMessages.LOCATION_INVALID),
                 longitude = hashMap["longitude"]?.toDoubleOrNull()
                     ?: throw CommonException(ValidationMessages.LOCATION_INVALID),
+                attachment = hashMap["attachment"]
+                    ?: throw CommonException(ValidationMessages.NO_ATTACHMENT),
                 status = hashMap["status"].let {
                     if (it.isNullOrBlank()) AttendanceStatus.CHECKED_IN
                     else AttendanceStatus.fromValue(it)
@@ -41,7 +44,7 @@ data class CreateAttendanceBody(
                 checkedInAt = hashMap["checkInAt"]?.toLongOrNull()
                     ?: throw CommonException(ValidationMessages.CHECKED_IN_AT_INVALID),
                 sDate = hashMap["date"]
-                    ?:throw CommonException(ValidationMessages.DATE_INVALID)
+                    ?: throw CommonException(ValidationMessages.DATE_INVALID)
             )
         }
     }
